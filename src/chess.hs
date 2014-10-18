@@ -186,15 +186,16 @@ toMoveParser             = do
 
 castlingRightsParser             :: GenParser Char FenParserState CastleRights
 castlingRightsParser             = do
-  castleRights <- permute (CastleRights <$?> (False, char 'K' >> return True)
-                                        <|?> (False, char 'k' >> return True)
-                                        <|?> (False, char 'Q' >> return True)
-                                        <|?> (False, char 'q' >> return True))
+  castleRights <- (char '-' >> return (CastleRights False False False False))
+    <|> permute (CastleRights <$?> (False, char 'K' >> return True)
+                              <|?> (False, char 'k' >> return True)
+                              <|?> (False, char 'Q' >> return True)
+                              <|?> (False, char 'q' >> return True))
   char ' '
   return castleRights
 
 enPassantSquareParser             :: GenParser Char FenParserState (Maybe Coordinate)
-enPassantSquareParser             = fmap Just coordinateParser <|> return Nothing where
+enPassantSquareParser             = fmap Just coordinateParser <|> (char '-' >> char ' ' >> return Nothing) where
 
   coordinateParser                :: GenParser Char FenParserState Coordinate
   coordinateParser                = do
