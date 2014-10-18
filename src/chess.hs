@@ -3,6 +3,7 @@ module Chess where
 import Control.Monad
 
 import Text.Parsec
+import Text.Parsec.Perm
 import Text.Parsec.String
 
 data Square = Square
@@ -38,7 +39,7 @@ type Rank   = Char
 type File   = Integer
 
 -- KkQq
-data CastleRights = CastleRights Bool Bool Bool Bool
+data CastleRights = CastleRights Bool Bool Bool Bool deriving(Show)
 
 type RegularBoardRepresentation   = [[Square]]
 
@@ -126,14 +127,13 @@ fenParser              :: GenParser Char FenParserState RegularGame
 fenParser              = do
   position <- positionParser
   toMove   <- toMoveParser
-  --castleRights <- castlingRightsParser
-  --char ' '
+  castleRights <- castlingRightsParser
   --enPassant <- enPassantSquareParser
   --char ' '
   --halfMoves <- halfMoveClockParser
   --char ' '
   --fullMoves <- fullMoveNumberParser
-  return $ RegularGame position toMove (CastleRights True True True True) (Just $ Coordinate 'e' 4) 0 0
+  return $ RegularGame position toMove castleRights (Just $ Coordinate 'e' 4) 0 0
   --return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
 --fenParser              = count 7 $ do
 --  rank <- rankParser
@@ -194,7 +194,10 @@ toMoveParser             = do
     _   -> return Black
 
 castlingRightsParser             :: GenParser Char FenParserState CastleRights
-castlingRightsParser             = undefined
+castlingRightsParser             = permute (CastleRights <$?> (False, char 'K' >> return True)
+                                               <|?> (False, char 'k' >> return True)
+                                               <|?> (False, char 'Q' >> return True)
+                                               <|?> (False, char 'q' >> return True))
 
 enPassantSquareParser             :: GenParser Char FenParserState (Maybe Coordinate)
 enPassantSquareParser             = undefined
