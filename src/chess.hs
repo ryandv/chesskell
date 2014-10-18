@@ -125,8 +125,7 @@ parseFen               = runParser fenParser (FenParserState $ Coordinate 'a' 1)
 fenParser              :: GenParser Char FenParserState RegularGame
 fenParser              = do
   position <- positionParser
-  --toMove   <- toMoveParser
-  --char ' '
+  toMove   <- toMoveParser
   --castleRights <- castlingRightsParser
   --char ' '
   --enPassant <- enPassantSquareParser
@@ -134,7 +133,7 @@ fenParser              = do
   --halfMoves <- halfMoveClockParser
   --char ' '
   --fullMoves <- fullMoveNumberParser
-  return $ RegularGame position White (CastleRights True True True True) (Just $ Coordinate 'e' 4) 0 0
+  return $ RegularGame position toMove (CastleRights True True True True) (Just $ Coordinate 'e' 4) 0 0
   --return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
 --fenParser              = count 7 $ do
 --  rank <- rankParser
@@ -188,7 +187,11 @@ nextFile                                   :: FenParserState -> FenParserState
 nextFile (FenParserState (Coordinate r f)) = FenParserState $ Coordinate r (f+1)
 
 toMoveParser             :: GenParser Char FenParserState Player
-toMoveParser             = undefined
+toMoveParser             = do
+  player <- oneOf "wb" >>= (\p -> char ' ' >> return p)
+  case player of
+    'w' -> return White
+    _   -> return Black
 
 castlingRightsParser             :: GenParser Char FenParserState CastleRights
 castlingRightsParser             = undefined
