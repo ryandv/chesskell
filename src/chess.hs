@@ -78,14 +78,6 @@ pseudoLegalMoves RegularGame { placement = b
                              , enPassantSquare = e
                              } = (concatMap . concatMap) (pseudoLegalMovesFrom e) b where
 
-----------------------------------------------------------------------
--- PARSING
-----------------------------------------------------------------------
-
-data FenParserState = FenParserState
-  { currentLocation :: Coordinate
-  }
-
 pseudoLegalMovesFrom :: Maybe Coordinate -> Square -> [(Coordinate, Coordinate)]
 pseudoLegalMovesFrom _ (Square Nothing _)            = []
 pseudoLegalMovesFrom c (Square (Just (Piece p _)) l) | p == Pawn   = pseudoLegalPawnMoves c l
@@ -120,6 +112,14 @@ pseudoLegalQueenMoves   = undefined
 pseudoLegalKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalKingMoves   = undefined
 
+----------------------------------------------------------------------
+-- PARSING
+----------------------------------------------------------------------
+
+data FenParserState = FenParserState
+  { currentLocation :: Coordinate
+  }
+
 parseFen               :: SourceName -> String -> Either ParseError RegularGame
 parseFen               = runParser fenParser (FenParserState $ Coordinate 'a' 1)
 
@@ -128,19 +128,12 @@ fenParser              = do
   position <- positionParser
   toMove   <- toMoveParser
   castleRights <- castlingRightsParser
-  --enPassant <- enPassantSquareParser
-  --char ' '
+  enPassant <- enPassantSquareParser
   --halfMoves <- halfMoveClockParser
   --char ' '
   --fullMoves <- fullMoveNumberParser
-  return $ RegularGame position toMove castleRights (Just $ Coordinate 'e' 4) 0 0
+  return $ RegularGame position toMove castleRights enPassant 0 0
   --return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
---fenParser              = count 7 $ do
---  rank <- rankParser
---  char '/'
---  rank <- rankParser
---  char ' '
---  return $ RegularGame 
 
 positionParser             :: GenParser Char FenParserState RegularBoardRepresentation
 positionParser             = do
@@ -194,13 +187,22 @@ toMoveParser             = do
     _   -> return Black
 
 castlingRightsParser             :: GenParser Char FenParserState CastleRights
-castlingRightsParser             = permute (CastleRights <$?> (False, char 'K' >> return True)
-                                               <|?> (False, char 'k' >> return True)
-                                               <|?> (False, char 'Q' >> return True)
-                                               <|?> (False, char 'q' >> return True))
+castlingRightsParser             = do
+  castleRights <- permute (CastleRights <$?> (False, char 'K' >> return True)
+                                        <|?> (False, char 'k' >> return True)
+                                        <|?> (False, char 'Q' >> return True)
+                                        <|?> (False, char 'q' >> return True))
+  char ' '
+  return castleRights
 
 enPassantSquareParser             :: GenParser Char FenParserState (Maybe Coordinate)
-enPassantSquareParser             = undefined
+enPassantSquareParser             = fmap Just coordinateParser <|> return Nothing where
+
+  coordinateParser                :: GenParser Char FenParserState Coordinate
+  coordinateParser                = do
+    rank <- oneOf "abcdefgh"
+    file <- oneOf "12345678"
+    return $ Coordinate rank (read $ return file)
 
 halfMoveClockParser             :: GenParser Char FenParserState Integer
 halfMoveClockParser             = undefined
