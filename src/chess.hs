@@ -129,11 +129,9 @@ fenParser              = do
   toMove   <- toMoveParser
   castleRights <- castlingRightsParser
   enPassant <- enPassantSquareParser
-  --halfMoves <- halfMoveClockParser
-  --char ' '
-  --fullMoves <- fullMoveNumberParser
-  return $ RegularGame position toMove castleRights enPassant 0 0
-  --return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
+  halfMoves <- halfMoveClockParser
+  fullMoves <- fullMoveNumberParser
+  return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
 
 positionParser             :: GenParser Char FenParserState RegularBoardRepresentation
 positionParser             = do
@@ -202,10 +200,16 @@ enPassantSquareParser             = fmap Just coordinateParser <|> return Nothin
   coordinateParser                = do
     rank <- oneOf "abcdefgh"
     file <- oneOf "12345678"
+    char ' '
     return $ Coordinate rank (read $ return file)
 
 halfMoveClockParser             :: GenParser Char FenParserState Integer
-halfMoveClockParser             = undefined
+halfMoveClockParser             = do
+  halfMoves <- many digit
+  char ' '
+  return . read $ halfMoves
 
 fullMoveNumberParser             :: GenParser Char FenParserState Integer
-fullMoveNumberParser             = undefined
+fullMoveNumberParser             = do
+  fullMoves <- manyTill digit eof
+  return . read $ fullMoves
