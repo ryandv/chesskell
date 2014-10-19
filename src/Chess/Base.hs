@@ -15,6 +15,8 @@ module Chess.Base
 
 import Control.Applicative
 
+import Data.Maybe
+
 data Square = Square
   { pieceOn  :: Maybe Piece
   , location :: Coordinate
@@ -92,16 +94,22 @@ isOnBoard (Coordinate r f) | r < 'a'   = False
 pseudoLegalMoves               :: RegularGame -> [(Coordinate, Coordinate)]
 pseudoLegalMoves RegularGame { placement = b
                              , enPassantSquare = e
-                             } = (concatMap . concatMap) (pseudoLegalMovesFrom e) b where
+                             } = (concatMap . concatMap) (pseudoLegalMovesFrom e b) b where
 
-pseudoLegalMovesFrom :: Maybe Coordinate -> Square -> [(Coordinate, Coordinate)]
-pseudoLegalMovesFrom _ (Square Nothing _)            = []
-pseudoLegalMovesFrom c (Square (Just (Piece p _)) l) | p == Pawn   = pseudoLegalPawnMoves c l
-                                                     | p == Knight = pseudoLegalKnightMoves l
-                                                     | p == Bishop = pseudoLegalBishopMoves l
-                                                     | p == Rook   = pseudoLegalRookMoves l
-                                                     | p == Queen  = pseudoLegalQueenMoves l
-                                                     | p == King   = pseudoLegalKingMoves l
+pseudoLegalMovesFrom :: Maybe Coordinate -> RegularBoardRepresentation -> Square -> [(Coordinate, Coordinate)]
+pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
+pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = filter (unoccupied b . snd) $ potentialPawnMoves c l
+                                                       | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves l
+                                                       | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves l
+                                                       | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves l
+                                                       | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves l
+                                                       | p == King   = filter (unoccupied b . snd) $ potentialKingMoves l
+
+unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
+unoccupied b c = isNothing . pieceOn $ squareAt b c
+
+squareAt                    :: RegularBoardRepresentation -> Coordinate -> Square
+squareAt b (Coordinate r f) = (b !! (fromEnum r - fromEnum 'a')) !! fromInteger f
 
 scaleBy                           :: Integer -> (Integer, Integer) -> (Integer, Integer)
 scaleBy s (x,y)                   = (x*s, y*s)
@@ -110,30 +118,29 @@ offsetBy                          :: Coordinate -> (Integer, Integer) -> Coordin
 offsetBy (Coordinate r f) (dr,df) = Coordinate (toEnum . fromInteger . (+ dr) . toInteger . fromEnum $ r) (f + df)
 
 
-pseudoLegalPawnMoves                          :: Maybe Coordinate -> Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalPawnMoves Nothing c                = standardPawnMoves c
-pseudoLegalPawnMoves (Just enPassant) c = standardPawnMoves c ++ enPassantMoves enPassant where
+potentialPawnMoves                          :: Maybe Coordinate -> Coordinate -> [(Coordinate, Coordinate)]
+potentialPawnMoves Nothing c                = standardPawnMoves c
+potentialPawnMoves (Just enPassant) c = standardPawnMoves c ++ enPassantMoves enPassant where
   enPassantMoves  :: Coordinate -> [(Coordinate, Coordinate)]
   enPassantMoves  = undefined
 
 standardPawnMoves :: Coordinate -> [(Coordinate, Coordinate)]
 standardPawnMoves = undefined
 
--- not really pseudo legal - does not check occupancy.
-pseudoLegalKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
+potentialKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
+potentialKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
-pseudoLegalBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalBishopMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> diagonals where
+potentialBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
+potentialBishopMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> diagonals where
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
-pseudoLegalRookMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalRookMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> straights where
+potentialRookMoves   :: Coordinate -> [(Coordinate, Coordinate)]
+potentialRookMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> straights where
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
-pseudoLegalQueenMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalQueenMoves c = pseudoLegalRookMoves c ++ pseudoLegalBishopMoves c
+potentialQueenMoves   :: Coordinate -> [(Coordinate, Coordinate)]
+potentialQueenMoves c = potentialRookMoves c ++ potentialBishopMoves c
 
-pseudoLegalKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalKingMoves   = undefined
+potentialKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
+potentialKingMoves   = undefined
