@@ -129,10 +129,11 @@ pseudoLegalBishopMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offs
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
 pseudoLegalRookMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalRookMoves   = undefined
+pseudoLegalRookMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> straights where
+  straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
 pseudoLegalQueenMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalQueenMoves   = undefined
+pseudoLegalQueenMoves c = pseudoLegalRookMoves c ++ pseudoLegalBishopMoves c
 
 pseudoLegalKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalKingMoves   = undefined
