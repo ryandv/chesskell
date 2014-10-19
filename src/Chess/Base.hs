@@ -80,6 +80,13 @@ instance Show RegularGame where
     secondRank  = map pieceOn $ placement g !! 1
     firstRank   = map pieceOn $ head $ placement g
 
+isOnBoard                  :: Coordinate -> Bool
+isOnBoard (Coordinate r f) | r < 'a'   = False
+                           | r > 'h'   = False
+                           | f < 1     = False
+                           | f > 8     = False
+                           | otherwise = True
+
 pseudoLegalMoves                   :: RegularGame -> [(Coordinate, Coordinate)]
 pseudoLegalMoves RegularGame { placement = b
                              , enPassantSquare = e
@@ -94,6 +101,9 @@ pseudoLegalMovesFrom c (Square (Just (Piece p _)) l) | p == Pawn   = pseudoLegal
                                                      | p == Queen  = pseudoLegalQueenMoves l
                                                      | p == King   = pseudoLegalKingMoves l
 
+offsetBy                          :: Coordinate -> (Integer,Integer) -> Coordinate
+offsetBy (Coordinate r f) (dr,df) = Coordinate (toEnum . fromInteger . (+ dr) . toInteger . fromEnum $ r) (f + df)
+
 
 pseudoLegalPawnMoves                          :: Maybe Coordinate -> Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalPawnMoves Nothing c                = standardPawnMoves c
@@ -105,7 +115,8 @@ standardPawnMoves :: Coordinate -> [(Coordinate, Coordinate)]
 standardPawnMoves = undefined
 
 pseudoLegalKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalKnightMoves   = undefined
+pseudoLegalKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
+  possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
 pseudoLegalBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalBishopMoves   = undefined
