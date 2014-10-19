@@ -13,6 +13,8 @@ module Chess.Base
     pseudoLegalMoves
   ) where
 
+import Control.Applicative
+
 data Square = Square
   { pieceOn  :: Maybe Piece
   , location :: Coordinate
@@ -87,7 +89,7 @@ isOnBoard (Coordinate r f) | r < 'a'   = False
                            | f > 8     = False
                            | otherwise = True
 
-pseudoLegalMoves                   :: RegularGame -> [(Coordinate, Coordinate)]
+pseudoLegalMoves               :: RegularGame -> [(Coordinate, Coordinate)]
 pseudoLegalMoves RegularGame { placement = b
                              , enPassantSquare = e
                              } = (concatMap . concatMap) (pseudoLegalMovesFrom e) b where
@@ -101,7 +103,10 @@ pseudoLegalMovesFrom c (Square (Just (Piece p _)) l) | p == Pawn   = pseudoLegal
                                                      | p == Queen  = pseudoLegalQueenMoves l
                                                      | p == King   = pseudoLegalKingMoves l
 
-offsetBy                          :: Coordinate -> (Integer,Integer) -> Coordinate
+scaleBy                           :: Integer -> (Integer, Integer) -> (Integer, Integer)
+scaleBy s (x,y)                   = (x*s, y*s)
+
+offsetBy                          :: Coordinate -> (Integer, Integer) -> Coordinate
 offsetBy (Coordinate r f) (dr,df) = Coordinate (toEnum . fromInteger . (+ dr) . toInteger . fromEnum $ r) (f + df)
 
 
@@ -114,12 +119,14 @@ pseudoLegalPawnMoves (Just enPassant) c = standardPawnMoves c ++ enPassantMoves 
 standardPawnMoves :: Coordinate -> [(Coordinate, Coordinate)]
 standardPawnMoves = undefined
 
+-- not really pseudo legal - does not check occupancy.
 pseudoLegalKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
 pseudoLegalBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-pseudoLegalBishopMoves   = undefined
+pseudoLegalBishopMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> diagonals where
+  diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
 pseudoLegalRookMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 pseudoLegalRookMoves   = undefined
