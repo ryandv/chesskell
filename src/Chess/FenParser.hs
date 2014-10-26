@@ -4,16 +4,18 @@ import Chess.Base
 
 import Control.Monad
 
+--import Debug.Trace
+
 import Text.Parsec
 import Text.Parsec.Perm
 import Text.Parsec.String
 
 data FenParserState = FenParserState
   { currentLocation :: Coordinate
-  }
+  } deriving(Show)
 
 parseFen               :: SourceName -> String -> Either ParseError RegularGame
-parseFen               = runParser fenParser (FenParserState $ Coordinate 'a' 1)
+parseFen               = runParser fenParser (FenParserState $ Coordinate 'a' 8)
 
 fenParser              :: GenParser Char FenParserState RegularGame
 fenParser              = do
@@ -34,17 +36,15 @@ positionParser             = do
 rankParser             :: GenParser Char FenParserState [Square]
 rankParser             = do
   squares <- manyTill squareParser $ char '/'
-  modifyState nextRank
   return $ concat squares
 
 lastRankParser             :: GenParser Char FenParserState [Square]
 lastRankParser             = do
   squares <- manyTill squareParser $ char ' '
-  modifyState nextRank
   return $ concat squares
 
 nextRank                                   :: FenParserState -> FenParserState
-nextRank (FenParserState (Coordinate r f)) = FenParserState $ Coordinate (succ r) f
+nextRank (FenParserState (Coordinate f r)) = FenParserState $ Coordinate f (r+1)
 
 squareParser             :: GenParser Char FenParserState [Square]
 squareParser             = do
@@ -63,11 +63,14 @@ squareParser             = do
     'Q' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Queen White) currentSquare)
     'K' -> modifyState nextFile >> (return . return) (Square (Just $ Piece King White) currentSquare)
     'P' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Pawn White) currentSquare)
-    n   -> let num = read $ return n in
-             replicateM_ num (modifyState nextFile) >> return (replicate (read $ return n) $ Square Nothing currentSquare)
+    n   -> let num = read $ return n in replicateM num $ do
+             modifyState nextFile
+             currentSquare <- fmap currentLocation getState
+             return (Square Nothing currentSquare)
 
 nextFile                                   :: FenParserState -> FenParserState
-nextFile (FenParserState (Coordinate r f)) = FenParserState $ Coordinate r (f+1)
+nextFile (FenParserState (Coordinate f r)) | f == 'h'    = FenParserState $ Coordinate 'a' (r-1)
+                                           | otherwise   = FenParserState $ Coordinate (succ f) r
 
 toMoveParser             :: GenParser Char FenParserState Player
 toMoveParser             = do
