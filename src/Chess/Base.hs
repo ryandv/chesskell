@@ -11,6 +11,8 @@ module Chess.Base
     RegularGame(..),
     Square(..),
 
+    coordinateEuclideanDistance,
+    isBlocked,
     potentialKnightMoves,
     potentialPawnMoves,
     pseudoLegalMoves,
@@ -168,24 +170,11 @@ captures b c@(Coordinate f r)      = nwCapture b c ++ neCapture b c where
                                                                 then [((Coordinate f r), (Coordinate (succ f) (r+1)))]
                                                                 else []
                                                      Black -> if (isJust $ blackTarget) && fmap pieceOwner blackTarget == Just White
-                                                              then [((Coordinate f r), (Coordinate (succ f) (r-1)))]
-                                                              else [])
+                                                                then [((Coordinate f r), (Coordinate (succ f) (r-1)))]
+                                                                else [])
                                               (pieceOn (squareAt b c)) where
     whiteTarget = pieceOn $ squareAt b (Coordinate (succ f) (r+1))
     blackTarget = pieceOn $ squareAt b (Coordinate (succ f) (r-1))
---captures b c@(Coordinate f r)      | isNothing . pieceOn $ squareAt b (Coordinate (succ f) r) && isNothing . pieceOn $ squareAt b (Coordinate (succ f) r)= []
---                                   | isJust . pieceOn $ squareAt b (Coordinate (su
---captures b c@(Coordinate f r)      = do
---  let target = maybeToList $ (pieceOn (squareAt b (Coordinate (succ f) r)))
---  let origin = maybeToList $ (pieceOn (squareAt b c))
---  case target of
---    [] -> []
---    [Piece _ (opponent . pieceOwner $ origin)] -> []
-
---captures b c@(Coordinate f r)      = maybe [] (\p -> case (pieceOwner p) of
---                                                       White -> [((Coordinate r f), (Coordinate f (r+1)))]
---                                                       Black -> [((Coordinate r f), (Coordinate f (r-1)))])
---                                              (pieceOn (squareAt b c))
 
 opponent               :: Player -> Player
 opponent White         = Black
@@ -197,6 +186,29 @@ potentialKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offset
 
 potentialRayMoves           :: Coordinate -> [(Integer, Integer)] -> [(Coordinate, Coordinate)]
 potentialRayMoves c offsets = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
+
+isBlocked                   :: RegularBoardRepresentation -> Coordinate -> Coordinate -> (Integer, Integer) -> Bool
+isBlocked b from to ray     = any (not . unoccupied b) alongRay where
+
+  alongRay :: [Coordinate]
+  alongRay = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
+           $ filter isOnBoard
+           $ fmap (from `offsetBy`)
+           $ scaleBy <$> [1..7] <*> [(fst ray `div` rayLength, snd ray `div` rayLength)]
+
+  rayLength :: Integer
+  rayLength = squareRoot $ pairEuclideanDistance (0,0) ray
+
+squareRoot :: Integer -> Integer
+squareRoot = round . sqrt . (fromIntegral :: Integer -> Double)
+
+coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Integer
+coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
+  x' = toInteger $ fromEnum cx' - fromEnum 'a'
+  x  = toInteger $ fromEnum cx - fromEnum 'a'
+
+pairEuclideanDistance               :: (Integer, Integer) -> (Integer, Integer) -> Integer
+pairEuclideanDistance (x,y) (x',y') = ((x' - x) ^ 2) + ((y' - y) ^ 2)
 
 potentialBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialBishopMoves c = potentialRayMoves c diagonals where
