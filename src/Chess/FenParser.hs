@@ -64,8 +64,8 @@ squareParser             = do
     'K' -> modifyState nextFile >> (return . return) (Square (Just $ Piece King White) currentSquare)
     'P' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Pawn White) currentSquare)
     n   -> let num = read $ return n in replicateM num $ do
-             modifyState nextFile
              currentSquare <- fmap currentLocation getState
+             modifyState nextFile
              return (Square Nothing currentSquare)
 
 nextFile                                   :: FenParserState -> FenParserState
@@ -86,7 +86,7 @@ castlingRightsParser             = do
                               <|?> (False, char 'k' >> return True)
                               <|?> (False, char 'Q' >> return True)
                               <|?> (False, char 'q' >> return True))
-  char ' '
+  _ <- char ' '
   return castleRights
 
 enPassantSquareParser             :: GenParser Char FenParserState (Maybe Coordinate)
@@ -96,13 +96,13 @@ enPassantSquareParser             = fmap Just coordinateParser <|> (char '-' >> 
   coordinateParser                = do
     rank <- oneOf "abcdefgh"
     file <- oneOf "12345678"
-    char ' '
+    _ <- char ' '
     return $ Coordinate rank (read $ return file)
 
 halfMoveClockParser             :: GenParser Char FenParserState Integer
 halfMoveClockParser             = do
   halfMoves <- many digit
-  char ' '
+  _ <- char ' '
   return . read $ halfMoves
 
 fullMoveNumberParser             :: GenParser Char FenParserState Integer

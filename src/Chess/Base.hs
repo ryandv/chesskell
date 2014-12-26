@@ -26,12 +26,12 @@ import Data.Maybe
 data Square = Square
   { pieceOn  :: Maybe Piece
   , location :: Coordinate
-  } deriving(Read, Show)
+  } deriving(Eq, Read, Show)
 
 data Piece = Piece
   { pieceType  :: PieceType
   , pieceOwner :: Player
-  } deriving(Read)
+  } deriving(Eq, Read)
 
 instance Show Piece where
   show (Piece Rook White)   = "R"
@@ -51,12 +51,12 @@ instance Show Piece where
 data PieceType  = Pawn | Knight | Bishop | Rook | Queen | King deriving (Enum, Eq, Read)
 data Player = White | Black deriving (Enum, Eq, Read, Show)
 
-data Coordinate = Coordinate File Rank deriving(Read, Show)
+data Coordinate = Coordinate File Rank deriving(Eq, Read, Show)
 type Rank   = Integer
 type File   = Char
 
 -- KkQq
-data CastleRights = CastleRights Bool Bool Bool Bool deriving(Show)
+data CastleRights = CastleRights Bool Bool Bool Bool deriving(Eq, Show)
 
 type RegularBoardRepresentation   = [[Square]]
 
@@ -67,7 +67,7 @@ data RegularGame = RegularGame
   , enPassantSquare :: Maybe Coordinate
   , halfMoveClock   :: Integer
   , fullMoveNumber  :: Integer
-  }
+  } deriving(Eq)
 
 instance Show RegularGame where
   show g =    "\n"
