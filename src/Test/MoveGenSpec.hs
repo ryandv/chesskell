@@ -105,7 +105,7 @@ main = hspec $
     context "rook moves" $ do
 
       it "never produces moves off the board" $
-        property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
+        property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialRookMoves (placement emptyTest) c
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialRookMoves (placement emptyTest) (Coordinate 'd' 5) `shouldBe`
@@ -135,6 +135,39 @@ main = hspec $
           , ((Coordinate 'd' 5), (Coordinate 'd' 7))
           , ((Coordinate 'd' 5), (Coordinate 'a' 5))
           , ((Coordinate 'd' 5), (Coordinate 'd' 8))
+          ]
+
+    context "bishop moves" $ do
+      it "never produces moves off the board" $
+        property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialBishopMoves (placement emptyTest) c
+
+      it "produces the correct set of moves without being blocked by pieces" $
+        potentialBishopMoves (placement emptyTest) (Coordinate 'e' 5) `shouldBe`
+          [ ((Coordinate 'e' 5), (Coordinate 'd' 6))
+          , ((Coordinate 'e' 5), (Coordinate 'f' 6))
+          , ((Coordinate 'e' 5), (Coordinate 'f' 4))
+          , ((Coordinate 'e' 5), (Coordinate 'd' 4))
+          , ((Coordinate 'e' 5), (Coordinate 'c' 7))
+          , ((Coordinate 'e' 5), (Coordinate 'g' 7))
+          , ((Coordinate 'e' 5), (Coordinate 'g' 3))
+          , ((Coordinate 'e' 5), (Coordinate 'c' 3))
+          , ((Coordinate 'e' 5), (Coordinate 'b' 8))
+          , ((Coordinate 'e' 5), (Coordinate 'h' 8))
+          , ((Coordinate 'e' 5), (Coordinate 'h' 2))
+          , ((Coordinate 'e' 5), (Coordinate 'b' 2))
+          , ((Coordinate 'e' 5), (Coordinate 'a' 1))
+          ]
+
+      it "produces the correct set of moves when blocked by some pieces" $
+        potentialBishopMoves (placement bishopTest) (Coordinate 'e' 5) `shouldBe`
+          [ ((Coordinate 'e' 5), (Coordinate 'd' 6))
+          , ((Coordinate 'e' 5), (Coordinate 'f' 6))
+          , ((Coordinate 'e' 5), (Coordinate 'f' 4))
+          , ((Coordinate 'e' 5), (Coordinate 'd' 4))
+          , ((Coordinate 'e' 5), (Coordinate 'c' 7))
+          , ((Coordinate 'e' 5), (Coordinate 'g' 3))
+          , ((Coordinate 'e' 5), (Coordinate 'b' 8))
+          , ((Coordinate 'e' 5), (Coordinate 'h' 2))
           ]
 
     context "knight moves" $

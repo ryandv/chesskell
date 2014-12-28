@@ -14,6 +14,7 @@ module Chess.Base
     alongRay,
     coordinateEuclideanDistance,
     isBlocked,
+    potentialBishopMoves,
     potentialKnightMoves,
     potentialPawnMoves,
     potentialRookMoves,
@@ -110,7 +111,7 @@ pseudoLegalMovesFrom :: Maybe Coordinate -> RegularBoardRepresentation -> Square
 pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
 pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = filter (unoccupied b . snd) $ potentialPawnMoves b c l
                                                        | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves l
-                                                       | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves l
+                                                       | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves b l
                                                        | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves b l
                                                        | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves b l
                                                        | p == King   = filter (unoccupied b . snd) $ potentialKingMoves l
@@ -219,8 +220,8 @@ rayFromMove ((Coordinate f r), (Coordinate f' r')) | fromEnum f' > fromEnum f &&
 pairEuclideanDistance               :: (Int, Int) -> (Int, Int) -> Int
 pairEuclideanDistance (x,y) (x',y') = ((x' - x) ^ 2) + ((y' - y) ^ 2)
 
-potentialBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-potentialBishopMoves c = potentialRayMoves c diagonals where
+potentialBishopMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialBishopMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c diagonals where
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
 potentialRookMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
@@ -228,7 +229,7 @@ potentialRookMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c stra
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
 potentialQueenMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
-potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves c
+potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves b c
 
 potentialKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKingMoves   = undefined
