@@ -11,11 +11,15 @@ module Chess.Base
     RegularGame(..),
     Square(..),
 
+    alongRay,
     coordinateEuclideanDistance,
     isBlocked,
     potentialKnightMoves,
     potentialPawnMoves,
+    potentialRookMoves,
     pseudoLegalMoves,
+    rayFromMove,
+    scaleBy,
     squareAt
   ) where
 
@@ -52,7 +56,7 @@ data PieceType  = Pawn | Knight | Bishop | Rook | Queen | King deriving (Enum, E
 data Player = White | Black deriving (Enum, Eq, Read, Show)
 
 data Coordinate = Coordinate File Rank deriving(Eq, Read, Show)
-type Rank   = Integer
+type Rank   = Int
 type File   = Char
 
 -- KkQq
@@ -65,8 +69,8 @@ data RegularGame = RegularGame
   , activeColor     :: Player
   , castlingRights  :: CastleRights
   , enPassantSquare :: Maybe Coordinate
-  , halfMoveClock   :: Integer
-  , fullMoveNumber  :: Integer
+  , halfMoveClock   :: Int
+  , fullMoveNumber  :: Int
   } deriving(Eq)
 
 instance Show RegularGame where
@@ -107,21 +111,21 @@ pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
 pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = filter (unoccupied b . snd) $ potentialPawnMoves b c l
                                                        | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves l
                                                        | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves l
-                                                       | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves l
-                                                       | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves l
+                                                       | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves b l
+                                                       | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves b l
                                                        | p == King   = filter (unoccupied b . snd) $ potentialKingMoves l
 
 unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
 unoccupied b c = isNothing . pieceOn $ squareAt b c
 
 squareAt                    :: RegularBoardRepresentation -> Coordinate -> Square
-squareAt b (Coordinate f r) = (b !! fromInteger (r-1)) !! (fromEnum f - fromEnum 'a')
+squareAt b (Coordinate f r) = (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
 
-scaleBy                           :: Integer -> (Integer, Integer) -> (Integer, Integer)
+scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
 scaleBy s (x,y)                   = (x*s, y*s)
 
-offsetBy                          :: Coordinate -> (Integer, Integer) -> Coordinate
-offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + fromInteger df) (r + dr)
+offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
+offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
 
 
 potentialPawnMoves                                       :: RegularBoardRepresentation -> Maybe Coordinate -> Coordinate -> [(Coordinate, Coordinate)]
@@ -184,42 +188,47 @@ potentialKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
-potentialRayMoves           :: Coordinate -> [(Integer, Integer)] -> [(Coordinate, Coordinate)]
+potentialRayMoves           :: Coordinate -> [(Int, Int)] -> [(Coordinate, Coordinate)]
 potentialRayMoves c offsets = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
 
-isBlocked                   :: RegularBoardRepresentation -> Coordinate -> Coordinate -> (Integer, Integer) -> Bool
-isBlocked b from to ray     = any (not . unoccupied b) alongRay where
+isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
+isBlocked b (from, to) = any (not . unoccupied b) (alongRay (from, to)) where
 
-  alongRay :: [Coordinate]
-  alongRay = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
-           $ filter isOnBoard
-           $ fmap (from `offsetBy`)
-           $ scaleBy <$> [1..7] <*> [(fst ray `div` rayLength, snd ray `div` rayLength)]
+alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
+alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
+                    $ filter isOnBoard
+                    $ fmap (from `offsetBy`)
+                    $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
 
-  rayLength :: Integer
-  rayLength = squareRoot $ pairEuclideanDistance (0,0) ray
-
-squareRoot :: Integer -> Integer
-squareRoot = round . sqrt . (fromIntegral :: Integer -> Double)
-
-coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Integer
+coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
 coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
-  x' = toInteger $ fromEnum cx' - fromEnum 'a'
-  x  = toInteger $ fromEnum cx - fromEnum 'a'
+  x' = fromEnum cx' - fromEnum 'a'
+  x  = fromEnum cx - fromEnum 'a'
 
-pairEuclideanDistance               :: (Integer, Integer) -> (Integer, Integer) -> Integer
+rayFromMove                                        :: (Coordinate, Coordinate) -> (Int, Int)
+rayFromMove ((Coordinate f r), (Coordinate f' r')) | fromEnum f' > fromEnum f && r' > r = (1,1)
+                                                   | fromEnum f' > fromEnum f && r' < r = (1,-1)
+                                                   | fromEnum f' > fromEnum f && r' == r = (1,0)
+                                                   | fromEnum f' < fromEnum f && r' > r = (-1,1)
+                                                   | fromEnum f' < fromEnum f && r' < r = (-1,-1)
+                                                   | fromEnum f' < fromEnum f && r' == r = (-1,0)
+                                                   | fromEnum f' == fromEnum f && r' > r = (0,1)
+                                                   | fromEnum f' == fromEnum f && r' < r = (0,-1)
+                                                   | fromEnum f' == fromEnum f && r' == r = (0,0)
+
+pairEuclideanDistance               :: (Int, Int) -> (Int, Int) -> Int
 pairEuclideanDistance (x,y) (x',y') = ((x' - x) ^ 2) + ((y' - y) ^ 2)
 
 potentialBishopMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialBishopMoves c = potentialRayMoves c diagonals where
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
-potentialRookMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-potentialRookMoves c = potentialRayMoves c straights where
+potentialRookMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialRookMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c straights where
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
-potentialQueenMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-potentialQueenMoves c = potentialRookMoves c ++ potentialBishopMoves c
+potentialQueenMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves c
 
 potentialKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKingMoves   = undefined

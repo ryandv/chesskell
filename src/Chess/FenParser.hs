@@ -99,13 +99,13 @@ enPassantSquareParser             = fmap Just coordinateParser <|> (char '-' >> 
     _ <- char ' '
     return $ Coordinate rank (read $ return file)
 
-halfMoveClockParser             :: GenParser Char FenParserState Integer
+halfMoveClockParser             :: GenParser Char FenParserState Int
 halfMoveClockParser             = do
   halfMoves <- many digit
   _ <- char ' '
   return . read $ halfMoves
 
-fullMoveNumberParser             :: GenParser Char FenParserState Integer
+fullMoveNumberParser             :: GenParser Char FenParserState Int
 fullMoveNumberParser             = do
   fullMoves <- manyTill digit eof
   return . read $ fullMoves
