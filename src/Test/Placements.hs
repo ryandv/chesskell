@@ -2,6 +2,8 @@ module Test.Placements where
 
 import Chess.Base
 
+import Control.Monad.State.Lazy
+
 placePiece                        :: RegularGame -> Piece -> Coordinate -> RegularGame
 placePiece g p c@(Coordinate f r) = g { placement = newPlacement } where
   newPlacement = fst splitBoard ++ [fst splitRank ++ [Square (Just p) c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
@@ -9,66 +11,70 @@ placePiece g p c@(Coordinate f r) = g { placement = newPlacement } where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
+setupGame                :: [(Piece, Coordinate)] -> RegularGame
+setupGame piecePositions = flip execState emptyTest $ setupGame' piecePositions where
+
+  setupGame'                :: [(Piece, Coordinate)] -> State RegularGame ()
+  setupGame' []             = return ()
+  setupGame' (pc:pcs)       = do
+    board <- get
+    put $ uncurry (placePiece board) pc
+    setupGame' pcs
+
 rookTest :: RegularGame
-rookTest = placePiece
-             (placePiece
-               (placePiece emptyTest (Piece Rook White) (Coordinate 'd' 3))
-               (Piece Rook White) (Coordinate 'd' 5)) (Piece Rook White) (Coordinate 'f' 5)
+rookTest = setupGame [ (Piece Rook White, Coordinate 'd' 3)
+                     , (Piece Rook White, Coordinate 'd' 5)
+                     , (Piece Rook White, Coordinate 'f' 5)
+                     ]
 
 onlyRookTest :: RegularGame
-onlyRookTest = placePiece emptyTest (Piece Rook White) (Coordinate 'd' 5)
+onlyRookTest = setupGame [ (Piece Rook White, Coordinate 'd' 5) ]
 
 rookCaptureVerticalTest :: RegularGame
-rookCaptureVerticalTest = placePiece
-                    (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 7))
-                    (Piece Rook White) (Coordinate 'd' 5)
+rookCaptureVerticalTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
+                                    , (Piece Rook White, Coordinate 'd' 5)
+                                    ]
 
 rookCaptureHorizontalTest :: RegularGame
-rookCaptureHorizontalTest = placePiece
-                    (placePiece emptyTest (Piece Pawn Black) (Coordinate 'f' 5))
-                    (Piece Rook White) (Coordinate 'd' 5)
+rookCaptureHorizontalTest = setupGame [ (Piece Pawn Black, Coordinate 'f' 5)
+                                      , (Piece Rook White, Coordinate 'd' 5)
+                                      ]
 
 rookAllCapturesTest :: RegularGame
-rookAllCapturesTest = placePiece
-                        (placePiece
-                          (placePiece
-                            (placePiece
-                              (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 7))
-                              (Piece Pawn Black) (Coordinate 'd' 3))
-                            (Piece Pawn Black) (Coordinate 'b' 5))
-                          (Piece Pawn Black) (Coordinate 'f' 5))
-                        (Piece Rook White) (Coordinate 'd' 5)
+rookAllCapturesTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
+                                , (Piece Pawn Black, Coordinate 'd' 3)
+                                , (Piece Pawn Black, Coordinate 'b' 5)
+                                , (Piece Pawn Black, Coordinate 'f' 5)
+                                , (Piece Rook White, Coordinate 'd' 5)
+                                ]
 
 bishopAllCapturesTest :: RegularGame
-bishopAllCapturesTest = placePiece
-                        (placePiece
-                          (placePiece
-                            (placePiece
-                              (placePiece emptyTest (Piece Pawn Black) (Coordinate 'c' 7))
-                              (Piece Pawn Black) (Coordinate 'g' 7))
-                            (Piece Pawn Black) (Coordinate 'g' 3))
-                          (Piece Pawn Black) (Coordinate 'c' 3))
-                        (Piece Bishop White) (Coordinate 'e' 5)
+bishopAllCapturesTest = setupGame [ (Piece Pawn Black, Coordinate 'c' 7)
+                                  , (Piece Pawn Black, Coordinate 'g' 7)
+                                  , (Piece Pawn Black, Coordinate 'g' 3)
+                                  , (Piece Pawn Black, Coordinate 'c' 3)
+                                  , (Piece Bishop White, Coordinate 'e' 5)
+                                  ]
 
 bishopCaptureTest :: RegularGame
-bishopCaptureTest = placePiece
-                    (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 4))
-                    (Piece Bishop White) (Coordinate 'a' 1)
+bishopCaptureTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                              , (Piece Bishop White, Coordinate 'a' 1)
+                              ]
 
 bishopTest :: RegularGame
-bishopTest = placePiece
-               (placePiece
-                 (placePiece emptyTest (Piece Pawn White) (Coordinate 'c' 3))
-                 (Piece Bishop White) (Coordinate 'e' 5)) (Piece Pawn White) (Coordinate 'g' 7)
+bishopTest = setupGame [ (Piece Pawn White, Coordinate 'c' 3)
+                       , (Piece Pawn White, Coordinate 'g' 7)
+                       , (Piece Bishop White, Coordinate 'e' 5)
+                       ]
 
 onlyBishopTest :: RegularGame
-onlyBishopTest = placePiece emptyTest (Piece Bishop White) (Coordinate 'e' 5)
+onlyBishopTest = setupGame [ (Piece Bishop White, Coordinate 'e' 5) ]
 
 diagonalTest :: RegularGame
-diagonalTest = placePiece
-                 (placePiece
-                   (placePiece emptyTest (Piece Queen White) (Coordinate 'f' 3))
-                   (Piece Queen White) (Coordinate 'd' 5)) (Piece Queen White) (Coordinate 'f' 7)
+diagonalTest = setupGame [ (Piece Queen White, Coordinate 'f' 3)
+                         , (Piece Queen White, Coordinate 'f' 7)
+                         , (Piece Queen White, Coordinate 'd' 5)
+                         ]
 
 emptyTest :: RegularGame
 emptyTest = RegularGame
