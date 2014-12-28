@@ -18,10 +18,42 @@ rookTest = placePiece
 onlyRookTest :: RegularGame
 onlyRookTest = placePiece emptyTest (Piece Rook White) (Coordinate 'd' 5)
 
-rookCaptureTest :: RegularGame
-rookCaptureTest = placePiece
+rookCaptureVerticalTest :: RegularGame
+rookCaptureVerticalTest = placePiece
+                    (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 7))
+                    (Piece Rook White) (Coordinate 'd' 5)
+
+rookCaptureHorizontalTest :: RegularGame
+rookCaptureHorizontalTest = placePiece
                     (placePiece emptyTest (Piece Pawn Black) (Coordinate 'f' 5))
                     (Piece Rook White) (Coordinate 'd' 5)
+
+rookAllCapturesTest :: RegularGame
+rookAllCapturesTest = placePiece
+                        (placePiece
+                          (placePiece
+                            (placePiece
+                              (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 7))
+                              (Piece Pawn Black) (Coordinate 'd' 3))
+                            (Piece Pawn Black) (Coordinate 'b' 5))
+                          (Piece Pawn Black) (Coordinate 'f' 5))
+                        (Piece Rook White) (Coordinate 'd' 5)
+
+bishopAllCapturesTest :: RegularGame
+bishopAllCapturesTest = placePiece
+                        (placePiece
+                          (placePiece
+                            (placePiece
+                              (placePiece emptyTest (Piece Pawn Black) (Coordinate 'c' 7))
+                              (Piece Pawn Black) (Coordinate 'g' 7))
+                            (Piece Pawn Black) (Coordinate 'g' 3))
+                          (Piece Pawn Black) (Coordinate 'c' 3))
+                        (Piece Bishop White) (Coordinate 'e' 5)
+
+bishopCaptureTest :: RegularGame
+bishopCaptureTest = placePiece
+                    (placePiece emptyTest (Piece Pawn Black) (Coordinate 'd' 4))
+                    (Piece Bishop White) (Coordinate 'a' 1)
 
 bishopTest :: RegularGame
 bishopTest = placePiece

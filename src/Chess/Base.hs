@@ -193,7 +193,18 @@ potentialRayMoves           :: Coordinate -> [(Int, Int)] -> [(Coordinate, Coord
 potentialRayMoves c offsets = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
 
 isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
-isBlocked b (from, to) = any (not . unoccupied b) (alongRay (from, to)) where
+isBlocked b (from, to) = not $ to `elem` (validMoves $ alongRay (from, to)) where
+
+  validMoves    :: [Coordinate] -> [Coordinate]
+  validMoves cs = validMoves' cs False
+
+  validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
+  validMoves' (c:cs) blocked | blocked == True = []
+                             | otherwise       = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
+                                                   Nothing                -> c:validMoves' cs False
+                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceOn $ squareAt b from))
+                                                                               then []
+                                                                               else c:validMoves' cs True
 
 alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
 alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
