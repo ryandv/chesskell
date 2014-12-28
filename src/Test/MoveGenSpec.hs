@@ -1,6 +1,7 @@
 module MoveGenSpec where
 
 import Chess.Base
+import Chess.MoveGen
 
 import Control.Monad
 
