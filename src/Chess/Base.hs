@@ -13,11 +13,11 @@ module Chess.Base
 
     coordinateEuclideanDistance,
     offsetBy,
-    potentialKnightMoves,
     rayFromMove,
     scaleBy,
     squareAt,
-    unoccupied
+    unoccupied,
+    unoccupiedByAlly
   ) where
 
 import Control.Applicative
@@ -98,6 +98,13 @@ isOnBoard (Coordinate f r) | f < 'a'   = False
                            | r > 8     = False
                            | otherwise = True
 
+unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
+unoccupiedByAlly b c ply | isNothing $ targetOwner = True
+                         | ply /= targetOwner = True
+                         | ply == targetOwner = False where
+  targetPiece = pieceOn $ squareAt b c
+  targetOwner = fmap pieceOwner $ targetPiece
+
 unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
 unoccupied b c = isNothing . pieceOn $ squareAt b c
 
@@ -115,10 +122,6 @@ offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + d
 opponent               :: Player -> Player
 opponent White         = Black
 opponent Black         = White
-
-potentialKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
-potentialKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
-  possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
 coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
 coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where

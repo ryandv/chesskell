@@ -3,6 +3,7 @@ module Chess.MoveGen
   , isBlocked
   , pseudoLegalMoves
   , potentialBishopMoves
+  , potentialKnightMoves
   , potentialPawnMoves
   , potentialRookMoves
   ) where
@@ -21,7 +22,7 @@ pseudoLegalMoves RegularGame { placement = b
 pseudoLegalMovesFrom :: Maybe Coordinate -> RegularBoardRepresentation -> Square -> [(Coordinate, Coordinate)]
 pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
 pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = filter (unoccupied b . snd) $ potentialPawnMoves b c l
-                                                       | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves l
+                                                       | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves b l
                                                        | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves b l
                                                        | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves b l
                                                        | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves b l
@@ -104,6 +105,10 @@ potentialRookMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c stra
 
 potentialQueenMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
 potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves b c
+
+potentialKnightMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialKnightMoves b c = fmap (\x -> (c,x)) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
+  possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
 potentialKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKingMoves   = undefined

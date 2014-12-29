@@ -214,10 +214,38 @@ main = hspec $
           , (Coordinate 'e' 5, Coordinate 'c' 3)
           ]
 
-    context "knight moves" $
+    context "knight moves" $ do
 
-      it "never produces moves off the board" $
-        property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
+      --it "never produces moves off the board" $
+      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
+
+      it "produces the correct set of moves without being blocked by pieces" $
+        potentialKnightMoves (placement onlyKnightTest) (Coordinate 'd' 4) `shouldBe`
+          [ (Coordinate 'd' 4, Coordinate 'b' 3)
+          , (Coordinate 'd' 4, Coordinate 'b' 5)
+          , (Coordinate 'd' 4, Coordinate 'c' 2)
+          , (Coordinate 'd' 4, Coordinate 'c' 6)
+          , (Coordinate 'd' 4, Coordinate 'e' 2)
+          , (Coordinate 'd' 4, Coordinate 'e' 6)
+          , (Coordinate 'd' 4, Coordinate 'f' 3)
+          , (Coordinate 'd' 4, Coordinate 'f' 5)
+          ]
+
+      it "produces the correct set of moves when blocked by some pieces" $
+        potentialKnightMoves (placement knightTest) (Coordinate 'd' 4) `shouldBe`
+          [ (Coordinate 'd' 4, Coordinate 'b' 3)
+          , (Coordinate 'd' 4, Coordinate 'c' 2)
+          , (Coordinate 'd' 4, Coordinate 'c' 6)
+          , (Coordinate 'd' 4, Coordinate 'e' 2)
+          , (Coordinate 'd' 4, Coordinate 'e' 6)
+          , (Coordinate 'd' 4, Coordinate 'f' 5)
+          ]
+
+      it "can jump over pieces" $
+        potentialKnightMoves (placement startingPos) (Coordinate 'b' 1) `shouldBe`
+          [ (Coordinate 'b' 1, Coordinate 'a' 3)
+          , (Coordinate 'b' 1, Coordinate 'c' 3)
+          ]
 
     context "pawn moves" $ do
 

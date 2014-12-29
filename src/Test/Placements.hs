@@ -76,6 +76,15 @@ diagonalTest = setupGame [ (Piece Queen White, Coordinate 'f' 3)
                          , (Piece Queen White, Coordinate 'd' 5)
                          ]
 
+onlyKnightTest :: RegularGame
+onlyKnightTest = setupGame [ (Piece Knight White, Coordinate 'd' 4) ]
+
+knightTest :: RegularGame
+knightTest = setupGame [ (Piece Knight White, Coordinate 'd' 4)
+                       , (Piece Knight White, Coordinate 'b' 5)
+                       , (Piece Knight White, Coordinate 'f' 3)
+                       ]
+
 emptyTest :: RegularGame
 emptyTest = RegularGame
   { placement =
