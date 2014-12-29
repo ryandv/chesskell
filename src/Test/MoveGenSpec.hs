@@ -231,10 +231,10 @@ main = hspec $
 
         it "disallows White double-jumping from elsewhere" $
           potentialPawnMoves (placement $
-            setupGame [ (Piece Pawn White, Coordinate 'e' 3) ])
+            setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])
                       Nothing
-                      (Coordinate 'e' 3) `shouldBe`
-            [ (Coordinate 'e' 3, Coordinate 'e' 4) ]
+                      (Coordinate 'e' 7) `shouldBe`
+            [ (Coordinate 'e' 7, Coordinate 'e' 8) ]
 
         it "allows double-jumping from the second rank for Black" $
           potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 7) `shouldBe`
@@ -244,10 +244,10 @@ main = hspec $
 
         it "disallows Black double-jumping from elsewhere" $
           potentialPawnMoves (placement $
-            setupGame [ (Piece Pawn Black, Coordinate 'e' 6) ])
+            setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])
                       Nothing 
-                      (Coordinate 'e' 6) `shouldBe`
-            [ (Coordinate 'e' 6, Coordinate 'e' 5) ]
+                      (Coordinate 'e' 2) `shouldBe`
+            [ (Coordinate 'e' 2, Coordinate 'e' 1) ]
 
         it "does not allow White to advance onto an occupied square" $
           potentialPawnMoves (placement $
