@@ -219,7 +219,172 @@ main = hspec $
       it "never produces moves off the board" $
         property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
 
-    context "pawn moves" $
+    context "pawn moves" $ do
 
-      it "never produces moves off the board" $
-        property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
+      context "movement" $ do
+
+        it "allows double-jumping from the second rank for White" $
+          potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 2) `shouldBe`
+            [ (Coordinate 'e' 2, Coordinate 'e' 4)
+            , (Coordinate 'e' 2, Coordinate 'e' 3)
+            ]
+
+        it "disallows White double-jumping from elsewhere" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn White, Coordinate 'e' 3) ])
+                      Nothing
+                      (Coordinate 'e' 3) `shouldBe`
+            [ (Coordinate 'e' 3, Coordinate 'e' 4) ]
+
+        it "allows double-jumping from the second rank for Black" $
+          potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 7) `shouldBe`
+            [ (Coordinate 'e' 7, Coordinate 'e' 5)
+            , (Coordinate 'e' 7, Coordinate 'e' 6)
+            ]
+
+        it "disallows Black double-jumping from elsewhere" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'e' 6) ])
+                      Nothing 
+                      (Coordinate 'e' 6) `shouldBe`
+            [ (Coordinate 'e' 6, Coordinate 'e' 5) ]
+
+        it "does not allow White to advance onto an occupied square" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                      , (Piece Pawn White, Coordinate 'd' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 4) `shouldBe` []
+
+        it "does not allow White to double-jump onto an occupied square" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                      , (Piece Pawn White, Coordinate 'd' 2)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 2) `shouldBe`
+            [ (Coordinate 'd' 2, Coordinate 'd' 3) ]
+
+        it "does not allow Black to double-jump onto an occupied square" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
+                      , (Piece Pawn White, Coordinate 'd' 5)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 7) `shouldBe`
+            [ (Coordinate 'd' 7, Coordinate 'd' 6) ]
+
+        it "does not allow Black to advance onto an occupied square" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                      , (Piece Pawn White, Coordinate 'd' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 5) `shouldBe` []
+
+      context "capturing" $ do
+
+        it "allows White to capture pieces on the neighbouring NW and NE squares" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'c' 5)
+                      , (Piece Pawn Black, Coordinate 'e' 5)
+                      , (Piece Pawn White, Coordinate 'd' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            ]
+
+        it "allows Black to capture pieces on the neighbouring NW and NE squares" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn White, Coordinate 'c' 4)
+                      , (Piece Pawn White, Coordinate 'e' 4)
+                      , (Piece Pawn Black, Coordinate 'd' 5)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 5) `shouldBe`
+            [ (Coordinate 'd' 5, Coordinate 'd' 4)
+            , (Coordinate 'd' 5, Coordinate 'c' 4)
+            , (Coordinate 'd' 5, Coordinate 'e' 4)
+            ]
+
+        it "does not allow White to capture its own pieces" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn White, Coordinate 'c' 5)
+                      , (Piece Pawn White, Coordinate 'e' 5)
+                      , (Piece Pawn White, Coordinate 'd' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'd' 5)
+            ]
+
+        it "does not allow Black to capture its own pieces" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
+                      , (Piece Pawn Black, Coordinate 'e' 4)
+                      , (Piece Pawn Black, Coordinate 'd' 5)
+                      ])
+                      Nothing
+                      (Coordinate 'd' 5) `shouldBe`
+            [ (Coordinate 'd' 5, Coordinate 'd' 4)
+            ]
+
+        it "only allows capturing on the 'b' file for pawns on the 'a' file" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'b' 5)
+                      , (Piece Pawn White, Coordinate 'a' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'a' 4) `shouldBe`
+            [ (Coordinate 'a' 4, Coordinate 'a' 5)
+            , (Coordinate 'a' 4, Coordinate 'b' 5)
+            ]
+
+        it "only allows capturing on the 'g' file for pawns on the 'h' file" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'g' 5)
+                      , (Piece Pawn White, Coordinate 'h' 4)
+                      ])
+                      Nothing
+                      (Coordinate 'h' 4) `shouldBe`
+            [ (Coordinate 'h' 4, Coordinate 'h' 5)
+            , (Coordinate 'h' 4, Coordinate 'g' 5)
+            ]
+
+        it "allows White to en passant, if available" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                      , (Piece Pawn White, Coordinate 'e' 5)
+                      ])
+                      (Just (Coordinate 'd' 6))
+                      (Coordinate 'e' 5) `shouldBe`
+            [ (Coordinate 'e' 5, Coordinate 'e' 6)
+            , (Coordinate 'e' 5, Coordinate 'd' 6)
+            ]
+
+        it "allows Black to en passant, if available" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                      , (Piece Pawn White, Coordinate 'e' 4)
+                      ])
+                      (Just (Coordinate 'e' 3))
+                      (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            ]
+
+        it "only allows en passant from the correct square" $
+          potentialPawnMoves (placement $
+            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                      , (Piece Pawn White, Coordinate 'e' 5)
+                      , (Piece Pawn White, Coordinate 'b' 2)
+                      ])
+                      (Just (Coordinate 'd' 6))
+                      (Coordinate 'b' 2) `shouldBe`
+            [ (Coordinate 'b' 2, Coordinate 'b' 4)
+            , (Coordinate 'b' 2, Coordinate 'b' 3)
+            ]
