@@ -11,9 +11,7 @@ module Chess.Base
     RegularGame(..),
     Square(..),
 
-    alongRay,
     coordinateEuclideanDistance,
-    isBlocked,
     offsetBy,
     potentialKnightMoves,
     rayFromMove,
@@ -121,26 +119,6 @@ opponent Black         = White
 potentialKnightMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKnightMoves c = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
-
-isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
-isBlocked b (from, to) = not $ to `elem` (validMoves $ alongRay (from, to)) where
-
-  validMoves    :: [Coordinate] -> [Coordinate]
-  validMoves cs = validMoves' cs False
-
-  validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
-  validMoves' (c:cs) blocked | blocked == True = []
-                             | otherwise       = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
-                                                   Nothing                -> c:validMoves' cs False
-                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceOn $ squareAt b from))
-                                                                               then []
-                                                                               else c:validMoves' cs True
-
-alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
-alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
-                    $ filter isOnBoard
-                    $ fmap (from `offsetBy`)
-                    $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
 
 coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
 coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where

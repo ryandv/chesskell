@@ -1,5 +1,7 @@
 module Chess.MoveGen
-  ( pseudoLegalMoves
+  ( alongRay
+  , isBlocked
+  , pseudoLegalMoves
   , potentialBishopMoves
   , potentialPawnMoves
   , potentialRookMoves
@@ -32,6 +34,7 @@ potentialPawnMoves b (Just enPassant) c@(Coordinate r f) = standardPawnMoves b c
   rankOffset = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
                  Just White -> 1
                  Just Black -> -1
+
   enPassantMoves                      :: Coordinate -> [(Coordinate, Coordinate)]
   enPassantMoves (Coordinate r' f')   | (toEnum $ fromEnum r' + fromEnum rankOffset) == r && (f == (f' - 1) || f == (f' + 1)) = [((Coordinate r f), (Coordinate r' f'))]
                                       | otherwise                                   = []
@@ -100,3 +103,24 @@ potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves b c
 
 potentialKingMoves   :: Coordinate -> [(Coordinate, Coordinate)]
 potentialKingMoves   = undefined
+
+isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
+isBlocked b (from, to) = not $ to `elem` (validMoves $ alongRay (from, to)) where
+
+  validMoves    :: [Coordinate] -> [Coordinate]
+  validMoves cs = validMoves' cs False
+
+  validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
+  validMoves' (c:cs) blocked | blocked == True = []
+                             | otherwise       = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
+                                                   Nothing                -> c:validMoves' cs False
+                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceOn $ squareAt b from))
+                                                                               then []
+                                                                               else c:validMoves' cs True
+
+alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
+alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
+                    $ filter isOnBoard
+                    $ fmap (from `offsetBy`)
+                    $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
+
