@@ -85,6 +85,21 @@ knightTest = setupGame [ (Piece Knight White, Coordinate 'd' 4)
                        , (Piece Knight White, Coordinate 'f' 3)
                        ]
 
+onlyQueenTest :: RegularGame
+onlyQueenTest = setupGame [ (Piece Queen White, Coordinate 'd' 4) ]
+
+queenTest :: RegularGame
+queenTest = setupGame [ (Piece Queen White, Coordinate 'd' 4)
+                      , (Piece Rook White, Coordinate 'd' 7)
+                      , (Piece Bishop White, Coordinate 'g' 7)
+                      ]
+
+queenCaptureTest :: RegularGame
+queenCaptureTest = setupGame [ (Piece Queen White, Coordinate 'd' 4)
+                             , (Piece Rook Black, Coordinate 'd' 7)
+                             , (Piece Bishop Black, Coordinate 'g' 7)
+                             ]
+
 onlyKingTest :: RegularGame
 onlyKingTest = setupGame [ (Piece King White, Coordinate 'd' 4) ]
 

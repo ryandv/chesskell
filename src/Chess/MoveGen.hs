@@ -6,6 +6,7 @@ module Chess.MoveGen
   , potentialKingMoves
   , potentialKnightMoves
   , potentialPawnMoves
+  , potentialQueenMoves
   , potentialRookMoves
   ) where
 

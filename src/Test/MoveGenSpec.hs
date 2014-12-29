@@ -247,6 +247,96 @@ main = hspec $
           , (Coordinate 'b' 1, Coordinate 'c' 3)
           ]
 
+    describe "potentialQueenMoves" $
+      context "movement" $ do
+        it "produces the correct set of moves without being blocked by pieces" $
+          potentialQueenMoves (placement onlyQueenTest) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'f' 4)
+            , (Coordinate 'd' 4, Coordinate 'b' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 6)
+            , (Coordinate 'd' 4, Coordinate 'd' 2)
+            , (Coordinate 'd' 4, Coordinate 'g' 4)
+            , (Coordinate 'd' 4, Coordinate 'a' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 7)
+            , (Coordinate 'd' 4, Coordinate 'd' 1)
+            , (Coordinate 'd' 4, Coordinate 'h' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 8)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            , (Coordinate 'd' 4, Coordinate 'b' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 2)
+            , (Coordinate 'd' 4, Coordinate 'b' 2)
+            , (Coordinate 'd' 4, Coordinate 'a' 7)
+            , (Coordinate 'd' 4, Coordinate 'g' 7)
+            , (Coordinate 'd' 4, Coordinate 'g' 1)
+            , (Coordinate 'd' 4, Coordinate 'a' 1)
+            , (Coordinate 'd' 4, Coordinate 'h' 8)
+            ]
+
+        it "produces the correct set of moves when blocked by some pieces" $
+          potentialQueenMoves (placement queenTest) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'f' 4)
+            , (Coordinate 'd' 4, Coordinate 'b' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 6)
+            , (Coordinate 'd' 4, Coordinate 'd' 2)
+            , (Coordinate 'd' 4, Coordinate 'g' 4)
+            , (Coordinate 'd' 4, Coordinate 'a' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 1)
+            , (Coordinate 'd' 4, Coordinate 'h' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            , (Coordinate 'd' 4, Coordinate 'b' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 2)
+            , (Coordinate 'd' 4, Coordinate 'b' 2)
+            , (Coordinate 'd' 4, Coordinate 'a' 7)
+            , (Coordinate 'd' 4, Coordinate 'g' 1)
+            , (Coordinate 'd' 4, Coordinate 'a' 1)
+            ]
+
+        it "produces the correct set of moves, including captures" $
+          potentialQueenMoves (placement queenCaptureTest) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'f' 4)
+            , (Coordinate 'd' 4, Coordinate 'b' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 6)
+            , (Coordinate 'd' 4, Coordinate 'd' 2)
+            , (Coordinate 'd' 4, Coordinate 'g' 4)
+            , (Coordinate 'd' 4, Coordinate 'a' 4)
+            , (Coordinate 'd' 4, Coordinate 'd' 7)
+            , (Coordinate 'd' 4, Coordinate 'd' 1)
+            , (Coordinate 'd' 4, Coordinate 'h' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            , (Coordinate 'd' 4, Coordinate 'b' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 6)
+            , (Coordinate 'd' 4, Coordinate 'f' 2)
+            , (Coordinate 'd' 4, Coordinate 'b' 2)
+            , (Coordinate 'd' 4, Coordinate 'a' 7)
+            , (Coordinate 'd' 4, Coordinate 'g' 7)
+            , (Coordinate 'd' 4, Coordinate 'g' 1)
+            , (Coordinate 'd' 4, Coordinate 'a' 1)
+            ]
+
+
     describe "potentialKingMoves" $
       context "movement" $ do
         it "allows the king to move to any square in its Moore neighbourhood" $
