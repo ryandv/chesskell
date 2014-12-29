@@ -61,9 +61,9 @@ whiteDoubleJump b c                  = advance b c 2
 blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
 blackDoubleJump b c                  = advance b c (-2)
 
-advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [(Coordinate, Coordinate)]
-advance b c@(Coordinate f r) offset | (unoccupied b $ Coordinate f (r+offset)) = [((Coordinate f r), (Coordinate f (r+offset)))]
-                                    | otherwise                                = []
+advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [(Coordinate, Coordinate)]
+advance b (Coordinate f r) offset | (unoccupied b $ Coordinate f (r+offset)) = [((Coordinate f r), (Coordinate f (r+offset)))]
+                                  | otherwise                                = []
 
 whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
 whiteCaptures b c@(Coordinate f _)      | f == 'a' = whiteNECapture b c
@@ -75,9 +75,9 @@ blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
                                         | f == 'h' = blackNWCapture b c
                                         | otherwise = blackNWCapture b c ++ blackNECapture b c
 
-capture                                     :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [(Coordinate, Coordinate)]
-capture b c@(Coordinate f r) tf dr opponent | (isJust $ target) && fmap pieceOwner target == Just opponent = [((Coordinate f r), targetCoord)]
-                                            | otherwise = [] where
+capture                                   :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [(Coordinate, Coordinate)]
+capture b (Coordinate f r) tf dr opponent | (isJust $ target) && fmap pieceOwner target == Just opponent = [((Coordinate f r), targetCoord)]
+                                          | otherwise = [] where
   target = pieceOn $ squareAt b (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
 
@@ -114,66 +114,50 @@ potentialKnightMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordi
 potentialKnightMoves b c = potentialOffsetMoves b c possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
---standardPawnMoves b c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump b c ++ whiteAdvance b c ++ whiteCaptures b c
---potentialKingMoves b castles c = potentialOffsetMoves b c possibleMoves ++ castles b castles c where
-potentialKingMoves                              :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [(Coordinate, Coordinate)]
-potentialKingMoves b castles c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles b castles c
-                                                | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles b castles c
-                                                | otherwise = potentialOffsetMoves b c possibleMoves where
-  kingOwner = fmap pieceOwner . pieceOn $ squareAt b c
+potentialKingMoves                                   :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [(Coordinate, Coordinate)]
+potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
+                                                     | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights
+                                                     | otherwise = potentialOffsetMoves b c possibleMoves where
+
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
-  whiteCastles                                                :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [(Coordinate, Coordinate)]
-  whiteCastles b (CastleRights oo _ ooo _) c@(Coordinate f r) | oo && ooo = whiteOOCastle b ++ whiteOOOCastle b
-                                                              | oo && not ooo = whiteOOCastle b
-                                                              | not oo && ooo = whiteOOOCastle b
-                                                              | otherwise = []
+  kingOwner = fmap pieceOwner . pieceOn $ squareAt b c
 
-  whiteOOCastle   :: RegularBoardRepresentation -> [(Coordinate, Coordinate)]
-  whiteOOCastle b | whiteOORookIsPresent b && whiteOOSquaresAreFree b = [(Coordinate 'e' 1, Coordinate 'g' 1)]
-                  | otherwise = []
+  castles                        :: Bool -> Bool -> Player -> [(Coordinate, Coordinate)]
+  castles kingside queenside ply | kingside && queenside = ooCastle (getHomeRank ply) ply ++ oooCastle (getHomeRank ply) ply
+                                 | kingside && not queenside = ooCastle (getHomeRank ply) ply
+                                 | not kingside && queenside = oooCastle (getHomeRank ply) ply
+                                 | otherwise = []
 
-  whiteOORookIsPresent   :: RegularBoardRepresentation -> Bool
-  whiteOORookIsPresent b = (Just (Piece Rook White)) == (pieceOn . squareAt b $ (Coordinate 'h' 1))
+  getHomeRank     :: Player -> Rank
+  getHomeRank ply | ply == White = 1
+                  | otherwise    = 8
 
-  whiteOOSquaresAreFree   :: RegularBoardRepresentation -> Bool
-  whiteOOSquaresAreFree b = all (unoccupied b) [(Coordinate 'f' 1), (Coordinate 'g' 1)]
+  whiteCastles                           :: CastleRights -> [(Coordinate, Coordinate)]
+  whiteCastles (CastleRights oo _ ooo _) = castles oo ooo White
 
-  whiteOOOCastle   :: RegularBoardRepresentation -> [(Coordinate, Coordinate)]
-  whiteOOOCastle b | whiteOOORookIsPresent b && whiteOOOSquaresAreFree b = [(Coordinate 'e' 1, Coordinate 'c' 1)]
-                   | otherwise = []
+  blackCastles                           :: CastleRights -> [(Coordinate, Coordinate)]
+  blackCastles (CastleRights _ oo _ ooo) = castles oo ooo Black
 
-  whiteOOORookIsPresent   :: RegularBoardRepresentation -> Bool
-  whiteOOORookIsPresent b = (Just (Piece Rook White)) == (pieceOn . squareAt b $ (Coordinate 'a' 1))
+  ooCastle              :: Rank -> Player -> [(Coordinate, Coordinate)]
+  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [(Coordinate 'e' homeRank, Coordinate 'g' homeRank)]
+                        | otherwise = []
 
-  whiteOOOSquaresAreFree   :: RegularBoardRepresentation -> Bool
-  whiteOOOSquaresAreFree b = all (unoccupied b) [(Coordinate 'b' 1), (Coordinate 'c' 1), (Coordinate 'd' 1)]
+  ooRookIsPresent              :: Rank -> Player -> Bool
+  ooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceOn . squareAt b $ (Coordinate 'h' homeRank))
 
-  blackCastles                                             :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [(Coordinate, Coordinate)]
-  blackCastles b (CastleRights _ oo _ ooo) c@(Coordinate f r) | oo && ooo = blackOOCastle b ++ blackOOOCastle b
-                                                              | oo && not ooo = blackOOCastle b
-                                                              | not oo && ooo = blackOOOCastle b
-                                                              | otherwise = []
+  ooSquaresAreFree          :: Rank -> Bool
+  ooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
 
-  blackOOCastle   :: RegularBoardRepresentation -> [(Coordinate, Coordinate)]
-  blackOOCastle b | blackOORookIsPresent b && blackOOSquaresAreFree b = [(Coordinate 'e' 8, Coordinate 'g' 8)]
-                  | otherwise = []
+  oooCastle              :: Rank -> Player -> [(Coordinate, Coordinate)]
+  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [(Coordinate 'e' homeRank, Coordinate 'c' homeRank)]
+                         | otherwise = []
 
-  blackOORookIsPresent   :: RegularBoardRepresentation -> Bool
-  blackOORookIsPresent b = (Just (Piece Rook Black)) == (pieceOn . squareAt b $ (Coordinate 'h' 8))
+  oooRookIsPresent              :: Rank -> Player -> Bool
+  oooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceOn . squareAt b $ (Coordinate 'a' homeRank))
 
-  blackOOSquaresAreFree   :: RegularBoardRepresentation -> Bool
-  blackOOSquaresAreFree b = all (unoccupied b) [(Coordinate 'f' 8), (Coordinate 'g' 8)]
-
-  blackOOOCastle   :: RegularBoardRepresentation -> [(Coordinate, Coordinate)]
-  blackOOOCastle b | blackOOORookIsPresent b && blackOOOSquaresAreFree b = [(Coordinate 'e' 8, Coordinate 'c' 8)]
-                   | otherwise = []
-
-  blackOOORookIsPresent   :: RegularBoardRepresentation -> Bool
-  blackOOORookIsPresent b = (Just (Piece Rook Black)) == (pieceOn . squareAt b $ (Coordinate 'a' 8))
-
-  blackOOOSquaresAreFree   :: RegularBoardRepresentation -> Bool
-  blackOOOSquaresAreFree b = all (unoccupied b) [(Coordinate 'b' 8), (Coordinate 'c' 8), (Coordinate 'd' 8)]
+  oooSquaresAreFree          :: Rank -> Bool
+  oooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]
 
 isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
 isBlocked b (from, to) = not $ to `elem` (validMoves $ alongRay (from, to)) where
