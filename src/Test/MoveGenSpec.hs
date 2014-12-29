@@ -16,9 +16,9 @@ coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
 main :: IO ()
 main = hspec $
 
-  describe "potential move generation" $ do
+  context "potential move generation" $ do
 
-    context "alongRay" $ do
+    describe "alongRay" $ do
       context "verticals" $ do
         it "returns a list of coordinates along the north vertical ray, including the destination" $
           alongRay (Coordinate 'a' 1, Coordinate 'a' 8) `shouldBe`
@@ -65,7 +65,7 @@ main = hspec $
             , Coordinate 'a' 1
             ]
 
-    context "isBlocked" $ do
+    describe "isBlocked" $ do
 
       context "verticals" $ do
         it "returns True if the destination point is behind another friendly piece along the ray" $
@@ -121,7 +121,7 @@ main = hspec $
         it "returns False if the destination square is occupied by an enemy piece" $
           isBlocked (placement bishopCaptureTest) (Coordinate 'a' 1, Coordinate 'd' 4) `shouldBe` False
 
-    context "rook moves" $ do
+    describe "potentialRookMoves" $ do
 
       --it "never produces moves off the board" $
       --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialRookMoves (placement emptyTest) c
@@ -169,7 +169,7 @@ main = hspec $
           ]
 
 
-    context "bishop moves" $ do
+    describe "potentialBishopMoves" $ do
       --it "never produces moves off the board" $
       --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialBishopMoves (placement emptyTest) c
 
@@ -214,7 +214,7 @@ main = hspec $
           , (Coordinate 'e' 5, Coordinate 'c' 3)
           ]
 
-    context "knight moves" $ do
+    describe "potentialKnightMoves" $ do
 
       --it "never produces moves off the board" $
       --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
@@ -247,7 +247,184 @@ main = hspec $
           , (Coordinate 'b' 1, Coordinate 'c' 3)
           ]
 
-    context "pawn moves" $ do
+    describe "potentialKingMoves" $
+      context "movement" $ do
+        it "allows the king to move to any square in its Moore neighbourhood" $
+          potentialKingMoves (placement onlyKingTest) (CastleRights False False False False) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            ]
+
+        it "allows the white king to castle kingside, if he has the right to" $
+          potentialKingMoves (placement whiteKingOOTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            , (Coordinate 'e' 1, Coordinate 'g' 1)
+            ]
+
+        it "does not allow the white king to castle kingside, if he does not have the right to" $
+          potentialKingMoves (placement whiteKingOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            ]
+
+        it "allows the white king to castle queenside, if he has the right to" $
+          potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            , (Coordinate 'e' 1, Coordinate 'c' 1)
+            ]
+
+        it "does not allow the white king to castle queenside, if he does not have the right to" $
+          potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            ]
+
+        it "allows the white king to castle both kingside or queenside, if he has the option" $
+          potentialKingMoves (placement whiteKingBothCastlesTest) (CastleRights True False True False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            , (Coordinate 'e' 1, Coordinate 'g' 1)
+            , (Coordinate 'e' 1, Coordinate 'c' 1)
+            ]
+
+        it "does not allow the white king to castle when he is not on his home square" $
+          potentialKingMoves (placement whiteKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            ]
+
+        it "does not allow the white king to castle kingside when the rook is not on its home square" $
+          potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            ]
+
+        it "does not allow the white king to castle queenside when the rook is not on its home square" $
+          potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
+            [ (Coordinate 'e' 1, Coordinate 'd' 1)
+            , (Coordinate 'e' 1, Coordinate 'd' 2)
+            , (Coordinate 'e' 1, Coordinate 'e' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 2)
+            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            ]
+
+        it "allows the black king to castle kingside, if he has the right to" $
+          potentialKingMoves (placement blackKingOOTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            , (Coordinate 'e' 8, Coordinate 'g' 8)
+            ]
+
+        it "does not allow the black king to castle kingside, if he does not have the right to" $
+          potentialKingMoves (placement blackKingOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            ]
+
+        it "allows the black king to castle queenside, if he has the right to" $
+          potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            , (Coordinate 'e' 8, Coordinate 'c' 8)
+            ]
+
+        it "does not allow the black king to castle queenside, if he does not have the right to" $
+          potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            ]
+
+        it "allows the black king to castle both kingside or queenside, if he has the option" $
+          potentialKingMoves (placement blackKingBothCastlesTest) (CastleRights False True False True) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            , (Coordinate 'e' 8, Coordinate 'g' 8)
+            , (Coordinate 'e' 8, Coordinate 'c' 8)
+            ]
+
+        it "does not allow the black king to castle when he is not on his home square" $
+          potentialKingMoves (placement blackKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
+            [ (Coordinate 'd' 4, Coordinate 'c' 4)
+            , (Coordinate 'd' 4, Coordinate 'c' 5)
+            , (Coordinate 'd' 4, Coordinate 'd' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            , (Coordinate 'd' 4, Coordinate 'e' 4)
+            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            , (Coordinate 'd' 4, Coordinate 'd' 3)
+            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            ]
+
+        it "does not allow the black king to castle kingside when the rook is not on its home square" $
+          potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            ]
+
+        it "does not allow the black king to castle queenside when the rook is not on its home square" $
+          potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
+            [ (Coordinate 'e' 8, Coordinate 'd' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 8)
+            , (Coordinate 'e' 8, Coordinate 'f' 7)
+            , (Coordinate 'e' 8, Coordinate 'e' 7)
+            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            ]
+
+        it "does not allow the king to castle if the intermediate squares are occupied" $
+          potentialKingMoves (placement startingPos) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+            []
+
+
+    describe "potentialPawnMoves" $ do
 
       context "movement" $ do
 
