@@ -5,11 +5,7 @@ import Chess.Base
 import Control.Monad.State.Lazy
 
 placePiece                        :: RegularGame -> Piece -> Coordinate -> RegularGame
-placePiece g p c@(Coordinate f r) = g { placement = newPlacement } where
-  newPlacement = fst splitBoard ++ [fst splitRank ++ [Square (Just p) c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
-  splitBoard = splitAt (r - 1) $ placement g
-  splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
-  targetRank = head . snd $ splitBoard
+placePiece g p c@(Coordinate f r) = g { placement = addPiece (placement g) (Just p) c }
 
 setupGame                :: [(Piece, Coordinate)] -> RegularGame
 setupGame piecePositions = flip execState emptyTest $ setupGame' piecePositions where

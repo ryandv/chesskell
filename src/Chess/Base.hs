@@ -13,6 +13,7 @@ module Chess.Base
     RegularGame(..),
     Square(..),
 
+    addPiece,
     coordinateEuclideanDistance,
     makeMove,
     offsetBy,
@@ -129,8 +130,6 @@ scaleBy s (x,y)                   = (x*s, y*s)
 offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
 offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
 
-
-
 opponent               :: Player -> Player
 opponent White         = Black
 opponent Black         = White
@@ -154,20 +153,6 @@ rayFromMove ((Coordinate f r), (Coordinate f' r')) | fromEnum f' > fromEnum f &&
 pairEuclideanDistance               :: (Int, Int) -> (Int, Int) -> Int
 pairEuclideanDistance (x,y) (x',y') = ((x' - x) ^ 2) + ((y' - y) ^ 2)
 
---placePiece                        :: RegularGame -> Piece -> Coordinate -> RegularGame
---placePiece g p c@(Coordinate f r) = g { placement = newPlacement } where
---  newPlacement = fst splitBoard ++ [fst splitRank ++ [Square (Just p) c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
---  splitBoard = splitAt (r - 1) $ placement g
---  splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
---  targetRank = head . snd $ splitBoard
-
-removePiece                      :: RegularBoardRepresentation -> Coordinate -> RegularBoardRepresentation
-removePiece b c@(Coordinate f r) = newPlacement where
-  newPlacement = fst splitBoard ++ [fst splitRank ++ [Square Nothing c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
-  splitBoard = splitAt (r - 1) $ b
-  splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
-  targetRank = head . snd $ splitBoard
-
 addPiece                        :: RegularBoardRepresentation -> Maybe Piece -> Coordinate -> RegularBoardRepresentation
 addPiece b p c@(Coordinate f r) = newPlacement where
   newPlacement = fst splitBoard ++ [fst splitRank ++ [Square p c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
@@ -175,14 +160,16 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
-makeMove :: Move -> State RegularGame Bool
+makeMove                              :: Move -> State RegularGame Bool
 makeMove Move { moveFrom = from
               , moveTo   = to
               , moveType = movetype } | movetype == Standard = do
+
   game <- get
   let position = placement game
   let originalPiece = pieceOn $ squareAt position from
-  put $ game { placement = removePiece position from }
+  put $ game { placement = addPiece position Nothing from }
+
   game <- get
   let position = placement game
   put $ game { placement = addPiece position originalPiece to }
