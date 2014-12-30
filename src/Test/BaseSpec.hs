@@ -214,7 +214,7 @@ kingOpening = RegularGame
                , location = Coordinate 'h' 8}
       ]
     ]
-  , activeColor     = White
+  , activeColor     = Black
   , castlingRights  = CastleRights True True True True
   , enPassantSquare = Nothing
   , halfMoveClock   = 0
@@ -227,3 +227,9 @@ main = hspec $
   describe "makeMove" $ do
     it "accepts standard moves and updates the game's positional state" $
       execState (makeMove $ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }) startingPos `shouldBe` kingOpening
+
+    it "accepts captures and removes the captured piece from the board" $
+      execState (makeMove $ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture })
+        (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
+                   , (Piece Pawn Black, Coordinate 'd' 5)
+                   ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'c' 4) ]) { activeColor = White }

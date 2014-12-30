@@ -94,7 +94,13 @@ instance Show RegularGame where
            ++ "3 " ++ concatMap (maybe "-" show) thirdRank   ++ " 3\n"
            ++ "2 " ++ concatMap (maybe "-" show) secondRank  ++ " 2\n"
            ++ "1 " ++ concatMap (maybe "-" show) firstRank   ++ " 1\n"
-           ++ "  abcdefgh \n " where
+           ++ "  abcdefgh \n "
+           ++ "\n"
+           ++ (show $ activeColor g) ++ " to move\n"
+           ++ (show $ castlingRights g) ++ "\n"
+           ++ "En passant on " ++ (show $ enPassantSquare g) ++ "\n"
+           ++ "Halfmove clock at " ++ (show $ halfMoveClock g) ++ "\n"
+           ++ "Fullmove number " ++ (show $ fullMoveNumber g) ++ "\n" where
     eighthRank  = map pieceOn $ placement g !! 7
     seventhRank = map pieceOn $ placement g !! 6
     sixthRank   = map pieceOn $ placement g !! 5
@@ -160,17 +166,22 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
-makeMove                              :: Move -> State RegularGame Bool
-makeMove Move { moveFrom = from
-              , moveTo   = to
-              , moveType = movetype } | movetype == Standard = do
-
+makeStandardMove :: Move -> State RegularGame Bool
+makeStandardMove Move { moveFrom = from
+                      , moveTo   = to
+                      , moveType = movetype } = do
   game <- get
   let position = placement game
   let originalPiece = pieceOn $ squareAt position from
-  put $ game { placement = addPiece position Nothing from }
+  put $ game { placement = addPiece position Nothing from, activeColor = opponent (activeColor game) }
 
   game <- get
   let position = placement game
   put $ game { placement = addPiece position originalPiece to }
   return True
+
+makeMove                              :: Move -> State RegularGame Bool
+makeMove move@Move { moveFrom = from
+                   , moveTo   = to
+                   , moveType = movetype } | movetype == Standard = makeStandardMove move
+                                           | movetype == Capture  = makeStandardMove move
