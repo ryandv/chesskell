@@ -180,8 +180,37 @@ makeStandardMove Move { moveFrom = from
   put $ game { placement = addPiece position originalPiece to }
   return True
 
+disableWhiteCastles :: CastleRights -> CastleRights
+disableWhiteCastles (CastleRights woo boo wooo booo) = CastleRights False boo False booo
+
+makeCastle                              :: Move -> State RegularGame Bool
+makeCastle Move { moveFrom = from
+                , moveTo   = to
+                , moveType = movetype } | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = do
+  game <- get
+  let position = placement game
+  let originalPiece = pieceOn $ squareAt position from
+  put $ game { placement = addPiece position Nothing from
+             , activeColor = opponent (activeColor game)
+             , castlingRights = disableWhiteCastles (castlingRights game)
+             }
+
+  game <- get
+  let position = placement game
+  put $ game { placement = addPiece position originalPiece to }
+
+  game <- get
+  let position = placement game
+  put $ game { placement = addPiece position Nothing (Coordinate 'h' 1) }
+
+  game <- get
+  let position = placement game
+  put $ game { placement = addPiece position (Just (Piece Rook White)) (Coordinate 'f' 1) }
+  return True
+
 makeMove                              :: Move -> State RegularGame Bool
 makeMove move@Move { moveFrom = from
                    , moveTo   = to
                    , moveType = movetype } | movetype == Standard = makeStandardMove move
                                            | movetype == Capture  = makeStandardMove move
+                                           | movetype == Castle   = makeCastle move

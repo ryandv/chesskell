@@ -1,13 +1,11 @@
 module BaseSpec where
 
 import Chess.Base
-import Chess.MoveGen
 
 import Control.Monad.State.Lazy
 
 import Test.Hspec
 import Test.Placements
-import Test.QuickCheck
 
 kingOpening :: RegularGame
 kingOpening = RegularGame
@@ -233,3 +231,11 @@ main = hspec $
         (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
                    , (Piece Pawn Black, Coordinate 'd' 5)
                    ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'c' 4) ]) { activeColor = White }
+
+    it "accepts white kingside castles, updating castling rights and moving the rook" $
+      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }) whiteKingOOTest `shouldBe`
+        (setupGame [ (Piece King White, Coordinate 'g' 1)
+                   , (Piece Rook White, Coordinate 'f' 1)
+                   ]) { activeColor = Black
+                      , castlingRights = CastleRights False True False True
+                      }
