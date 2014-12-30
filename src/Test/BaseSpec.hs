@@ -239,3 +239,11 @@ main = hspec $
                    ]) { activeColor = Black
                       , castlingRights = CastleRights False True False True
                       }
+
+    it "accepts white queenside castles, updating castling rights and moving the rook" $
+      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'c' 1), moveType = Castle }) whiteKingOOOTest `shouldBe`
+        (setupGame [ (Piece King White, Coordinate 'c' 1)
+                   , (Piece Rook White, Coordinate 'd' 1)
+                   ]) { activeColor = Black
+                      , castlingRights = CastleRights False True False True
+                      }

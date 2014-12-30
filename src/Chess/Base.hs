@@ -166,6 +166,12 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
+updateSquare     :: Coordinate -> Maybe Piece -> State RegularGame ()
+updateSquare c p = do
+  game <- get
+  let position = placement game
+  put $ game { placement = addPiece position p c }
+
 makeStandardMove :: Move -> State RegularGame Bool
 makeStandardMove Move { moveFrom = from
                       , moveTo   = to
@@ -173,44 +179,44 @@ makeStandardMove Move { moveFrom = from
   game <- get
   let position = placement game
   let originalPiece = pieceOn $ squareAt position from
-  put $ game { placement = addPiece position Nothing from, activeColor = opponent (activeColor game) }
+  put $ game { activeColor = opponent (activeColor game) }
 
-  game <- get
-  let position = placement game
-  put $ game { placement = addPiece position originalPiece to }
+  updateSquare from Nothing
+  updateSquare to originalPiece
   return True
 
 disableWhiteCastles :: CastleRights -> CastleRights
 disableWhiteCastles (CastleRights woo boo wooo booo) = CastleRights False boo False booo
 
-makeCastle                              :: Move -> State RegularGame Bool
-makeCastle Move { moveFrom = from
-                , moveTo   = to
-                , moveType = movetype } | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = do
+makeWhiteCastle                                              :: Coordinate -> Coordinate -> Move -> State RegularGame Bool
+makeWhiteCastle rooksrc rookdst Move { moveFrom = from
+                                     , moveTo   = to } = do
   game <- get
   let position = placement game
   let originalPiece = pieceOn $ squareAt position from
-  put $ game { placement = addPiece position Nothing from
-             , activeColor = opponent (activeColor game)
+  put $ game { activeColor = opponent (activeColor game)
              , castlingRights = disableWhiteCastles (castlingRights game)
              }
 
-  game <- get
-  let position = placement game
-  put $ game { placement = addPiece position originalPiece to }
+  updateSquare from Nothing
+  updateSquare to originalPiece
+  updateSquare rooksrc Nothing
+  updateSquare rookdst (Just $ Piece Rook White)
 
-  game <- get
-  let position = placement game
-  put $ game { placement = addPiece position Nothing (Coordinate 'h' 1) }
-
-  game <- get
-  let position = placement game
-  put $ game { placement = addPiece position (Just (Piece Rook White)) (Coordinate 'f' 1) }
   return True
 
-makeMove                              :: Move -> State RegularGame Bool
-makeMove move@Move { moveFrom = from
-                   , moveTo   = to
-                   , moveType = movetype } | movetype == Standard = makeStandardMove move
+makeWhiteKingsideCastle      :: Move -> State RegularGame Bool
+makeWhiteKingsideCastle move = makeWhiteCastle (Coordinate 'h' 1) (Coordinate 'f' 1) move
+
+makeWhiteQueensideCastle      :: Move -> State RegularGame Bool
+makeWhiteQueensideCastle move = makeWhiteCastle (Coordinate 'a' 1) (Coordinate 'd' 1) move
+
+makeCastle                              :: Move -> State RegularGame Bool
+makeCastle move@Move { moveFrom = from
+                     , moveTo   = to }  | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = makeWhiteKingsideCastle move
+                                        | from == Coordinate 'e' 1 && to == Coordinate 'c' 1 = makeWhiteQueensideCastle move
+
+makeMove                                   :: Move -> State RegularGame Bool
+makeMove move@Move { moveType = movetype } | movetype == Standard = makeStandardMove move
                                            | movetype == Capture  = makeStandardMove move
                                            | movetype == Castle   = makeCastle move
