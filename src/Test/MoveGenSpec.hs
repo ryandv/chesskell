@@ -69,57 +69,57 @@ main = hspec $
 
       context "verticals" $ do
         it "returns True if the destination point is behind another friendly piece along the ray" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'd' 1) `shouldBe` True
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 1, moveType = Standard } `shouldBe` True
 
         it "returns True if the destination point is behind another enemy piece along the ray" $
-          isBlocked (placement rookCaptureVerticalTest) (Coordinate 'd' 5, Coordinate 'd' 8) `shouldBe` True
+          isBlocked (placement rookCaptureVerticalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 8, moveType = Standard } `shouldBe` True
 
         it "returns False if the destination point is in front of another piece along the ray" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'd' 4) `shouldBe` False
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 4, moveType = Standard } `shouldBe` False
 
         it "returns False if the ray is not blocked, moving north" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'd' 8) `shouldBe` False
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 8, moveType = Standard } `shouldBe` False
 
         it "returns False if the ray is not blocked, moving south" $
-          isBlocked (placement onlyRookTest) (Coordinate 'd' 5, Coordinate 'd' 3) `shouldBe` False
+          isBlocked (placement onlyRookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 3, moveType = Standard } `shouldBe` False
 
         it "returns False if the destination square is occupied by an enemy piece" $
-          isBlocked (placement rookCaptureVerticalTest) (Coordinate 'd' 5, Coordinate 'd' 7) `shouldBe` False
+          isBlocked (placement rookCaptureVerticalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'd' 7, moveType = Standard } `shouldBe` False
 
       context "horizontals" $ do
         it "returns True if the destination point is behind another piece along the ray" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'h' 5) `shouldBe` True
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'h' 5, moveType = Standard } `shouldBe` True
 
         it "returns True if the destination point is behind another enemy piece along the ray" $
-          isBlocked (placement rookCaptureHorizontalTest) (Coordinate 'd' 5, Coordinate 'g' 5) `shouldBe` True
+          isBlocked (placement rookCaptureHorizontalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'g' 5, moveType = Standard } `shouldBe` True
 
         it "returns False if the destination point is in front of another piece along the ray" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'e' 5) `shouldBe` False
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'e' 5, moveType = Standard } `shouldBe` False
 
         it "returns False if the ray is not blocked, moving west" $
-          isBlocked (placement rookTest) (Coordinate 'd' 5, Coordinate 'a' 5) `shouldBe` False
+          isBlocked (placement rookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'a' 5, moveType = Standard } `shouldBe` False
 
         it "returns False if the ray is not blocked, moving east" $
-          isBlocked (placement onlyRookTest) (Coordinate 'd' 5, Coordinate 'h' 5) `shouldBe` False
+          isBlocked (placement onlyRookTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'h' 5, moveType = Standard } `shouldBe` False
 
         it "returns False if the destination square is occupied by an enemy piece" $
-          isBlocked (placement rookCaptureHorizontalTest) (Coordinate 'd' 5, Coordinate 'f' 5) `shouldBe` False
+          isBlocked (placement rookCaptureHorizontalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'f' 5, moveType = Standard } `shouldBe` False
 
       context "diagonals" $ do
         it "returns True if the destination point is behind another piece along the ray" $
-          isBlocked (placement diagonalTest) (Coordinate 'd' 5, Coordinate 'g' 8) `shouldBe` True
+          isBlocked (placement diagonalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'g' 8, moveType = Standard } `shouldBe` True
 
         it "returns True if the destination point is behind another piece along the ray" $
-          isBlocked (placement bishopCaptureTest) (Coordinate 'a' 1, Coordinate 'h' 8) `shouldBe` True
+          isBlocked (placement bishopCaptureTest) Move { moveFrom = (Coordinate 'a' 1), moveTo = Coordinate 'h' 8, moveType = Standard } `shouldBe` True
 
         it "returns False if the destination point is in front of another piece along the ray" $
-          isBlocked (placement diagonalTest) (Coordinate 'd' 5, Coordinate 'e' 6) `shouldBe` False
+          isBlocked (placement diagonalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'e' 6, moveType = Standard } `shouldBe` False
 
         it "returns False if the ray is not blocked" $
-          isBlocked (placement diagonalTest) (Coordinate 'd' 5, Coordinate 'a' 8) `shouldBe` False
+          isBlocked (placement diagonalTest) Move { moveFrom = (Coordinate 'd' 5), moveTo = Coordinate 'a' 8, moveType = Standard } `shouldBe` False
 
         it "returns False if the destination square is occupied by an enemy piece" $
-          isBlocked (placement bishopCaptureTest) (Coordinate 'a' 1, Coordinate 'd' 4) `shouldBe` False
+          isBlocked (placement bishopCaptureTest) Move { moveFrom = (Coordinate 'a' 1), moveTo = Coordinate 'd' 4, moveType = Standard } `shouldBe` False
 
     describe "potentialRookMoves" $ do
 
@@ -128,44 +128,44 @@ main = hspec $
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialRookMoves (placement onlyRookTest) (Coordinate 'd' 5) `shouldBe`
-          [ (Coordinate 'd' 5, Coordinate 'e' 5)
-          , (Coordinate 'd' 5, Coordinate 'c' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 6)
-          , (Coordinate 'd' 5, Coordinate 'd' 4)
-          , (Coordinate 'd' 5, Coordinate 'f' 5)
-          , (Coordinate 'd' 5, Coordinate 'b' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 7)
-          , (Coordinate 'd' 5, Coordinate 'd' 3)
-          , (Coordinate 'd' 5, Coordinate 'g' 5)
-          , (Coordinate 'd' 5, Coordinate 'a' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 8)
-          , (Coordinate 'd' 5, Coordinate 'd' 2)
-          , (Coordinate 'd' 5, Coordinate 'h' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 1)
+          [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'f' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'b' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 7), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'g' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'a' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 8), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'h' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 1), moveType = Standard }
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
         potentialRookMoves (placement rookTest) (Coordinate 'd' 5) `shouldBe`
-          [ (Coordinate 'd' 5, Coordinate 'e' 5)
-          , (Coordinate 'd' 5, Coordinate 'c' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 6)
-          , (Coordinate 'd' 5, Coordinate 'd' 4)
-          , (Coordinate 'd' 5, Coordinate 'b' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 7)
-          , (Coordinate 'd' 5, Coordinate 'a' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 8)
+          [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'b' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 7), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'a' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 8), moveType = Standard }
           ]
 
       it "produces the correct set of moves, including captures" $
         potentialRookMoves (placement rookAllCapturesTest) (Coordinate 'd' 5) `shouldBe`
-          [ (Coordinate 'd' 5, Coordinate 'e' 5)
-          , (Coordinate 'd' 5, Coordinate 'c' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 6)
-          , (Coordinate 'd' 5, Coordinate 'd' 4)
-          , (Coordinate 'd' 5, Coordinate 'f' 5)
-          , (Coordinate 'd' 5, Coordinate 'b' 5)
-          , (Coordinate 'd' 5, Coordinate 'd' 7)
-          , (Coordinate 'd' 5, Coordinate 'd' 3)
+          [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'f' 5), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'b' 5), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 7), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 3), moveType = Capture }
           ]
 
 
@@ -175,43 +175,43 @@ main = hspec $
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialBishopMoves (placement onlyBishopTest) (Coordinate 'e' 5) `shouldBe`
-          [ (Coordinate 'e' 5, Coordinate 'd' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 4)
-          , (Coordinate 'e' 5, Coordinate 'd' 4)
-          , (Coordinate 'e' 5, Coordinate 'c' 7)
-          , (Coordinate 'e' 5, Coordinate 'g' 7)
-          , (Coordinate 'e' 5, Coordinate 'g' 3)
-          , (Coordinate 'e' 5, Coordinate 'c' 3)
-          , (Coordinate 'e' 5, Coordinate 'b' 8)
-          , (Coordinate 'e' 5, Coordinate 'h' 8)
-          , (Coordinate 'e' 5, Coordinate 'h' 2)
-          , (Coordinate 'e' 5, Coordinate 'b' 2)
-          , (Coordinate 'e' 5, Coordinate 'a' 1)
+          [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'c' 7), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'g' 7), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'g' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'c' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'b' 8), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'h' 8), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'h' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'b' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'a' 1), moveType = Standard }
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
         potentialBishopMoves (placement bishopTest) (Coordinate 'e' 5) `shouldBe`
-          [ (Coordinate 'e' 5, Coordinate 'd' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 4)
-          , (Coordinate 'e' 5, Coordinate 'd' 4)
-          , (Coordinate 'e' 5, Coordinate 'c' 7)
-          , (Coordinate 'e' 5, Coordinate 'g' 3)
-          , (Coordinate 'e' 5, Coordinate 'b' 8)
-          , (Coordinate 'e' 5, Coordinate 'h' 2)
+          [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'c' 7), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'g' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'b' 8), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'h' 2), moveType = Standard }
           ]
 
       it "produces the correct set of moves, including captures" $
         potentialBishopMoves (placement bishopAllCapturesTest) (Coordinate 'e' 5) `shouldBe`
-          [ (Coordinate 'e' 5, Coordinate 'd' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 6)
-          , (Coordinate 'e' 5, Coordinate 'f' 4)
-          , (Coordinate 'e' 5, Coordinate 'd' 4)
-          , (Coordinate 'e' 5, Coordinate 'c' 7)
-          , (Coordinate 'e' 5, Coordinate 'g' 7)
-          , (Coordinate 'e' 5, Coordinate 'g' 3)
-          , (Coordinate 'e' 5, Coordinate 'c' 3)
+          [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'c' 7), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'g' 7), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'g' 3), moveType = Capture }
+          , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'c' 3), moveType = Capture }
           ]
 
     describe "potentialKnightMoves" $ do
@@ -221,119 +221,119 @@ main = hspec $
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialKnightMoves (placement onlyKnightTest) (Coordinate 'd' 4) `shouldBe`
-          [ (Coordinate 'd' 4, Coordinate 'b' 3)
-          , (Coordinate 'd' 4, Coordinate 'b' 5)
-          , (Coordinate 'd' 4, Coordinate 'c' 2)
-          , (Coordinate 'd' 4, Coordinate 'c' 6)
-          , (Coordinate 'd' 4, Coordinate 'e' 2)
-          , (Coordinate 'd' 4, Coordinate 'e' 6)
-          , (Coordinate 'd' 4, Coordinate 'f' 3)
-          , (Coordinate 'd' 4, Coordinate 'f' 5)
+          [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 5), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 5), moveType = Standard }
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
         potentialKnightMoves (placement knightTest) (Coordinate 'd' 4) `shouldBe`
-          [ (Coordinate 'd' 4, Coordinate 'b' 3)
-          , (Coordinate 'd' 4, Coordinate 'c' 2)
-          , (Coordinate 'd' 4, Coordinate 'c' 6)
-          , (Coordinate 'd' 4, Coordinate 'e' 2)
-          , (Coordinate 'd' 4, Coordinate 'e' 6)
-          , (Coordinate 'd' 4, Coordinate 'f' 5)
+          [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 2), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 6), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 5), moveType = Standard }
           ]
 
       it "can jump over pieces" $
         potentialKnightMoves (placement startingPos) (Coordinate 'b' 1) `shouldBe`
-          [ (Coordinate 'b' 1, Coordinate 'a' 3)
-          , (Coordinate 'b' 1, Coordinate 'c' 3)
+          [ Move { moveFrom = (Coordinate 'b' 1), moveTo = (Coordinate 'a' 3), moveType = Standard }
+          , Move { moveFrom = (Coordinate 'b' 1), moveTo = (Coordinate 'c' 3), moveType = Standard }
           ]
 
     describe "potentialQueenMoves" $
       context "movement" $ do
         it "produces the correct set of moves without being blocked by pieces" $
           potentialQueenMoves (placement onlyQueenTest) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'f' 4)
-            , (Coordinate 'd' 4, Coordinate 'b' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 6)
-            , (Coordinate 'd' 4, Coordinate 'd' 2)
-            , (Coordinate 'd' 4, Coordinate 'g' 4)
-            , (Coordinate 'd' 4, Coordinate 'a' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 7)
-            , (Coordinate 'd' 4, Coordinate 'd' 1)
-            , (Coordinate 'd' 4, Coordinate 'h' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 8)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
-            , (Coordinate 'd' 4, Coordinate 'b' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 2)
-            , (Coordinate 'd' 4, Coordinate 'b' 2)
-            , (Coordinate 'd' 4, Coordinate 'a' 7)
-            , (Coordinate 'd' 4, Coordinate 'g' 7)
-            , (Coordinate 'd' 4, Coordinate 'g' 1)
-            , (Coordinate 'd' 4, Coordinate 'a' 1)
-            , (Coordinate 'd' 4, Coordinate 'h' 8)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'h' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'h' 8), moveType = Standard }
             ]
 
         it "produces the correct set of moves when blocked by some pieces" $
           potentialQueenMoves (placement queenTest) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'f' 4)
-            , (Coordinate 'd' 4, Coordinate 'b' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 6)
-            , (Coordinate 'd' 4, Coordinate 'd' 2)
-            , (Coordinate 'd' 4, Coordinate 'g' 4)
-            , (Coordinate 'd' 4, Coordinate 'a' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 1)
-            , (Coordinate 'd' 4, Coordinate 'h' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
-            , (Coordinate 'd' 4, Coordinate 'b' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 2)
-            , (Coordinate 'd' 4, Coordinate 'b' 2)
-            , (Coordinate 'd' 4, Coordinate 'a' 7)
-            , (Coordinate 'd' 4, Coordinate 'g' 1)
-            , (Coordinate 'd' 4, Coordinate 'a' 1)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'h' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 1), moveType = Standard }
             ]
 
         it "produces the correct set of moves, including captures" $
           potentialQueenMoves (placement queenCaptureTest) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'f' 4)
-            , (Coordinate 'd' 4, Coordinate 'b' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 6)
-            , (Coordinate 'd' 4, Coordinate 'd' 2)
-            , (Coordinate 'd' 4, Coordinate 'g' 4)
-            , (Coordinate 'd' 4, Coordinate 'a' 4)
-            , (Coordinate 'd' 4, Coordinate 'd' 7)
-            , (Coordinate 'd' 4, Coordinate 'd' 1)
-            , (Coordinate 'd' 4, Coordinate 'h' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
-            , (Coordinate 'd' 4, Coordinate 'b' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 6)
-            , (Coordinate 'd' 4, Coordinate 'f' 2)
-            , (Coordinate 'd' 4, Coordinate 'b' 2)
-            , (Coordinate 'd' 4, Coordinate 'a' 7)
-            , (Coordinate 'd' 4, Coordinate 'g' 7)
-            , (Coordinate 'd' 4, Coordinate 'g' 1)
-            , (Coordinate 'd' 4, Coordinate 'a' 1)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 7), moveType = Capture }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'h' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 7), moveType = Capture }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'g' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'a' 1), moveType = Standard }
             ]
 
 
@@ -341,172 +341,172 @@ main = hspec $
       context "movement" $ do
         it "allows the king to move to any square in its Moore neighbourhood" $
           potentialKingMoves (placement onlyKingTest) (CastleRights False False False False) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
             ]
 
         it "allows the white king to castle kingside, if he has the right to" $
           potentialKingMoves (placement whiteKingOOTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
-            , (Coordinate 'e' 1, Coordinate 'g' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }
             ]
 
         it "does not allow the white king to castle kingside, if he does not have the right to" $
           potentialKingMoves (placement whiteKingOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
             ]
 
         it "allows the white king to castle queenside, if he has the right to" $
           potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
-            , (Coordinate 'e' 1, Coordinate 'c' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'c' 1), moveType = Castle }
             ]
 
         it "does not allow the white king to castle queenside, if he does not have the right to" $
           potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
             ]
 
         it "allows the white king to castle both kingside or queenside, if he has the option" $
           potentialKingMoves (placement whiteKingBothCastlesTest) (CastleRights True False True False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
-            , (Coordinate 'e' 1, Coordinate 'g' 1)
-            , (Coordinate 'e' 1, Coordinate 'c' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'c' 1), moveType = Castle }
             ]
 
         it "does not allow the white king to castle when he is not on his home square" $
           potentialKingMoves (placement whiteKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
             ]
 
         it "does not allow the white king to castle kingside when the rook is not on its home square" $
           potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
             ]
 
         it "does not allow the white king to castle queenside when the rook is not on its home square" $
           potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
-            [ (Coordinate 'e' 1, Coordinate 'd' 1)
-            , (Coordinate 'e' 1, Coordinate 'd' 2)
-            , (Coordinate 'e' 1, Coordinate 'e' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 2)
-            , (Coordinate 'e' 1, Coordinate 'f' 1)
+            [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 2), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'f' 1), moveType = Standard }
             ]
 
         it "allows the black king to castle kingside, if he has the right to" $
           potentialKingMoves (placement blackKingOOTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
-            , (Coordinate 'e' 8, Coordinate 'g' 8)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'g' 8), moveType = Castle }
             ]
 
         it "does not allow the black king to castle kingside, if he does not have the right to" $
           potentialKingMoves (placement blackKingOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
             ]
 
         it "allows the black king to castle queenside, if he has the right to" $
           potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
-            , (Coordinate 'e' 8, Coordinate 'c' 8)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'c' 8), moveType = Castle }
             ]
 
         it "does not allow the black king to castle queenside, if he does not have the right to" $
           potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
             ]
 
         it "allows the black king to castle both kingside or queenside, if he has the option" $
           potentialKingMoves (placement blackKingBothCastlesTest) (CastleRights False True False True) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
-            , (Coordinate 'e' 8, Coordinate 'g' 8)
-            , (Coordinate 'e' 8, Coordinate 'c' 8)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'g' 8), moveType = Castle }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'c' 8), moveType = Castle }
             ]
 
         it "does not allow the black king to castle when he is not on his home square" $
           potentialKingMoves (placement blackKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'c' 4)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 4)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
-            , (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'c' 3)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 3), moveType = Standard }
             ]
 
         it "does not allow the black king to castle kingside when the rook is not on its home square" $
           potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
             ]
 
         it "does not allow the black king to castle queenside when the rook is not on its home square" $
           potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
-            [ (Coordinate 'e' 8, Coordinate 'd' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 8)
-            , (Coordinate 'e' 8, Coordinate 'f' 7)
-            , (Coordinate 'e' 8, Coordinate 'e' 7)
-            , (Coordinate 'e' 8, Coordinate 'd' 7)
+            [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'e' 7), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 7), moveType = Standard }
             ]
 
         it "does not allow the king to castle if the intermediate squares are occupied" $
@@ -520,8 +520,8 @@ main = hspec $
 
         it "allows double-jumping from the second rank for White" $
           potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 2) `shouldBe`
-            [ (Coordinate 'e' 2, Coordinate 'e' 4)
-            , (Coordinate 'e' 2, Coordinate 'e' 3)
+            [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 3), moveType = Standard }
             ]
 
         it "disallows White double-jumping from elsewhere" $
@@ -529,12 +529,12 @@ main = hspec $
             setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])
                       Nothing
                       (Coordinate 'e' 7) `shouldBe`
-            [ (Coordinate 'e' 7, Coordinate 'e' 8) ]
+            [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Standard } ]
 
         it "allows double-jumping from the second rank for Black" $
           potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 7) `shouldBe`
-            [ (Coordinate 'e' 7, Coordinate 'e' 5)
-            , (Coordinate 'e' 7, Coordinate 'e' 6)
+            [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 6), moveType = Standard }
             ]
 
         it "disallows Black double-jumping from elsewhere" $
@@ -542,7 +542,7 @@ main = hspec $
             setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])
                       Nothing 
                       (Coordinate 'e' 2) `shouldBe`
-            [ (Coordinate 'e' 2, Coordinate 'e' 1) ]
+            [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Standard } ]
 
         it "does not allow White to advance onto an occupied square" $
           potentialPawnMoves (placement $
@@ -559,7 +559,7 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 2) `shouldBe`
-            [ (Coordinate 'd' 2, Coordinate 'd' 3) ]
+            [ Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 3), moveType = Standard } ]
 
         it "does not allow Black to double-jump onto an occupied square" $
           potentialPawnMoves (placement $
@@ -568,7 +568,7 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 7) `shouldBe`
-            [ (Coordinate 'd' 7, Coordinate 'd' 6) ]
+            [ Move { moveFrom = (Coordinate 'd' 7), moveTo = (Coordinate 'd' 6), moveType = Standard } ]
 
         it "does not allow Black to advance onto an occupied square" $
           potentialPawnMoves (placement $
@@ -588,9 +588,9 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'd' 5)
-            , (Coordinate 'd' 4, Coordinate 'c' 5)
-            , (Coordinate 'd' 4, Coordinate 'e' 5)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Capture }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Capture }
             ]
 
         it "allows Black to capture pieces on the neighbouring NW and NE squares" $
@@ -601,9 +601,9 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 5) `shouldBe`
-            [ (Coordinate 'd' 5, Coordinate 'd' 4)
-            , (Coordinate 'd' 5, Coordinate 'c' 4)
-            , (Coordinate 'd' 5, Coordinate 'e' 4)
+            [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture }
+            , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 4), moveType = Capture }
             ]
 
         it "does not allow White to capture its own pieces" $
@@ -614,7 +614,7 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'd' 5)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
             ]
 
         it "does not allow Black to capture its own pieces" $
@@ -625,7 +625,7 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'd' 5) `shouldBe`
-            [ (Coordinate 'd' 5, Coordinate 'd' 4)
+            [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
             ]
 
         it "only allows capturing on the 'b' file for pawns on the 'a' file" $
@@ -635,8 +635,8 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'a' 4) `shouldBe`
-            [ (Coordinate 'a' 4, Coordinate 'a' 5)
-            , (Coordinate 'a' 4, Coordinate 'b' 5)
+            [ Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'a' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'b' 5), moveType = Capture }
             ]
 
         it "only allows capturing on the 'g' file for pawns on the 'h' file" $
@@ -646,8 +646,8 @@ main = hspec $
                       ])
                       Nothing
                       (Coordinate 'h' 4) `shouldBe`
-            [ (Coordinate 'h' 4, Coordinate 'h' 5)
-            , (Coordinate 'h' 4, Coordinate 'g' 5)
+            [ Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'h' 5), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'g' 5), moveType = Capture }
             ]
 
         it "allows White to en passant, if available" $
@@ -657,8 +657,8 @@ main = hspec $
                       ])
                       (Just (Coordinate 'd' 6))
                       (Coordinate 'e' 5) `shouldBe`
-            [ (Coordinate 'e' 5, Coordinate 'e' 6)
-            , (Coordinate 'e' 5, Coordinate 'd' 6)
+            [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'e' 6), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = EnPassant }
             ]
 
         it "allows Black to en passant, if available" $
@@ -668,8 +668,8 @@ main = hspec $
                       ])
                       (Just (Coordinate 'e' 3))
                       (Coordinate 'd' 4) `shouldBe`
-            [ (Coordinate 'd' 4, Coordinate 'd' 3)
-            , (Coordinate 'd' 4, Coordinate 'e' 3)
+            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = EnPassant }
             ]
 
         it "only allows en passant from the correct square" $
@@ -680,6 +680,6 @@ main = hspec $
                       ])
                       (Just (Coordinate 'd' 6))
                       (Coordinate 'b' 2) `shouldBe`
-            [ (Coordinate 'b' 2, Coordinate 'b' 4)
-            , (Coordinate 'b' 2, Coordinate 'b' 3)
+            [ Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 4), moveType = Standard }
+            , Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 3), moveType = Standard }
             ]

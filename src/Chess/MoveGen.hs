@@ -16,21 +16,21 @@ import Data.Maybe
 
 import Control.Applicative
 
-pseudoLegalMoves               :: RegularGame -> [(Coordinate, Coordinate)]
+pseudoLegalMoves               :: RegularGame -> [Move]
 pseudoLegalMoves RegularGame { placement = b
                              , enPassantSquare = e
                              } = (concatMap . concatMap) (pseudoLegalMovesFrom e b) b where
 
-pseudoLegalMovesFrom :: Maybe Coordinate -> RegularBoardRepresentation -> Square -> [(Coordinate, Coordinate)]
+pseudoLegalMovesFrom :: Maybe Coordinate -> RegularBoardRepresentation -> Square -> [Move]
 pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
-pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = filter (unoccupied b . snd) $ potentialPawnMoves b c l
-                                                       | p == Knight = filter (unoccupied b . snd) $ potentialKnightMoves b l
-                                                       | p == Bishop = filter (unoccupied b . snd) $ potentialBishopMoves b l
-                                                       | p == Rook   = filter (unoccupied b . snd) $ potentialRookMoves b l
-                                                       | p == Queen  = filter (unoccupied b . snd) $ potentialQueenMoves b l
-                                                       | p == King   = filter (unoccupied b . snd) $ potentialKingMoves b undefined l
+pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves b c l
+                                                       | p == Knight = potentialKnightMoves b l
+                                                       | p == Bishop = potentialBishopMoves b l
+                                                       | p == Rook   = potentialRookMoves b l
+                                                       | p == Queen  = potentialQueenMoves b l
+                                                       | p == King   = potentialKingMoves b undefined l
 
-potentialPawnMoves                                       :: RegularBoardRepresentation -> Maybe Coordinate -> Coordinate -> [(Coordinate, Coordinate)]
+potentialPawnMoves                                       :: RegularBoardRepresentation -> Maybe Coordinate -> Coordinate -> [Move]
 potentialPawnMoves b Nothing c                           = standardPawnMoves b c
 potentialPawnMoves b (Just enPassant) c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
   rankOffset :: Int
@@ -38,11 +38,12 @@ potentialPawnMoves b (Just enPassant) c@(Coordinate r f) = standardPawnMoves b c
                  Just White -> 1
                  Just Black -> -1
 
-  enPassantMoves                      :: Coordinate -> [(Coordinate, Coordinate)]
-  enPassantMoves (Coordinate r' f')   | (toEnum $ fromEnum r' + fromEnum rankOffset) == r && (f == (f' - 1) || f == (f' + 1)) = [((Coordinate r f), (Coordinate r' f'))]
+  enPassantMoves                      :: Coordinate -> [Move]
+  enPassantMoves (Coordinate r' f')   | (toEnum $ fromEnum r' + fromEnum rankOffset) == r
+                                        && (f == (f' - 1) || f == (f' + 1))         = [Move { moveFrom = (Coordinate r f), moveTo = (Coordinate r' f'), moveType = EnPassant }]
                                       | otherwise                                   = []
 
-standardPawnMoves                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+standardPawnMoves                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 standardPawnMoves b c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump b c ++ whiteAdvance b c ++ whiteCaptures b c
                                        | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump b c ++ blackAdvance b c ++ blackCaptures b c
                                        | ((Just White) == pawnOwner) = whiteAdvance b c ++ whiteCaptures b c
@@ -50,72 +51,76 @@ standardPawnMoves b c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  
   pawnOwner :: Maybe Player
   pawnOwner = (fmap pieceOwner . pieceOn $ squareAt b c)
 
-whiteAdvance                       :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+whiteAdvance                       :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteAdvance b c                   = advance b c 1
 
-blackAdvance                       :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+blackAdvance                       :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackAdvance b c                   = advance b c (-1)
 
-whiteDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+whiteDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteDoubleJump b c                  = advance b c 2
 
-blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackDoubleJump b c                  = advance b c (-2)
 
-advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [(Coordinate, Coordinate)]
-advance b (Coordinate f r) offset | (unoccupied b $ Coordinate f (r+offset)) = [((Coordinate f r), (Coordinate f (r+offset)))]
+advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
+advance b (Coordinate f r) offset | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r), moveTo = (Coordinate f (r+offset)), moveType = Standard }]
                                   | otherwise                                = []
 
-whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteCaptures b c@(Coordinate f _)      | f == 'a' = whiteNECapture b c
                                         | f == 'h' = whiteNWCapture b c
                                         | otherwise = whiteNWCapture b c ++ whiteNECapture b c
 
-blackCaptures                           :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+blackCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
                                         | f == 'h' = blackNWCapture b c
                                         | otherwise = blackNWCapture b c ++ blackNECapture b c
 
-capture                                   :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [(Coordinate, Coordinate)]
-capture b (Coordinate f r) tf dr opponent | (isJust $ target) && fmap pieceOwner target == Just opponent = [((Coordinate f r), targetCoord)]
+capture                                   :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
+capture b (Coordinate f r) tf dr opponent | (isJust $ target) && fmap pieceOwner target == Just opponent = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
                                           | otherwise = [] where
   target = pieceOn $ squareAt b (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
 
-whiteNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+whiteNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteNWCapture b c@(Coordinate f _) = capture b c (pred f) 1 Black
 
-blackNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+blackNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackNWCapture b c@(Coordinate f _) = capture b c (pred f) (-1) White
 
-whiteNECapture                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+whiteNECapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteNECapture b c@(Coordinate f _) = capture b c (succ f) 1 Black
 
-blackNECapture                      :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+blackNECapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackNECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White
 
-potentialRayMoves           :: Coordinate -> [(Int, Int)] -> [(Coordinate, Coordinate)]
-potentialRayMoves c offsets = fmap (\x -> (c,x)) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
+potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
+potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c, moveTo = x, moveType = determineMoveType b c x }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
 
-potentialBishopMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
-potentialBishopMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c diagonals where
+determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
+determineMoveType b from to       | isNothing . pieceOn $ squareAt b to                          = Standard
+                                  | (fmap pieceOwner . pieceOn $ squareAt b to) /= (fmap pieceOwner . pieceOn $ squareAt b from) = Capture
+
+potentialBishopMoves     :: RegularBoardRepresentation -> Coordinate -> [Move]
+potentialBishopMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves b c diagonals where
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
-potentialRookMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
-potentialRookMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves c straights where
+potentialRookMoves     :: RegularBoardRepresentation -> Coordinate -> [Move]
+potentialRookMoves b c = filter (not . (isBlocked b)) $ potentialRayMoves b c straights where
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
-potentialQueenMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialQueenMoves     :: RegularBoardRepresentation -> Coordinate -> [Move]
 potentialQueenMoves b c = potentialRookMoves b c ++ potentialBishopMoves b c
 
-potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [(Coordinate, Coordinate)]
-potentialOffsetMoves b c offsets = fmap (\x -> (c,x)) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
+potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
+potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c, moveTo = x, moveType = determineMoveType b c x }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
-potentialKnightMoves     :: RegularBoardRepresentation -> Coordinate -> [(Coordinate, Coordinate)]
+potentialKnightMoves     :: RegularBoardRepresentation -> Coordinate -> [Move]
 potentialKnightMoves b c = potentialOffsetMoves b c possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
-potentialKingMoves                                   :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [(Coordinate, Coordinate)]
+potentialKingMoves                                   :: RegularBoardRepresentation -> CastleRights -> Coordinate -> [Move]
 potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
                                                      | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights
                                                      | otherwise = potentialOffsetMoves b c possibleMoves where
@@ -124,7 +129,7 @@ potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Ju
 
   kingOwner = fmap pieceOwner . pieceOn $ squareAt b c
 
-  castles                        :: Bool -> Bool -> Player -> [(Coordinate, Coordinate)]
+  castles                        :: Bool -> Bool -> Player -> [Move]
   castles kingside queenside ply | kingside && queenside = ooCastle (getHomeRank ply) ply ++ oooCastle (getHomeRank ply) ply
                                  | kingside && not queenside = ooCastle (getHomeRank ply) ply
                                  | not kingside && queenside = oooCastle (getHomeRank ply) ply
@@ -134,14 +139,14 @@ potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Ju
   getHomeRank ply | ply == White = 1
                   | otherwise    = 8
 
-  whiteCastles                           :: CastleRights -> [(Coordinate, Coordinate)]
+  whiteCastles                           :: CastleRights -> [Move]
   whiteCastles (CastleRights oo _ ooo _) = castles oo ooo White
 
-  blackCastles                           :: CastleRights -> [(Coordinate, Coordinate)]
+  blackCastles                           :: CastleRights -> [Move]
   blackCastles (CastleRights _ oo _ ooo) = castles oo ooo Black
 
-  ooCastle              :: Rank -> Player -> [(Coordinate, Coordinate)]
-  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [(Coordinate 'e' homeRank, Coordinate 'g' homeRank)]
+  ooCastle              :: Rank -> Player -> [Move]
+  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank, moveTo = Coordinate 'g' homeRank, moveType = Castle }]
                         | otherwise = []
 
   ooRookIsPresent              :: Rank -> Player -> Bool
@@ -150,8 +155,8 @@ potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Ju
   ooSquaresAreFree          :: Rank -> Bool
   ooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
 
-  oooCastle              :: Rank -> Player -> [(Coordinate, Coordinate)]
-  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [(Coordinate 'e' homeRank, Coordinate 'c' homeRank)]
+  oooCastle              :: Rank -> Player -> [Move]
+  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank, moveTo = Coordinate 'c' homeRank, moveType = Castle }]
                          | otherwise = []
 
   oooRookIsPresent              :: Rank -> Player -> Bool
@@ -160,8 +165,9 @@ potentialKingMoves b castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Ju
   oooSquaresAreFree          :: Rank -> Bool
   oooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]
 
-isBlocked              :: RegularBoardRepresentation -> (Coordinate, Coordinate) -> Bool
-isBlocked b (from, to) = not $ to `elem` (validMoves $ alongRay (from, to)) where
+isBlocked                       :: RegularBoardRepresentation -> Move -> Bool
+isBlocked b Move { moveFrom = from
+                 , moveTo = to }  = not $ to `elem` (validMoves $ alongRay (from, to)) where
 
   validMoves    :: [Coordinate] -> [Coordinate]
   validMoves cs = validMoves' cs False

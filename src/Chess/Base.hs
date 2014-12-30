@@ -3,6 +3,8 @@ module Chess.Base
     Coordinate(..),
     File,
     isOnBoard,
+    Move(..),
+    MoveType(..),
     Piece(..),
     PieceType(..),
     Player(..),
@@ -33,6 +35,14 @@ data Piece = Piece
   { pieceType  :: PieceType
   , pieceOwner :: Player
   } deriving(Eq, Read)
+
+data Move = Move
+  { moveFrom     :: Coordinate
+  , moveTo       :: Coordinate
+  , moveType     :: MoveType
+  } deriving(Eq, Read, Show)
+
+data MoveType = Standard | Capture | Castle | Promotion | EnPassant deriving(Eq, Read, Show)
 
 instance Show Piece where
   show (Piece Rook White)   = "R"
