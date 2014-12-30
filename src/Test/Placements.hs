@@ -129,9 +129,9 @@ whiteKingBothCastlesTest = setupGame [ (Piece King White, Coordinate 'e' 1)
                                      ]
 
 blackKingOOTest :: RegularGame
-blackKingOOTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
-                            , (Piece Rook Black, Coordinate 'h' 8)
-                            ]
+blackKingOOTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                             , (Piece Rook Black, Coordinate 'h' 8)
+                             ]) { activeColor = Black }
 
 blackKingMovedNoOOTest :: RegularGame
 blackKingMovedNoOOTest = setupGame [ (Piece King Black, Coordinate 'd' 4)
@@ -142,9 +142,9 @@ blackKingNoRookCastleTest :: RegularGame
 blackKingNoRookCastleTest = setupGame [ (Piece King Black, Coordinate 'e' 8) ]
 
 blackKingOOOTest :: RegularGame
-blackKingOOOTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
-                             , (Piece Rook Black, Coordinate 'a' 8)
-                             ]
+blackKingOOOTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                              , (Piece Rook Black, Coordinate 'a' 8)
+                              ]) { activeColor = Black }
 
 blackKingMovedNoOOOTest :: RegularGame
 blackKingMovedNoOOOTest = setupGame [ (Piece King Black, Coordinate 'd' 4)
