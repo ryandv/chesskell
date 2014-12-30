@@ -243,7 +243,19 @@ makeCastle move@Move { moveFrom = from
                                         | from == Coordinate 'e' 8 && to == Coordinate 'g' 8 = makeBlackKingsideCastle move
                                         | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = makeBlackQueensideCastle move
 
-makeMove                                   :: Move -> State RegularGame Bool
-makeMove move@Move { moveType = movetype } | movetype == Standard = makeStandardMove move
-                                           | movetype == Capture  = makeStandardMove move
-                                           | movetype == Castle   = makeCastle move
+makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
+makePromotion p@(Just Piece { pieceType  = pt, pieceOwner = o }) move@Move { moveFrom = from, moveTo = to } = do
+  game <- get
+  let position = placement game
+  put $ game { activeColor = opponent (activeColor game) }
+
+  updateSquare from Nothing
+  updateSquare to p
+  return True
+
+
+makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool
+makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = makeStandardMove move
+                                                     | movetype == Capture   = makeStandardMove move
+                                                     | movetype == Castle    = makeCastle move
+                                                     | movetype == Promotion = makePromotion promoteTo move

@@ -224,16 +224,16 @@ main = hspec $
 
   describe "makeMove" $ do
     it "accepts standard moves and updates the game's positional state" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }) startingPos `shouldBe` kingOpening
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }) startingPos `shouldBe` kingOpening
 
     it "accepts captures and removes the captured piece from the board" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture })
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture })
         (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
                    , (Piece Pawn Black, Coordinate 'd' 5)
                    ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'c' 4) ]) { activeColor = White }
 
     it "accepts white kingside castles, updating castling rights and moving the rook" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }) whiteKingOOTest `shouldBe`
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }) whiteKingOOTest `shouldBe`
         (setupGame [ (Piece King White, Coordinate 'g' 1)
                    , (Piece Rook White, Coordinate 'f' 1)
                    ]) { activeColor = Black
@@ -241,7 +241,7 @@ main = hspec $
                       }
 
     it "accepts white queenside castles, updating castling rights and moving the rook" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'c' 1), moveType = Castle }) whiteKingOOOTest `shouldBe`
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'c' 1), moveType = Castle }) whiteKingOOOTest `shouldBe`
         (setupGame [ (Piece King White, Coordinate 'c' 1)
                    , (Piece Rook White, Coordinate 'd' 1)
                    ]) { activeColor = Black
@@ -249,7 +249,7 @@ main = hspec $
                       }
 
     it "accepts black kingside castles, updating castling rights and moving the rook" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'g' 8), moveType = Castle }) blackKingOOTest `shouldBe`
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'g' 8), moveType = Castle }) blackKingOOTest `shouldBe`
         (setupGame [ (Piece King Black, Coordinate 'g' 8)
                    , (Piece Rook Black, Coordinate 'f' 8)
                    ]) { activeColor = White
@@ -257,9 +257,17 @@ main = hspec $
                       }
 
     it "accepts black queenside castles, updating castling rights and moving the rook" $
-      execState (makeMove $ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'c' 8), moveType = Castle }) blackKingOOOTest `shouldBe`
+      execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'c' 8), moveType = Castle }) blackKingOOOTest `shouldBe`
         (setupGame [ (Piece King Black, Coordinate 'c' 8)
                    , (Piece Rook Black, Coordinate 'd' 8)
                    ]) { activeColor = White
                       , castlingRights = CastleRights True False True False
                       }
+
+    it "allows white to promote pawns" $
+      execState (makeMove (Just (Piece Queen White)) $ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Promotion })
+        (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]) `shouldBe` (setupGame [ (Piece Queen White, Coordinate 'e' 8) ]) { activeColor = Black }
+
+    it "allows black to promote pawns" $
+      execState (makeMove (Just (Piece Queen Black)) $ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Promotion })
+        (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Queen Black, Coordinate 'e' 1) ]) { activeColor = White }
