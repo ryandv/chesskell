@@ -157,6 +157,17 @@ blackKingBothCastlesTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
                                      , (Piece Rook Black, Coordinate 'h' 8)
                                      ]
 
+whiteEnPassantTest :: RegularGame
+whiteEnPassantTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                               , (Piece Pawn White, Coordinate 'e' 5)
+                               ]
+
+blackEnPassantTest :: RegularGame
+blackEnPassantTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                               , (Piece Pawn White, Coordinate 'e' 4)
+                               ]
+
+
 emptyTest :: RegularGame
 emptyTest = RegularGame
   { placement =

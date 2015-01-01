@@ -651,10 +651,7 @@ main = hspec $
             ]
 
         it "allows White to en passant, if available" $
-          potentialPawnMoves (placement $
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
-                      , (Piece Pawn White, Coordinate 'e' 5)
-                      ])
+          potentialPawnMoves (placement $ whiteEnPassantTest)
                       (Just (Coordinate 'd' 6))
                       (Coordinate 'e' 5) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'e' 6), moveType = Standard }
@@ -662,10 +659,7 @@ main = hspec $
             ]
 
         it "allows Black to en passant, if available" $
-          potentialPawnMoves (placement $
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
-                      , (Piece Pawn White, Coordinate 'e' 4)
-                      ])
+          potentialPawnMoves (placement $ blackEnPassantTest)
                       (Just (Coordinate 'e' 3))
                       (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }

@@ -253,9 +253,26 @@ makePromotion p@(Just Piece { pieceType  = pt, pieceOwner = o }) move@Move { mov
   updateSquare to p
   return True
 
+makeEnPassant   :: Move -> State RegularGame Bool
+makeEnPassant m@Move { moveTo = to@(Coordinate f r)
+                     , moveFrom = from } = do
+  game <- get
+  let position = placement game
+  let originalPiece = pieceOn $ squareAt position from
+  let rankOffset = if fmap pieceOwner originalPiece == (Just White) then (-1) else 1
+  put $ game { activeColor = opponent (activeColor game) }
+
+  let enpassantpawn = pieceOn . squareAt position $ Coordinate f (r+rankOffset)
+
+  updateSquare from Nothing
+  updateSquare (Coordinate f (r+rankOffset)) Nothing
+  updateSquare to originalPiece
+  return True
+
 
 makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool
 makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = makeStandardMove move
                                                      | movetype == Capture   = makeStandardMove move
                                                      | movetype == Castle    = makeCastle move
                                                      | movetype == Promotion = makePromotion promoteTo move
+                                                     | movetype == EnPassant = makeEnPassant move
