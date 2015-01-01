@@ -28,7 +28,7 @@ pseudoLegalMovesFrom c b (Square (Just (Piece p _)) l) | p == Pawn   = potential
                                                        | p == Bishop = potentialBishopMoves b l
                                                        | p == Rook   = potentialRookMoves b l
                                                        | p == Queen  = potentialQueenMoves b l
-                                                       | p == King   = potentialKingMoves b undefined l
+                                                       | p == King   = potentialKingMoves b (CastleRights True True True True) l
 
 potentialPawnMoves                                       :: RegularBoardRepresentation -> Maybe Coordinate -> Coordinate -> [Move]
 potentialPawnMoves b Nothing c                           = standardPawnMoves b c
