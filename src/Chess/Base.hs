@@ -166,6 +166,7 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
+-- TODO: extract non-monadic operations
 updateSquare     :: Coordinate -> Maybe Piece -> State RegularGame ()
 updateSquare c p = do
   game <- get
@@ -175,10 +176,11 @@ updateSquare c p = do
 isLegal :: RegularGame -> Move -> Bool
 isLegal game move@Move { moveFrom = from
                        , moveTo   = to
-                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking && isKnightChecking where
+                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking && isKnightChecking && isPawnChecking where
 
   originalPiece = pieceOn $ squareAt (placement game) from
 
+  -- TODO: Extract
   nextState = addPiece (addPiece (placement game) Nothing from) originalPiece to
 
   activePly = fromJust $ pieceOwner <$> (pieceOn $ squareAt (placement game) from)
@@ -197,6 +199,10 @@ isLegal game move@Move { moveFrom = from
 
   isKnightChecking :: Bool
   isKnightChecking = isChecking Knight potentialKnightMoves
+
+  -- TODO: do we need to consider en passant? I think not.
+  isPawnChecking :: Bool
+  isPawnChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves nextState Nothing (location $ kingSquare activePly)
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
