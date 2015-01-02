@@ -231,7 +231,11 @@ main = hspec $
         execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture })
           (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
                      , (Piece Pawn Black, Coordinate 'd' 5)
-                     ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'c' 4) ]) { activeColor = White }
+                     , (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'e' 8)
+                     ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
+                                                                      , (Piece King White, Coordinate 'e' 1)
+                                                                      , (Piece King Black, Coordinate 'e' 8)]) { activeColor = White }
 
       it "accepts white kingside castles, updating castling rights and moving the rook" $
         execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'g' 1), moveType = Castle }) whiteKingOOTest `shouldBe`
@@ -290,6 +294,20 @@ main = hspec $
       it "does not modify the game state for illegal moves" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 1, moveTo = (Coordinate 'd' 8), moveType = Standard })
           startingPos `shouldBe` startingPos
+
+      it "does not allow the king to move into check by a queen" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'e' 8)
+                     , (Piece Queen Black, Coordinate 'd' 8)]) `shouldBe` (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                                                                     , (Piece King Black, Coordinate 'e' 8)
+                                                                                     , (Piece Queen Black, Coordinate 'd' 8)])
+
+      it "returns false when the king moves into check by a queen" $
+        evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'e' 8)
+                     , (Piece Queen Black, Coordinate 'd' 8)]) `shouldBe` False
 
       it "does not allow black to make a move during white's turn" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 5, moveType = Standard })

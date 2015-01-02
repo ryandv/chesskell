@@ -172,13 +172,30 @@ updateSquare c p = do
   let position = placement game
   put $ game { placement = addPiece position p c }
 
+isLegal :: RegularGame -> Move -> Bool
+isLegal game move@Move { moveFrom = from
+                       , moveTo   = to
+                       , moveType = movetype } = isQueenChecking where
+
+  originalPiece = pieceOn $ squareAt (placement game) from
+
+  nextState = addPiece (addPiece (placement game) Nothing from) originalPiece to
+
+  activePly = fromJust $ pieceOwner <$> (pieceOn $ squareAt (placement game) from)
+
+  isQueenChecking :: Bool
+  isQueenChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== Queen) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialQueenMoves nextState (location $ kingSquare activePly)
+
+  kingSquare     :: Player -> Square
+  kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
+
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from
                            , moveTo   = to
                            , moveType = movetype } = do
   game <- get
   let position = placement game
-  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game)))
+  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (isLegal game move)
     then do let originalPiece = pieceOn $ squareAt position from
             put $ game { activeColor = opponent (activeColor game) }
 
