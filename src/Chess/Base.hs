@@ -176,7 +176,7 @@ updateSquare c p = do
 isLegal :: RegularGame -> Move -> Bool
 isLegal game move@Move { moveFrom = from
                        , moveTo   = to
-                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking && isKnightChecking && isPawnChecking where
+                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking && isKnightChecking && isPawnChecking && isKingChecking where
 
   originalPiece = pieceOn $ squareAt (placement game) from
 
@@ -203,6 +203,10 @@ isLegal game move@Move { moveFrom = from
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
   isPawnChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves nextState Nothing (location $ kingSquare activePly)
+
+  -- TODO: do we need to consider castling? I think not.
+  isKingChecking :: Bool
+  isKingChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves nextState (CastleRights False False False False) (location $ kingSquare activePly)
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState

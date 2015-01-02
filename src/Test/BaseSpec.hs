@@ -365,6 +365,17 @@ main = hspec $
                      , (Piece King Black, Coordinate 'e' 8)
                      , (Piece Pawn Black, Coordinate 'e' 2)]) `shouldBe` False
 
+      it "does not allow the king to move into check by a king" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'c' 2)]) `shouldBe` (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                                                                    , (Piece King Black, Coordinate 'c' 2)])
+
+      it "returns false when the king moves into check by a king" $
+        evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'c' 2)]) `shouldBe` False
+
       it "does not allow black to make a move during white's turn" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 5, moveType = Standard })
           startingPos `shouldBe` startingPos
