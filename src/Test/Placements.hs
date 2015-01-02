@@ -158,14 +158,14 @@ blackKingBothCastlesTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
                                      ]
 
 whiteEnPassantTest :: RegularGame
-whiteEnPassantTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
-                               , (Piece Pawn White, Coordinate 'e' 5)
-                               ]
+whiteEnPassantTest = (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                                , (Piece Pawn White, Coordinate 'e' 5)
+                                ]) { enPassantSquare = Just $ Coordinate 'd' 6 }
 
 blackEnPassantTest :: RegularGame
-blackEnPassantTest = setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
-                               , (Piece Pawn White, Coordinate 'e' 4)
-                               ]
+blackEnPassantTest = (setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                                , (Piece Pawn White, Coordinate 'e' 4)
+                                ]) { enPassantSquare = Just $ Coordinate 'e' 3 }
 
 
 emptyTest :: RegularGame

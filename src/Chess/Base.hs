@@ -259,17 +259,20 @@ makeEnPassant   :: Move -> State RegularGame Bool
 makeEnPassant m@Move { moveTo = to@(Coordinate f r)
                      , moveFrom = from } = do
   game <- get
-  let position = placement game
-  let originalPiece = pieceOn $ squareAt position from
-  let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
-  put $ game { activeColor = opponent (activeColor game) }
+  if (m `elem` pseudoLegalMoves game)
+    then do let position = placement game
+            let originalPiece = pieceOn $ squareAt position from
+            let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
+            put $ game { activeColor = opponent (activeColor game) 
+                       , enPassantSquare = Nothing }
 
-  let enpassantpawn = pieceOn . squareAt position $ Coordinate f (r+rankOffset)
+            let enpassantpawn = pieceOn . squareAt position $ Coordinate f (r+rankOffset)
 
-  updateSquare from Nothing
-  updateSquare (Coordinate f (r+rankOffset)) Nothing
-  updateSquare to originalPiece
-  return True
+            updateSquare from Nothing
+            updateSquare (Coordinate f (r+rankOffset)) Nothing
+            updateSquare to originalPiece
+            return True
+    else return False
 
 
 makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool

@@ -290,3 +290,11 @@ main = hspec $
       it "does not modify the game state for illegal moves" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 1, moveTo = (Coordinate 'd' 8), moveType = Standard })
           startingPos `shouldBe` startingPos
+
+      it "returns a value of false for en passant moves when none are allowed" $
+        evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant })
+          whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } `shouldBe` False
+
+      it "does not modify the game state for en passant moves when none are allowed" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant })
+          whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } `shouldBe` whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing }
