@@ -291,6 +291,14 @@ main = hspec $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 1, moveTo = (Coordinate 'd' 8), moveType = Standard })
           startingPos `shouldBe` startingPos
 
+      it "does not allow black to make a move during white's turn" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 5, moveType = Standard })
+          startingPos `shouldBe` startingPos
+
+      it "does not allow white to make a move during black's turn" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 2, moveTo = Coordinate 'd' 4, moveType = Standard })
+          kingOpening `shouldBe` kingOpening
+
       it "returns a value of false for en passant moves when none are allowed" $
         evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant })
           whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } `shouldBe` False

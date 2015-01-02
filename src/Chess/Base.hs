@@ -174,12 +174,12 @@ updateSquare c p = do
 
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from
-                      , moveTo   = to
-                      , moveType = movetype } = do
+                           , moveTo   = to
+                           , moveType = movetype } = do
   game <- get
-  if (move `elem` pseudoLegalMoves game)
-    then do let position = placement game
-            let originalPiece = pieceOn $ squareAt position from
+  let position = placement game
+  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game)))
+    then do let originalPiece = pieceOn $ squareAt position from
             put $ game { activeColor = opponent (activeColor game) }
 
             updateSquare from Nothing
