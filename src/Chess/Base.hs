@@ -175,7 +175,7 @@ updateSquare c p = do
 isLegal :: RegularGame -> Move -> Bool
 isLegal game move@Move { moveFrom = from
                        , moveTo   = to
-                       , moveType = movetype } = isQueenChecking && isRookChecking where
+                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking where
 
   originalPiece = pieceOn $ squareAt (placement game) from
 
@@ -191,6 +191,9 @@ isLegal game move@Move { moveFrom = from
 
   isRookChecking :: Bool
   isRookChecking = isChecking Rook potentialRookMoves
+
+  isBishopChecking :: Bool
+  isBishopChecking = isChecking Bishop potentialBishopMoves
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState

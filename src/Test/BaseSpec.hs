@@ -323,6 +323,20 @@ main = hspec $
                      , (Piece King Black, Coordinate 'e' 8)
                      , (Piece Rook Black, Coordinate 'd' 8)]) `shouldBe` False
 
+      it "does not allow the king to move into check by a bishop" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'e' 8)
+                     , (Piece Bishop Black, Coordinate 'h' 5)]) `shouldBe` (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                                                                      , (Piece King Black, Coordinate 'e' 8)
+                                                                                      , (Piece Bishop Black, Coordinate 'h' 5)])
+
+      it "returns false when the king moves into check by a bishop" $
+        evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          (setupGame [ (Piece King White, Coordinate 'e' 1)
+                     , (Piece King Black, Coordinate 'e' 8)
+                     , (Piece Bishop Black, Coordinate 'h' 5)]) `shouldBe` False
+
       it "does not allow black to make a move during white's turn" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 5, moveType = Standard })
           startingPos `shouldBe` startingPos
