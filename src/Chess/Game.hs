@@ -22,6 +22,9 @@ updateSquare c p = do
   let position = placement game
   put $ game { placement = addPiece position p c }
 
+isCheckmate          :: RegularGame -> Player -> Bool
+isCheckmate game ply = null $ filter (\x -> ((pieceOwner <$> (pieceOn $ (squareAt (placement game) (moveFrom x)))) == (Just ply)) && (not $ isChecked game x)) $ pseudoLegalMoves game
+
 isChecked :: RegularGame -> Move -> Bool
 isChecked game move@Move { moveFrom = from
                        , moveTo   = to
