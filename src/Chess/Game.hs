@@ -22,10 +22,10 @@ updateSquare c p = do
   let position = placement game
   put $ game { placement = addPiece position p c }
 
-isLegal :: RegularGame -> Move -> Bool
-isLegal game move@Move { moveFrom = from
+isChecked :: RegularGame -> Move -> Bool
+isChecked game move@Move { moveFrom = from
                        , moveTo   = to
-                       , moveType = movetype } = isQueenChecking && isRookChecking && isBishopChecking && isKnightChecking && isPawnChecking && isKingChecking where
+                       , moveType = movetype } = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
   originalPiece = pieceOn $ squareAt (placement game) from
 
@@ -35,7 +35,7 @@ isLegal game move@Move { moveFrom = from
   activePly = fromJust $ pieceOwner <$> (pieceOn $ squareAt (placement game) from)
 
   isChecking            :: PieceType -> (RegularBoardRepresentation -> Coordinate -> [Move]) -> Bool
-  isChecking pt movegen = null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen nextState (location $ kingSquare activePly)
+  isChecking pt movegen = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen nextState (location $ kingSquare activePly)
 
   isQueenChecking :: Bool
   isQueenChecking = isChecking Queen potentialQueenMoves
@@ -51,11 +51,11 @@ isLegal game move@Move { moveFrom = from
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves nextState Nothing (location $ kingSquare activePly)
+  isPawnChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves nextState Nothing (location $ kingSquare activePly)
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves nextState (CastleRights False False False False) (location $ kingSquare activePly)
+  isKingChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves nextState (CastleRights False False False False) (location $ kingSquare activePly)
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
@@ -66,7 +66,7 @@ makeStandardMove move@Move { moveFrom = from
                            , moveType = movetype } = do
   game <- get
   let position = placement game
-  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (isLegal game move)
+  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (not $ isChecked game move)
     then do let originalPiece = pieceOn $ squareAt position from
             put $ game { activeColor = opponent (activeColor game) }
 
@@ -169,4 +169,3 @@ makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = m
                                                      | movetype == Castle    = makeCastle move
                                                      | movetype == Promotion = makePromotion promoteTo move
                                                      | movetype == EnPassant = makeEnPassant move
-
