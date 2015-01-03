@@ -1,6 +1,7 @@
 module BaseSpec where
 
 import Chess.Base
+import Chess.Game
 
 import Control.Monad.State.Lazy
 

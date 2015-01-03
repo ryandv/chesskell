@@ -185,3 +185,14 @@ alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordi
                     $ filter isOnBoard
                     $ fmap (from `offsetBy`)
                     $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
+
+rayFromMove                                    :: (Coordinate, Coordinate) -> (Int, Int)
+rayFromMove (Coordinate f r, Coordinate f' r') | fromEnum f' > fromEnum f && r' > r = (1,1)
+                                               | fromEnum f' > fromEnum f && r' < r = (1,-1)
+                                               | fromEnum f' > fromEnum f && r' == r = (1,0)
+                                               | fromEnum f' < fromEnum f && r' > r = (-1,1)
+                                               | fromEnum f' < fromEnum f && r' < r = (-1,-1)
+                                               | fromEnum f' < fromEnum f && r' == r = (-1,0)
+                                               | fromEnum f' == fromEnum f && r' > r = (0,1)
+                                               | fromEnum f' == fromEnum f && r' < r = (0,-1)
+                                               | fromEnum f' == fromEnum f && r' == r = (0,0)
