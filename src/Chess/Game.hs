@@ -23,19 +23,23 @@ updateSquare c p = do
   put $ game { placement = addPiece position p c }
 
 isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = null $ filter (\x -> ((pieceOwner <$> (pieceOn $ (squareAt (placement game) (moveFrom x)))) == (Just ply)) && (not $ isChecked game x)) $ pseudoLegalMoves game
+isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = placementAfterMove x })) $ pseudoLegalMoves game where
 
-isChecked :: RegularGame -> Move -> Bool
-isChecked game move@Move { moveFrom = from
-                       , moveTo   = to
-                       , moveType = movetype } = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
+  pieceIsOwnedByPly :: Move -> Bool
+  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
 
-  originalPiece = pieceOn $ squareAt (placement game) from
+  placementAfterMove :: Move -> RegularBoardRepresentation
+  placementAfterMove Move { moveFrom = from
+                          , moveTo   = to } = addPiece (addPiece (placement game) Nothing from) (pieceOn $ (squareAt (placement game) from)) to
+
+
+isChecked      :: RegularGame -> Bool
+isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
   -- TODO: Extract
-  nextState = addPiece (addPiece (placement game) Nothing from) originalPiece to
+  nextState = (placement game)
 
-  activePly = fromJust $ pieceOwner <$> (pieceOn $ squareAt (placement game) from)
+  activePly = (activeColor game)
 
   isChecking            :: PieceType -> (RegularBoardRepresentation -> Coordinate -> [Move]) -> Bool
   isChecking pt movegen = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen nextState (location $ kingSquare activePly)
@@ -69,7 +73,7 @@ makeStandardMove move@Move { moveFrom = from
                            , moveType = movetype } = do
   game <- get
   let position = placement game
-  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (not $ isChecked game move)
+  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (not $ isChecked game { placement = (addPiece (addPiece (placement game) Nothing from) (pieceOn $ (squareAt (placement game) from)) to) })
     then do let originalPiece = pieceOn $ squareAt position from
             put $ game { activeColor = opponent (activeColor game) }
 
