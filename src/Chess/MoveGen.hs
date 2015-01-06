@@ -17,18 +17,16 @@ import Data.Maybe
 import Control.Applicative
 
 pseudoLegalMoves               :: RegularGame -> [Move]
-pseudoLegalMoves game@RegularGame { placement = b
-                                  , enPassantSquare = e
-                                  } = (concatMap . concatMap) (pseudoLegalMovesFrom e game) b where
+pseudoLegalMoves game@RegularGame { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b where
 
-pseudoLegalMovesFrom :: Maybe Coordinate -> RegularGame -> Square -> [Move]
-pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
-pseudoLegalMovesFrom c game (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves game l
-                                                       | p == Knight = potentialKnightMoves game l
-                                                       | p == Bishop = potentialBishopMoves game l
-                                                       | p == Rook   = potentialRookMoves game l
-                                                       | p == Queen  = potentialQueenMoves game l
-                                                       | p == King   = potentialKingMoves game l
+pseudoLegalMovesFrom :: RegularGame -> Square -> [Move]
+pseudoLegalMovesFrom _ (Square Nothing _)            = []
+pseudoLegalMovesFrom game (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves game l
+                                                        | p == Knight = potentialKnightMoves game l
+                                                        | p == Bishop = potentialBishopMoves game l
+                                                        | p == Rook   = potentialRookMoves game l
+                                                        | p == Queen  = potentialQueenMoves game l
+                                                        | p == King   = potentialKingMoves game l
 
 potentialPawnMoves                                       :: RegularGame -> Coordinate -> [Move]
 potentialPawnMoves RegularGame { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
@@ -78,8 +76,8 @@ blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
                                         | otherwise = blackNWCapture b c ++ blackNECapture b c
 
 capture                                   :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
-capture b (Coordinate f r) tf dr opponent | (isJust $ target) && fmap pieceOwner target == Just opponent = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
-                                          | otherwise = [] where
+capture b (Coordinate f r) tf dr enemy | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
+                                       | otherwise = [] where
   target = pieceOn $ squareAt b (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
 
