@@ -519,161 +519,144 @@ main = hspec $
       context "movement" $ do
 
         it "allows double-jumping from the second rank for White" $
-          potentialPawnMoves startingPos Nothing (Coordinate 'e' 2) `shouldBe`
+          potentialPawnMoves startingPos { enPassantSquare = Nothing } (Coordinate 'e' 2) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 3), moveType = Standard }
             ]
 
         it "disallows White double-jumping from elsewhere" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])
-                      Nothing
-                      (Coordinate 'e' 7) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Standard } ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]) { enPassantSquare = Nothing }
+            (Coordinate 'e' 7) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Standard } ]
 
         it "allows double-jumping from the second rank for Black" $
-          potentialPawnMoves startingPos Nothing (Coordinate 'e' 7) `shouldBe`
+          potentialPawnMoves startingPos { enPassantSquare = Nothing } (Coordinate 'e' 7) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 5), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 6), moveType = Standard }
             ]
 
         it "disallows Black double-jumping from elsewhere" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])
-                      Nothing 
-                      (Coordinate 'e' 2) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Standard } ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]) { enPassantSquare = Nothing }
+            (Coordinate 'e' 2) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Standard } ]
 
         it "does not allow White to advance onto an occupied square" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
-                      , (Piece Pawn White, Coordinate 'd' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 4) `shouldBe` []
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                       , (Piece Pawn White, Coordinate 'd' 4)
+                       ]) { enPassantSquare = Nothing}
+            (Coordinate 'd' 4) `shouldBe` []
 
         it "does not allow White to double-jump onto an occupied square" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
-                      , (Piece Pawn White, Coordinate 'd' 2)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 2) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 3), moveType = Standard } ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
+                       , (Piece Pawn White, Coordinate 'd' 2)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 2) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 3), moveType = Standard } ]
 
         it "does not allow Black to double-jump onto an occupied square" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
-                      , (Piece Pawn White, Coordinate 'd' 5)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 7) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 7), moveTo = (Coordinate 'd' 6), moveType = Standard } ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
+                       , (Piece Pawn White, Coordinate 'd' 5)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 7) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 7), moveTo = (Coordinate 'd' 6), moveType = Standard } ]
 
         it "does not allow Black to advance onto an occupied square" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
-                      , (Piece Pawn White, Coordinate 'd' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 5) `shouldBe` []
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                       , (Piece Pawn White, Coordinate 'd' 4)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 5) `shouldBe` []
 
       context "capturing" $ do
 
         it "allows White to capture pieces on the neighbouring NW and NE squares" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'c' 5)
-                      , (Piece Pawn Black, Coordinate 'e' 5)
-                      , (Piece Pawn White, Coordinate 'd' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 4) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
-            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Capture }
-            , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Capture }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'c' 5)
+                       , (Piece Pawn Black, Coordinate 'e' 5)
+                       , (Piece Pawn White, Coordinate 'd' 4)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 4) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+              , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Capture }
+              , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 5), moveType = Capture }
+              ]
 
         it "allows Black to capture pieces on the neighbouring NW and NE squares" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn White, Coordinate 'c' 4)
-                      , (Piece Pawn White, Coordinate 'e' 4)
-                      , (Piece Pawn Black, Coordinate 'd' 5)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 5) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
-            , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture }
-            , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 4), moveType = Capture }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
+                       , (Piece Pawn White, Coordinate 'e' 4)
+                       , (Piece Pawn Black, Coordinate 'd' 5)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 5) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+              , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 4), moveType = Capture }
+              , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 4), moveType = Capture }
+              ]
 
         it "does not allow White to capture its own pieces" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn White, Coordinate 'c' 5)
-                      , (Piece Pawn White, Coordinate 'e' 5)
-                      , (Piece Pawn White, Coordinate 'd' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 4) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn White, Coordinate 'c' 5)
+                       , (Piece Pawn White, Coordinate 'e' 5)
+                       , (Piece Pawn White, Coordinate 'd' 4)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 4) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
+              ]
 
         it "does not allow Black to capture its own pieces" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
-                      , (Piece Pawn Black, Coordinate 'e' 4)
-                      , (Piece Pawn Black, Coordinate 'd' 5)
-                      ])
-                      Nothing
-                      (Coordinate 'd' 5) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
+                        , (Piece Pawn Black, Coordinate 'e' 4)
+                        , (Piece Pawn Black, Coordinate 'd' 5)
+                        ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 5) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 4), moveType = Standard }
+              ]
 
         it "only allows capturing on the 'b' file for pawns on the 'a' file" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'b' 5)
-                      , (Piece Pawn White, Coordinate 'a' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'a' 4) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'a' 5), moveType = Standard }
-            , Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'b' 5), moveType = Capture }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'b' 5)
+                       , (Piece Pawn White, Coordinate 'a' 4)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'a' 4) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'a' 5), moveType = Standard }
+              , Move { moveFrom = (Coordinate 'a' 4), moveTo = (Coordinate 'b' 5), moveType = Capture }
+              ]
 
         it "only allows capturing on the 'g' file for pawns on the 'h' file" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'g' 5)
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'g' 5)
                       , (Piece Pawn White, Coordinate 'h' 4)
-                      ])
-                      Nothing
-                      (Coordinate 'h' 4) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'h' 5), moveType = Standard }
-            , Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'g' 5), moveType = Capture }
-            ]
+                      ]) { enPassantSquare = Nothing }
+            (Coordinate 'h' 4) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'h' 5), moveType = Standard }
+              , Move { moveFrom = (Coordinate 'h' 4), moveTo = (Coordinate 'g' 5), moveType = Capture }
+              ]
 
         it "allows White to en passant, if available" $
-          potentialPawnMoves whiteEnPassantTest
-                      (Just (Coordinate 'd' 6))
-                      (Coordinate 'e' 5) `shouldBe`
+          potentialPawnMoves (whiteEnPassantTest { enPassantSquare = (Just (Coordinate 'd' 6)) }) (Coordinate 'e' 5) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'e' 6), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = EnPassant }
             ]
 
         it "allows Black to en passant, if available" $
-          potentialPawnMoves blackEnPassantTest
-                      (Just (Coordinate 'e' 3))
-                      (Coordinate 'd' 4) `shouldBe`
+          potentialPawnMoves blackEnPassantTest { enPassantSquare = (Just (Coordinate 'e' 3)) } (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = EnPassant }
             ]
 
         it "only allows en passant from the correct square" $
-          potentialPawnMoves (
-            setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
-                      , (Piece Pawn White, Coordinate 'e' 5)
-                      , (Piece Pawn White, Coordinate 'b' 2)
-                      ])
-                      (Just (Coordinate 'd' 6))
-                      (Coordinate 'b' 2) `shouldBe`
-            [ Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 4), moveType = Standard }
-            , Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 3), moveType = Standard }
-            ]
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
+                       , (Piece Pawn White, Coordinate 'e' 5)
+                       , (Piece Pawn White, Coordinate 'b' 2)
+                       ]) { enPassantSquare = (Just (Coordinate 'd' 6)) }
+            (Coordinate 'b' 2) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 4), moveType = Standard }
+              , Move { moveFrom = (Coordinate 'b' 2), moveTo = (Coordinate 'b' 3), moveType = Standard }
+              ]

@@ -68,7 +68,7 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves game Nothing (location $ kingSquare activePly)
+  isPawnChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves game (location $ kingSquare activePly)
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool

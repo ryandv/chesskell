@@ -23,16 +23,16 @@ pseudoLegalMoves game@RegularGame { placement = b
 
 pseudoLegalMovesFrom :: Maybe Coordinate -> RegularGame -> Square -> [Move]
 pseudoLegalMovesFrom _ _ (Square Nothing _)            = []
-pseudoLegalMovesFrom c game@RegularGame { placement = b } (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves game c l
+pseudoLegalMovesFrom c game (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves game l
                                                        | p == Knight = potentialKnightMoves game l
                                                        | p == Bishop = potentialBishopMoves game l
                                                        | p == Rook   = potentialRookMoves game l
                                                        | p == Queen  = potentialQueenMoves game l
                                                        | p == King   = potentialKingMoves game (CastleRights True True True True) l
 
-potentialPawnMoves                                       :: RegularGame -> Maybe Coordinate -> Coordinate -> [Move]
-potentialPawnMoves RegularGame { placement = b } Nothing c                           = standardPawnMoves b c
-potentialPawnMoves RegularGame { placement = b } (Just enPassant) c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
+potentialPawnMoves                                       :: RegularGame -> Coordinate -> [Move]
+potentialPawnMoves RegularGame { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
+potentialPawnMoves RegularGame { placement = b, enPassantSquare = (Just enPassant) } c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
   rankOffset :: Int
   rankOffset = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
                  Just White -> 1
