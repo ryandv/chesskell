@@ -8,6 +8,114 @@ import Chess.MoveGen
 
 import Data.Maybe
 
+
+makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool
+makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = makeStandardMove move
+                                                     | movetype == Capture   = makeStandardMove move
+                                                     | movetype == Castle    = makeCastle move
+                                                     | movetype == Promotion = makePromotion promoteTo move
+                                                     | movetype == EnPassant = makeEnPassant move
+
+makeStandardMove                              :: Move -> State RegularGame Bool
+makeStandardMove move@Move { moveFrom = from } = do
+  game <- get
+  let position = placement game
+
+  let moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
+  let moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
+
+  if moveIsPseudoLegal && moveIsByRightPlayer && (not $ isChecked game { placement = positionAfterMove position move})
+    then do let originalPiece = pieceOn $ squareAt position from
+
+            put $ game { activeColor = opponent (activeColor game) }
+            doMovePiece originalPiece move
+
+            return True
+    else return False
+
+makeCastle                              :: Move -> State RegularGame Bool
+makeCastle move@Move { moveFrom = from
+                     , moveTo   = to }  | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = makeWhiteKingsideCastle
+                                        | from == Coordinate 'e' 1 && to == Coordinate 'c' 1 = makeWhiteQueensideCastle
+                                        | from == Coordinate 'e' 8 && to == Coordinate 'g' 8 = makeBlackKingsideCastle
+                                        | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = makeBlackQueensideCastle where
+
+  makeWhiteKingsideCastle :: State RegularGame Bool
+  makeWhiteKingsideCastle = doCastle disableWhiteCastles
+    Move { moveFrom = Coordinate 'h' 1
+         , moveTo   = Coordinate 'f' 1
+         , moveType = Castle
+         }
+
+  makeWhiteQueensideCastle :: State RegularGame Bool
+  makeWhiteQueensideCastle = doCastle disableWhiteCastles
+    Move { moveFrom = Coordinate 'a' 1
+         , moveTo   = Coordinate 'd' 1
+         , moveType = Castle
+         }
+
+  makeBlackKingsideCastle :: State RegularGame Bool
+  makeBlackKingsideCastle = doCastle disableBlackCastles
+    Move { moveFrom = Coordinate 'h' 8
+         , moveTo   = Coordinate 'f' 8
+         , moveType = Castle
+         }
+
+  makeBlackQueensideCastle :: State RegularGame Bool
+  makeBlackQueensideCastle = doCastle disableBlackCastles
+    Move { moveFrom = Coordinate 'a' 8
+         , moveTo   = Coordinate 'd' 8
+         , moveType = Castle
+         }
+
+  disableWhiteCastles :: CastleRights -> CastleRights
+  disableWhiteCastles (CastleRights _ boo _ booo) = CastleRights False boo False booo
+
+  disableBlackCastles :: CastleRights -> CastleRights
+  disableBlackCastles (CastleRights woo _ wooo _) = CastleRights woo False wooo False
+
+  doCastle :: (CastleRights -> CastleRights) -> Move -> State RegularGame Bool
+  doCastle fupdaterights rookMove@Move { moveFrom = rookfrom } = do
+    game <- get
+    let position = placement game
+
+    let originalPiece = pieceOn $ squareAt position from
+    let rook = pieceOn $ squareAt position rookfrom
+
+    put $ game { activeColor = opponent (activeColor game)
+               , castlingRights = fupdaterights (castlingRights game)
+               }
+
+    doMovePiece originalPiece move
+    doMovePiece rook rookMove
+
+    return True
+
+makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
+makePromotion p@(Just Piece { pieceType  = _, pieceOwner = _ }) move@Move { moveFrom = _, moveTo = _ } = do
+  game <- get
+  put $ game { activeColor = opponent (activeColor game) }
+
+  doMovePiece p move
+  return True
+
+makeEnPassant   :: Move -> State RegularGame Bool
+makeEnPassant m@Move { moveTo = Coordinate f r
+                     , moveFrom = from } = do
+  game <- get
+  if (m `elem` pseudoLegalMoves game)
+    then do let position = placement game
+            let originalPiece = pieceOn $ squareAt position from
+            let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
+            put $ game { activeColor = opponent (activeColor game) 
+                       , enPassantSquare = Nothing }
+
+            doMovePiece originalPiece m
+            updateSquare (Coordinate f (r+rankOffset)) Nothing
+
+            return True
+    else return False
+
 addPiece                        :: RegularBoardRepresentation -> Maybe Piece -> Coordinate -> RegularBoardRepresentation
 addPiece b p c@(Coordinate f r) = newPlacement where
   newPlacement = fst splitBoard ++ [fst splitRank ++ [Square p c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
@@ -41,11 +149,9 @@ isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChec
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
 
-
 isChecked      :: RegularGame -> Bool
 isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
-  -- TODO: Extract
   nextState = (placement game)
 
   activePly = (activeColor game)
@@ -75,111 +181,3 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
-
-makeStandardMove                              :: Move -> State RegularGame Bool
-makeStandardMove move@Move { moveFrom = from } = do
-  game <- get
-  let position = placement game
-
-  let moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  let moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
-
-  if moveIsPseudoLegal && moveIsByRightPlayer && (not $ isChecked game { placement = positionAfterMove position move})
-    then do let originalPiece = pieceOn $ squareAt position from
-
-            put $ game { activeColor = opponent (activeColor game) }
-            doMovePiece originalPiece move
-
-            return True
-    else return False
-
-disableWhiteCastles :: CastleRights -> CastleRights
-disableWhiteCastles (CastleRights _ boo _ booo) = CastleRights False boo False booo
-
-disableBlackCastles :: CastleRights -> CastleRights
-disableBlackCastles (CastleRights woo _ wooo _) = CastleRights woo False wooo False
-
-doCastle :: (CastleRights -> CastleRights) -> Move -> Move -> State RegularGame Bool
-doCastle fupdaterights move@Move { moveFrom = from } rookMove@Move { moveFrom = rookfrom } = do
-  game <- get
-  let position = placement game
-
-  let originalPiece = pieceOn $ squareAt position from
-  let rook = pieceOn $ squareAt position rookfrom
-
-  put $ game { activeColor = opponent (activeColor game)
-             , castlingRights = fupdaterights (castlingRights game)
-             }
-
-  doMovePiece originalPiece move
-  doMovePiece rook rookMove
-
-  return True
-
-makeWhiteKingsideCastle      :: Move -> State RegularGame Bool
-makeWhiteKingsideCastle move = doCastle disableWhiteCastles move
-  Move { moveFrom = Coordinate 'h' 1
-       , moveTo   = Coordinate 'f' 1
-       , moveType = Castle
-       }
-
-makeWhiteQueensideCastle      :: Move -> State RegularGame Bool
-makeWhiteQueensideCastle move = doCastle disableWhiteCastles move
-  Move { moveFrom = Coordinate 'a' 1
-       , moveTo   = Coordinate 'd' 1
-       , moveType = Castle
-       }
-
-makeBlackKingsideCastle      :: Move -> State RegularGame Bool
-makeBlackKingsideCastle move = doCastle disableBlackCastles move
-  Move { moveFrom = Coordinate 'h' 8
-       , moveTo   = Coordinate 'f' 8
-       , moveType = Castle
-       }
-
-makeBlackQueensideCastle      :: Move -> State RegularGame Bool
-makeBlackQueensideCastle move = doCastle disableBlackCastles move
-  Move { moveFrom = Coordinate 'a' 8
-       , moveTo   = Coordinate 'd' 8
-       , moveType = Castle
-       }
-
-makeCastle                              :: Move -> State RegularGame Bool
-makeCastle move@Move { moveFrom = from
-                     , moveTo   = to }  | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = makeWhiteKingsideCastle move
-                                        | from == Coordinate 'e' 1 && to == Coordinate 'c' 1 = makeWhiteQueensideCastle move
-                                        | from == Coordinate 'e' 8 && to == Coordinate 'g' 8 = makeBlackKingsideCastle move
-                                        | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = makeBlackQueensideCastle move
-
-makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
-makePromotion p@(Just Piece { pieceType  = _, pieceOwner = _ }) move@Move { moveFrom = _, moveTo = _ } = do
-  game <- get
-  put $ game { activeColor = opponent (activeColor game) }
-
-  doMovePiece p move
-  return True
-
-makeEnPassant   :: Move -> State RegularGame Bool
-makeEnPassant m@Move { moveTo = Coordinate f r
-                     , moveFrom = from } = do
-  game <- get
-  if (m `elem` pseudoLegalMoves game)
-    then do let position = placement game
-            let originalPiece = pieceOn $ squareAt position from
-            let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
-            put $ game { activeColor = opponent (activeColor game) 
-                       , enPassantSquare = Nothing }
-
-            doMovePiece originalPiece m
-            updateSquare (Coordinate f (r+rankOffset)) Nothing
-
-            return True
-    else return False
-
-
-makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool
-makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = makeStandardMove move
-                                                     | movetype == Capture   = makeStandardMove move
-                                                     | movetype == Castle    = makeCastle move
-                                                     | movetype == Promotion = makePromotion promoteTo move
-                                                     | movetype == EnPassant = makeEnPassant move
