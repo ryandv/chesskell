@@ -28,7 +28,7 @@ pseudoLegalMovesFrom c game (Square (Just (Piece p _)) l) | p == Pawn   = potent
                                                        | p == Bishop = potentialBishopMoves game l
                                                        | p == Rook   = potentialRookMoves game l
                                                        | p == Queen  = potentialQueenMoves game l
-                                                       | p == King   = potentialKingMoves game (CastleRights True True True True) l
+                                                       | p == King   = potentialKingMoves game l
 
 potentialPawnMoves                                       :: RegularGame -> Coordinate -> [Move]
 potentialPawnMoves RegularGame { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
@@ -120,10 +120,12 @@ potentialKnightMoves     :: RegularGame -> Coordinate -> [Move]
 potentialKnightMoves RegularGame { placement = b } c = potentialOffsetMoves b c possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
-potentialKingMoves                                   :: RegularGame -> CastleRights -> Coordinate -> [Move]
-potentialKingMoves RegularGame { placement = b } castlerights c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
-                                                     | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights
-                                                     | otherwise = potentialOffsetMoves b c possibleMoves where
+potentialKingMoves                                   :: RegularGame -> Coordinate -> [Move]
+potentialKingMoves RegularGame { placement = b
+                               , castlingRights = castlerights
+                               } c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
+                                                    | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights
+                                                    | otherwise = potentialOffsetMoves b c possibleMoves where
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 

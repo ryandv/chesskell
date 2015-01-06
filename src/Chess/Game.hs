@@ -72,7 +72,7 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves game (CastleRights False False False False) (location $ kingSquare activePly)
+  isKingChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves game (location $ kingSquare activePly)
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
