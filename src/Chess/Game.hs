@@ -15,6 +15,20 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
 
+doMovePiece     :: Maybe Piece -> Move -> State RegularGame ()
+doMovePiece p m = do
+  game <- get
+  let position = placement game
+  put $ game { placement = movePiece position p m }
+
+movePiece :: RegularBoardRepresentation -> Maybe Piece -> Move -> RegularBoardRepresentation
+movePiece position piece Move { moveFrom = from
+                              , moveTo   = to } = addPiece (addPiece position Nothing from) piece to
+
+positionAfterMove :: RegularBoardRepresentation -> Move -> RegularBoardRepresentation
+positionAfterMove position move@Move { moveFrom = from
+                                     , moveTo   = to } = movePiece position (pieceOn $ (squareAt position from)) move
+
 -- TODO: extract non-monadic operations
 updateSquare     :: Coordinate -> Maybe Piece -> State RegularGame ()
 updateSquare c p = do
@@ -23,14 +37,10 @@ updateSquare c p = do
   put $ game { placement = addPiece position p c }
 
 isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = placementAfterMove x })) $ pseudoLegalMoves game where
+isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
-
-  placementAfterMove :: Move -> RegularBoardRepresentation
-  placementAfterMove Move { moveFrom = from
-                          , moveTo   = to } = addPiece (addPiece (placement game) Nothing from) (pieceOn $ (squareAt (placement game) from)) to
 
 
 isChecked      :: RegularGame -> Bool
@@ -73,12 +83,16 @@ makeStandardMove move@Move { moveFrom = from
                            , moveType = movetype } = do
   game <- get
   let position = placement game
-  if (move `elem` pseudoLegalMoves game) && ((pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))) && (not $ isChecked game { placement = (addPiece (addPiece (placement game) Nothing from) (pieceOn $ (squareAt (placement game) from)) to) })
-    then do let originalPiece = pieceOn $ squareAt position from
-            put $ game { activeColor = opponent (activeColor game) }
 
-            updateSquare from Nothing
-            updateSquare to originalPiece
+  let moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
+  let moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
+
+  if moveIsPseudoLegal && moveIsByRightPlayer && (not $ isChecked game { placement = positionAfterMove position move})
+    then do let originalPiece = pieceOn $ squareAt position from
+
+            put $ game { activeColor = opponent (activeColor game) }
+            doMovePiece originalPiece move
+
             return True
     else return False
 
@@ -89,19 +103,20 @@ disableBlackCastles :: CastleRights -> CastleRights
 disableBlackCastles (CastleRights woo boo wooo booo) = CastleRights woo False wooo False
 
 doCastle :: (CastleRights -> CastleRights) -> Player -> Move -> Move -> State RegularGame Bool
-doCastle fupdaterights ply Move { moveFrom = from, moveTo = to } Move { moveFrom = rookfrom
-                                                                      , moveTo   = rookto } = do
+doCastle fupdaterights ply move@Move { moveFrom = from, moveTo = to } rookMove@Move { moveFrom = rookfrom
+                                                                                    , moveTo   = rookto } = do
   game <- get
   let position = placement game
+
   let originalPiece = pieceOn $ squareAt position from
+  let rook = pieceOn $ squareAt position rookfrom
+
   put $ game { activeColor = opponent (activeColor game)
              , castlingRights = fupdaterights (castlingRights game)
              }
 
-  updateSquare from Nothing
-  updateSquare to originalPiece
-  updateSquare rookfrom Nothing
-  updateSquare rookto (Just $ Piece Rook ply)
+  doMovePiece originalPiece move
+  doMovePiece rook rookMove
 
   return True
 
@@ -144,10 +159,11 @@ makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
 makePromotion p@(Just Piece { pieceType  = pt, pieceOwner = o }) move@Move { moveFrom = from, moveTo = to } = do
   game <- get
   let position = placement game
+
   put $ game { activeColor = opponent (activeColor game) }
 
-  updateSquare from Nothing
-  updateSquare to p
+  doMovePiece p move
+
   return True
 
 makeEnPassant   :: Move -> State RegularGame Bool
@@ -163,9 +179,9 @@ makeEnPassant m@Move { moveTo = to@(Coordinate f r)
 
             let enpassantpawn = pieceOn . squareAt position $ Coordinate f (r+rankOffset)
 
-            updateSquare from Nothing
+            doMovePiece originalPiece m
             updateSquare (Coordinate f (r+rankOffset)) Nothing
-            updateSquare to originalPiece
+
             return True
     else return False
 
