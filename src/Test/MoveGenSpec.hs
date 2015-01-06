@@ -124,10 +124,10 @@ main = hspec $
     describe "potentialRookMoves" $ do
 
       --it "never produces moves off the board" $
-      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialRookMoves (placement emptyTest) c
+      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialRookMoves emptyTest c
 
       it "produces the correct set of moves without being blocked by pieces" $
-        potentialRookMoves (placement onlyRookTest) (Coordinate 'd' 5) `shouldBe`
+        potentialRookMoves onlyRookTest (Coordinate 'd' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
@@ -145,7 +145,7 @@ main = hspec $
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
-        potentialRookMoves (placement rookTest) (Coordinate 'd' 5) `shouldBe`
+        potentialRookMoves rookTest (Coordinate 'd' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
@@ -157,7 +157,7 @@ main = hspec $
           ]
 
       it "produces the correct set of moves, including captures" $
-        potentialRookMoves (placement rookAllCapturesTest) (Coordinate 'd' 5) `shouldBe`
+        potentialRookMoves rookAllCapturesTest (Coordinate 'd' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'e' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'c' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
@@ -171,10 +171,10 @@ main = hspec $
 
     describe "potentialBishopMoves" $ do
       --it "never produces moves off the board" $
-      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialBishopMoves (placement emptyTest) c
+      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialBishopMoves emptyTest c
 
       it "produces the correct set of moves without being blocked by pieces" $
-        potentialBishopMoves (placement onlyBishopTest) (Coordinate 'e' 5) `shouldBe`
+        potentialBishopMoves onlyBishopTest (Coordinate 'e' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
@@ -191,7 +191,7 @@ main = hspec $
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
-        potentialBishopMoves (placement bishopTest) (Coordinate 'e' 5) `shouldBe`
+        potentialBishopMoves bishopTest (Coordinate 'e' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
@@ -203,7 +203,7 @@ main = hspec $
           ]
 
       it "produces the correct set of moves, including captures" $
-        potentialBishopMoves (placement bishopAllCapturesTest) (Coordinate 'e' 5) `shouldBe`
+        potentialBishopMoves bishopAllCapturesTest (Coordinate 'e' 5) `shouldBe`
           [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 6), moveType = Standard }
           , Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'f' 4), moveType = Standard }
@@ -220,7 +220,7 @@ main = hspec $
       --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
 
       it "produces the correct set of moves without being blocked by pieces" $
-        potentialKnightMoves (placement onlyKnightTest) (Coordinate 'd' 4) `shouldBe`
+        potentialKnightMoves onlyKnightTest (Coordinate 'd' 4) `shouldBe`
           [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 3), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 5), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 2), moveType = Standard }
@@ -232,7 +232,7 @@ main = hspec $
           ]
 
       it "produces the correct set of moves when blocked by some pieces" $
-        potentialKnightMoves (placement knightTest) (Coordinate 'd' 4) `shouldBe`
+        potentialKnightMoves knightTest (Coordinate 'd' 4) `shouldBe`
           [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'b' 3), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 2), moveType = Standard }
           , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 6), moveType = Standard }
@@ -242,7 +242,7 @@ main = hspec $
           ]
 
       it "can jump over pieces" $
-        potentialKnightMoves (placement startingPos) (Coordinate 'b' 1) `shouldBe`
+        potentialKnightMoves startingPos (Coordinate 'b' 1) `shouldBe`
           [ Move { moveFrom = (Coordinate 'b' 1), moveTo = (Coordinate 'a' 3), moveType = Standard }
           , Move { moveFrom = (Coordinate 'b' 1), moveTo = (Coordinate 'c' 3), moveType = Standard }
           ]
@@ -250,7 +250,7 @@ main = hspec $
     describe "potentialQueenMoves" $
       context "movement" $ do
         it "produces the correct set of moves without being blocked by pieces" $
-          potentialQueenMoves (placement onlyQueenTest) (Coordinate 'd' 4) `shouldBe`
+          potentialQueenMoves onlyQueenTest (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -281,7 +281,7 @@ main = hspec $
             ]
 
         it "produces the correct set of moves when blocked by some pieces" $
-          potentialQueenMoves (placement queenTest) (Coordinate 'd' 4) `shouldBe`
+          potentialQueenMoves queenTest (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -308,7 +308,7 @@ main = hspec $
             ]
 
         it "produces the correct set of moves, including captures" $
-          potentialQueenMoves (placement queenCaptureTest) (Coordinate 'd' 4) `shouldBe`
+          potentialQueenMoves queenCaptureTest (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -340,7 +340,7 @@ main = hspec $
     describe "potentialKingMoves" $
       context "movement" $ do
         it "allows the king to move to any square in its Moore neighbourhood" $
-          potentialKingMoves (placement onlyKingTest) (CastleRights False False False False) (Coordinate 'd' 4) `shouldBe`
+          potentialKingMoves onlyKingTest (CastleRights False False False False) (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -352,7 +352,7 @@ main = hspec $
             ]
 
         it "allows the white king to castle kingside, if he has the right to" $
-          potentialKingMoves (placement whiteKingOOTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingOOTest (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -362,7 +362,7 @@ main = hspec $
             ]
 
         it "does not allow the white king to castle kingside, if he does not have the right to" $
-          potentialKingMoves (placement whiteKingOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingOOTest (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -371,7 +371,7 @@ main = hspec $
             ]
 
         it "allows the white king to castle queenside, if he has the right to" $
-          potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingOOOTest (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -381,7 +381,7 @@ main = hspec $
             ]
 
         it "does not allow the white king to castle queenside, if he does not have the right to" $
-          potentialKingMoves (placement whiteKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingOOOTest (CastleRights False False False False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -390,7 +390,7 @@ main = hspec $
             ]
 
         it "allows the white king to castle both kingside or queenside, if he has the option" $
-          potentialKingMoves (placement whiteKingBothCastlesTest) (CastleRights True False True False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingBothCastlesTest (CastleRights True False True False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -401,7 +401,7 @@ main = hspec $
             ]
 
         it "does not allow the white king to castle when he is not on his home square" $
-          potentialKingMoves (placement whiteKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
+          potentialKingMoves whiteKingMovedNoOOTest (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -413,7 +413,7 @@ main = hspec $
             ]
 
         it "does not allow the white king to castle kingside when the rook is not on its home square" $
-          potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingNoRookCastleTest (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -422,7 +422,7 @@ main = hspec $
             ]
 
         it "does not allow the white king to castle queenside when the rook is not on its home square" $
-          potentialKingMoves (placement whiteKingNoRookCastleTest) (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves whiteKingNoRookCastleTest (CastleRights False False True False) (Coordinate 'e' 1) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 1), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'd' 2), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 1), moveTo = (Coordinate 'e' 2), moveType = Standard }
@@ -431,7 +431,7 @@ main = hspec $
             ]
 
         it "allows the black king to castle kingside, if he has the right to" $
-          potentialKingMoves (placement blackKingOOTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingOOTest (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -441,7 +441,7 @@ main = hspec $
             ]
 
         it "does not allow the black king to castle kingside, if he does not have the right to" $
-          potentialKingMoves (placement blackKingOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingOOTest (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -450,7 +450,7 @@ main = hspec $
             ]
 
         it "allows the black king to castle queenside, if he has the right to" $
-          potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingOOOTest (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -460,7 +460,7 @@ main = hspec $
             ]
 
         it "does not allow the black king to castle queenside, if he does not have the right to" $
-          potentialKingMoves (placement blackKingOOOTest) (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingOOOTest (CastleRights False False False False) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -469,7 +469,7 @@ main = hspec $
             ]
 
         it "allows the black king to castle both kingside or queenside, if he has the option" $
-          potentialKingMoves (placement blackKingBothCastlesTest) (CastleRights False True False True) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingBothCastlesTest (CastleRights False True False True) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -480,7 +480,7 @@ main = hspec $
             ]
 
         it "does not allow the black king to castle when he is not on his home square" $
-          potentialKingMoves (placement blackKingMovedNoOOTest) (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
+          potentialKingMoves blackKingMovedNoOOTest (CastleRights True True True True) (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 5), moveType = Standard }
             , Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 5), moveType = Standard }
@@ -492,7 +492,7 @@ main = hspec $
             ]
 
         it "does not allow the black king to castle kingside when the rook is not on its home square" $
-          potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingNoRookCastleTest (CastleRights False True False False) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -501,7 +501,7 @@ main = hspec $
             ]
 
         it "does not allow the black king to castle queenside when the rook is not on its home square" $
-          potentialKingMoves (placement blackKingNoRookCastleTest) (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
+          potentialKingMoves blackKingNoRookCastleTest (CastleRights False False False True) (Coordinate 'e' 8) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'd' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 8), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 8), moveTo = (Coordinate 'f' 7), moveType = Standard }
@@ -510,7 +510,7 @@ main = hspec $
             ]
 
         it "does not allow the king to castle if the intermediate squares are occupied" $
-          potentialKingMoves (placement startingPos) (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
+          potentialKingMoves startingPos (CastleRights True False False False) (Coordinate 'e' 1) `shouldBe`
             []
 
 
@@ -519,33 +519,33 @@ main = hspec $
       context "movement" $ do
 
         it "allows double-jumping from the second rank for White" $
-          potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 2) `shouldBe`
+          potentialPawnMoves startingPos Nothing (Coordinate 'e' 2) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 3), moveType = Standard }
             ]
 
         it "disallows White double-jumping from elsewhere" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])
                       Nothing
                       (Coordinate 'e' 7) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Standard } ]
 
         it "allows double-jumping from the second rank for Black" $
-          potentialPawnMoves (placement startingPos) Nothing (Coordinate 'e' 7) `shouldBe`
+          potentialPawnMoves startingPos Nothing (Coordinate 'e' 7) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 5), moveType = Standard }
             , Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 6), moveType = Standard }
             ]
 
         it "disallows Black double-jumping from elsewhere" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])
                       Nothing 
                       (Coordinate 'e' 2) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Standard } ]
 
         it "does not allow White to advance onto an occupied square" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                       , (Piece Pawn White, Coordinate 'd' 4)
                       ])
@@ -553,7 +553,7 @@ main = hspec $
                       (Coordinate 'd' 4) `shouldBe` []
 
         it "does not allow White to double-jump onto an occupied square" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
                       , (Piece Pawn White, Coordinate 'd' 2)
                       ])
@@ -562,7 +562,7 @@ main = hspec $
             [ Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 3), moveType = Standard } ]
 
         it "does not allow Black to double-jump onto an occupied square" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
                       , (Piece Pawn White, Coordinate 'd' 5)
                       ])
@@ -571,7 +571,7 @@ main = hspec $
             [ Move { moveFrom = (Coordinate 'd' 7), moveTo = (Coordinate 'd' 6), moveType = Standard } ]
 
         it "does not allow Black to advance onto an occupied square" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                       , (Piece Pawn White, Coordinate 'd' 4)
                       ])
@@ -581,7 +581,7 @@ main = hspec $
       context "capturing" $ do
 
         it "allows White to capture pieces on the neighbouring NW and NE squares" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'c' 5)
                       , (Piece Pawn Black, Coordinate 'e' 5)
                       , (Piece Pawn White, Coordinate 'd' 4)
@@ -594,7 +594,7 @@ main = hspec $
             ]
 
         it "allows Black to capture pieces on the neighbouring NW and NE squares" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn White, Coordinate 'c' 4)
                       , (Piece Pawn White, Coordinate 'e' 4)
                       , (Piece Pawn Black, Coordinate 'd' 5)
@@ -607,7 +607,7 @@ main = hspec $
             ]
 
         it "does not allow White to capture its own pieces" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn White, Coordinate 'c' 5)
                       , (Piece Pawn White, Coordinate 'e' 5)
                       , (Piece Pawn White, Coordinate 'd' 4)
@@ -618,7 +618,7 @@ main = hspec $
             ]
 
         it "does not allow Black to capture its own pieces" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
                       , (Piece Pawn Black, Coordinate 'e' 4)
                       , (Piece Pawn Black, Coordinate 'd' 5)
@@ -629,7 +629,7 @@ main = hspec $
             ]
 
         it "only allows capturing on the 'b' file for pawns on the 'a' file" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'b' 5)
                       , (Piece Pawn White, Coordinate 'a' 4)
                       ])
@@ -640,7 +640,7 @@ main = hspec $
             ]
 
         it "only allows capturing on the 'g' file for pawns on the 'h' file" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'g' 5)
                       , (Piece Pawn White, Coordinate 'h' 4)
                       ])
@@ -651,7 +651,7 @@ main = hspec $
             ]
 
         it "allows White to en passant, if available" $
-          potentialPawnMoves (placement $ whiteEnPassantTest)
+          potentialPawnMoves whiteEnPassantTest
                       (Just (Coordinate 'd' 6))
                       (Coordinate 'e' 5) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'e' 6), moveType = Standard }
@@ -659,7 +659,7 @@ main = hspec $
             ]
 
         it "allows Black to en passant, if available" $
-          potentialPawnMoves (placement $ blackEnPassantTest)
+          potentialPawnMoves blackEnPassantTest
                       (Just (Coordinate 'e' 3))
                       (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'd' 3), moveType = Standard }
@@ -667,7 +667,7 @@ main = hspec $
             ]
 
         it "only allows en passant from the correct square" $
-          potentialPawnMoves (placement $
+          potentialPawnMoves (
             setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                       , (Piece Pawn White, Coordinate 'e' 5)
                       , (Piece Pawn White, Coordinate 'b' 2)

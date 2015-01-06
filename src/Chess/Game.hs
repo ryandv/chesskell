@@ -51,8 +51,8 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
 
   activePly = (activeColor game)
 
-  isChecking            :: PieceType -> (RegularBoardRepresentation -> Coordinate -> [Move]) -> Bool
-  isChecking pt movegen = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen nextState (location $ kingSquare activePly)
+  isChecking            :: PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
+  isChecking pt movegen = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen game (location $ kingSquare activePly)
 
   isQueenChecking :: Bool
   isQueenChecking = isChecking Queen potentialQueenMoves
@@ -68,11 +68,11 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves nextState Nothing (location $ kingSquare activePly)
+  isPawnChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== Pawn) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialPawnMoves game Nothing (location $ kingSquare activePly)
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves nextState (CastleRights False False False False) (location $ kingSquare activePly)
+  isKingChecking = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== King) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ potentialKingMoves game (CastleRights False False False False) (location $ kingSquare activePly)
 
   kingSquare     :: Player -> Square
   kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
