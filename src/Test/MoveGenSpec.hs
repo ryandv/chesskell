@@ -123,8 +123,8 @@ main = hspec $
 
     describe "potentialRookMoves" $ do
 
-      --it "never produces moves off the board" $
-      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialRookMoves emptyTest c
+      it "never produces moves off the board" $
+        property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialRookMoves (placePiece emptyTest (Piece Rook White) c) c
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialRookMoves onlyRookTest (Coordinate 'd' 5) `shouldBe`
@@ -170,8 +170,9 @@ main = hspec $
 
 
     describe "potentialBishopMoves" $ do
-      --it "never produces moves off the board" $
-      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialBishopMoves emptyTest c
+
+      it "never produces moves off the board" $
+        property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialBishopMoves (placePiece emptyTest (Piece Bishop White) c) c
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialBishopMoves onlyBishopTest (Coordinate 'e' 5) `shouldBe`
@@ -216,8 +217,8 @@ main = hspec $
 
     describe "potentialKnightMoves" $ do
 
-      --it "never produces moves off the board" $
-      --  property $ forAll coords $ \c -> all (isOnBoard . snd) $ potentialKnightMoves c
+      it "never produces moves off the board" $
+        property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialKnightMoves (placePiece emptyTest (Piece Knight White) c) c
 
       it "produces the correct set of moves without being blocked by pieces" $
         potentialKnightMoves onlyKnightTest (Coordinate 'd' 4) `shouldBe`
@@ -248,7 +249,12 @@ main = hspec $
           ]
 
     describe "potentialQueenMoves" $
+
       context "movement" $ do
+
+        it "never produces moves off the board" $
+          property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialQueenMoves (placePiece emptyTest (Piece Queen White) c) c
+
         it "produces the correct set of moves without being blocked by pieces" $
           potentialQueenMoves onlyQueenTest (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 4), moveType = Standard }
@@ -338,7 +344,12 @@ main = hspec $
 
 
     describe "potentialKingMoves" $
+
       context "movement" $ do
+
+        it "never produces moves off the board" $
+          property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialKingMoves (placePiece emptyTest (Piece King White) c) c
+
         it "allows the king to move to any square in its Moore neighbourhood" $
           potentialKingMoves onlyKingTest { castlingRights = (CastleRights False False False False) } (Coordinate 'd' 4) `shouldBe`
             [ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'c' 4), moveType = Standard }
