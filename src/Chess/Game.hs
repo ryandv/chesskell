@@ -149,6 +149,12 @@ isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChec
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
 
+isStalemate          :: RegularGame -> Player -> Bool
+isStalemate game ply = (not $ isChecked game) && (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
+
+  pieceIsOwnedByPly :: Move -> Bool
+  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
+
 isChecked      :: RegularGame -> Bool
 isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 

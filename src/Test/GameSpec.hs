@@ -237,6 +237,20 @@ main = hspec $ do
                              , (Piece Queen Black, Coordinate 'h' 1)
                              , (Piece Rook Black, Coordinate 'h' 2)]) White `shouldBe` False
 
+  describe "isStalemate" $ do
+    it "accepts a game and a player, returning true if that player has been stalemated" $
+      isStalemate (setupGame [ (Piece King White, Coordinate 'f' 7)
+                             , (Piece Queen White, Coordinate 'g' 6)
+                             , (Piece King Black, Coordinate 'h' 8)
+                             ]) { activeColor = Black } Black `shouldBe` True
+
+    it "accepts a game and a player, returning false if that player still has a legal move" $
+      isStalemate (setupGame [ (Piece King White, Coordinate 'f' 7)
+                             , (Piece Queen White, Coordinate 'g' 6)
+                             , (Piece King Black, Coordinate 'h' 1)
+                             ]) { activeColor = Black } Black `shouldBe` False
+
+
   describe "makeMove" $ do
     context "legal moves" $ do
       it "accepts standard moves and updates the game's positional state" $
