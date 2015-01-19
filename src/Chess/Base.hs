@@ -1,25 +1,26 @@
 module Chess.Base
-  ( CastleRights(..),
-    Coordinate(..),
-    File,
-    isOnBoard,
-    Move(..),
-    MoveType(..),
-    Piece(..),
-    PieceType(..),
-    Player(..),
-    Rank,
-    RegularBoardRepresentation,
-    RegularGame(..),
-    Square(..),
+  ( CastleRights(..)
+  , Coordinate(..)
+  , File
+  , isOnBoard
+  , Move(..)
+  , MoveType(..)
+  , Piece(..)
+  , PieceType(..)
+  , Player(..)
+  , Rank
+  , RegularBoardRepresentation
+  , RegularGame(..)
+  , Square(..)
 
-    coordinateEuclideanDistance,
-    offsetBy,
-    opponent,
-    scaleBy,
-    squareAt,
-    unoccupied,
-    unoccupiedByAlly
+  , clampRank
+  , coordinateEuclideanDistance
+  , offsetBy
+  , opponent
+  , scaleBy
+  , squareAt
+  , unoccupied
+  , unoccupiedByAlly
   ) where
 
 import Control.Applicative
@@ -142,3 +143,6 @@ coordinateEuclideanDistance                                       :: Coordinate 
 coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
   x' = fromEnum cx' - fromEnum 'a'
   x  = fromEnum cx - fromEnum 'a'
+
+clampRank :: Rank -> Rank
+clampRank = min 8 . max 1
