@@ -41,11 +41,16 @@ makeCastle move@Move { moveFrom = from
                                         | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = makeBlackQueensideCastle where
 
   makeWhiteKingsideCastle :: State RegularGame Bool
-  makeWhiteKingsideCastle = doCastle disableWhiteCastles
-    Move { moveFrom = Coordinate 'h' 1
-         , moveTo   = Coordinate 'f' 1
-         , moveType = Castle
-         }
+  makeWhiteKingsideCastle = do
+    game <- get
+    if all (not . isAttacked game) [Coordinate 'f' 1, Coordinate 'g' 1]
+      then doCastle disableWhiteCastles
+        Move { moveFrom = Coordinate 'h' 1
+             , moveTo   = Coordinate 'f' 1
+             , moveType = Castle
+             }
+      else return False
+
 
   makeWhiteQueensideCastle :: State RegularGame Bool
   makeWhiteQueensideCastle = doCastle disableWhiteCastles
@@ -159,15 +164,18 @@ isStalemate game ply = (not $ isChecked game) && (null $ filter (\x -> pieceIsOw
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
 
-isChecked      :: RegularGame -> Bool
-isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
+isAttacked :: RegularGame -> Coordinate -> Bool
+isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
   nextState = (placement game)
 
   activePly = (activeColor game)
 
   isChecking            :: PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
-  isChecking pt movegen = not $ null $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x))) $ movegen game (location $ kingSquare activePly)
+  isChecking pt movegen = not
+                        $ null
+                        $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x)))
+                        $ movegen (game { placement = addPiece nextState (Just (Piece pt activePly)) sq }) sq
 
   isQueenChecking :: Bool
   isQueenChecking = isChecking Queen potentialQueenMoves
@@ -189,5 +197,8 @@ isChecked game = isQueenChecking || isRookChecking || isBishopChecking || isKnig
   isKingChecking :: Bool
   isKingChecking = isChecking King potentialKingMoves
 
-  kingSquare     :: Player -> Square
-  kingSquare ply = head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] nextState
+isChecked      :: RegularGame -> Bool
+isChecked game = isAttacked game (kingSquare (activeColor game)) where
+
+  kingSquare     :: Player -> Coordinate
+  kingSquare ply = location $ head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] (placement game)

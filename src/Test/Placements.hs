@@ -189,6 +189,12 @@ castleIntoCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
                                  , (Piece Rook White, Coordinate 'h' 1)
                                  , (Piece King White, Coordinate 'e' 1)])
 
+castleThroughCheckTest :: RegularGame
+castleThroughCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                    , (Piece Rook Black, Coordinate 'f' 8)
+                                    , (Piece Rook White, Coordinate 'h' 1)
+                                    , (Piece King White, Coordinate 'e' 1)])
+
 
 emptyTest :: RegularGame
 emptyTest = RegularGame

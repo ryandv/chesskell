@@ -168,6 +168,22 @@ main = hspec $
           , Move { moveFrom = (Coordinate 'd' 5), moveTo = (Coordinate 'd' 3), moveType = Capture }
           ]
 
+      -- RLUD
+      it "does not allow a rook to capture pieces of its own color" $
+        potentialRookMoves (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                      , (Piece Rook White, Coordinate 'h' 1)
+                                      ]) (Coordinate 'h' 1) `shouldBe`
+          [ Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'g' 1, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 2, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'f' 1, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 3, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 4, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 5, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 6, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 7, moveType = Standard }
+          , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 8, moveType = Standard }
+          ]
+
 
     describe "potentialBishopMoves" $ do
 
