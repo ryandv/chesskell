@@ -64,18 +64,26 @@ makeCastle move@Move { moveFrom = from
       else return False
 
   makeBlackKingsideCastle :: State RegularGame Bool
-  makeBlackKingsideCastle = doCastle disableBlackCastles
-    Move { moveFrom = Coordinate 'h' 8
-         , moveTo   = Coordinate 'f' 8
-         , moveType = Castle
-         }
+  makeBlackKingsideCastle = do
+    game <- get
+    if all (not . isAttacked game) [Coordinate 'f' 8, Coordinate 'g' 8]
+      then doCastle disableBlackCastles
+        Move { moveFrom = Coordinate 'h' 8
+             , moveTo   = Coordinate 'f' 8
+             , moveType = Castle
+             }
+      else return False
 
   makeBlackQueensideCastle :: State RegularGame Bool
-  makeBlackQueensideCastle = doCastle disableBlackCastles
-    Move { moveFrom = Coordinate 'a' 8
-         , moveTo   = Coordinate 'd' 8
-         , moveType = Castle
-         }
+  makeBlackQueensideCastle = do
+    game <- get
+    if all (not . isAttacked game) [Coordinate 'd' 8, Coordinate 'c' 8]
+      then doCastle disableBlackCastles
+        Move { moveFrom = Coordinate 'a' 8
+             , moveTo   = Coordinate 'd' 8
+             , moveType = Castle
+             }
+      else return False
 
   disableWhiteCastles :: CastleRights -> CastleRights
   disableWhiteCastles (CastleRights _ boo _ booo) = CastleRights False boo False booo
