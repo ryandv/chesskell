@@ -175,6 +175,14 @@ discoveredCheckTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
                                 , (Piece Queen White, Coordinate 'e' 2)
                                 ]
 
+doubleCheckTest :: RegularGame
+doubleCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                             , (Piece Bishop Black, Coordinate 'h' 7)
+                             , (Piece Knight White, Coordinate 'g' 7)
+                             , (Piece Rook White, Coordinate 'e' 4)
+                             , (Piece King White, Coordinate 'e' 1)
+                             ]) { activeColor = Black }
+
 
 emptyTest :: RegularGame
 emptyTest = RegularGame

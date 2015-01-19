@@ -447,3 +447,11 @@ main = hspec $ do
         it "returns false if a piece pinned to the king is moved" $
           evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 5, moveType = Standard })
             discoveredCheckTest `shouldBe` False
+
+        it "requires the king to move under double check" $
+          execState (makeMove Nothing $ Move { moveFrom = Coordinate 'h' 7, moveTo = Coordinate 'e' 4, moveType = Capture })
+            doubleCheckTest `shouldBe` doubleCheckTest
+
+        it "returns false if the king does not move under double check" $
+          evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'h' 7, moveTo = Coordinate 'e' 4, moveType = Capture })
+            doubleCheckTest `shouldBe` False
