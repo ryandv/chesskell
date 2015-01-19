@@ -168,6 +168,13 @@ blackEnPassantTest = (setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
                                 , (Piece Pawn White, Coordinate 'e' 4)
                                 ]) { enPassantSquare = Just $ Coordinate 'e' 3 }
 
+discoveredCheckTest :: RegularGame
+discoveredCheckTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                , (Piece Pawn Black, Coordinate 'e' 5)
+                                , (Piece King White, Coordinate 'e' 1)
+                                , (Piece Queen White, Coordinate 'e' 2)
+                                ]
+
 
 emptyTest :: RegularGame
 emptyTest = RegularGame

@@ -439,3 +439,11 @@ main = hspec $ do
                        , (Piece Pawn White, Coordinate 'a' 2)
                        , (Piece Queen Black, Coordinate 'h' 1)
                        , (Piece King Black, Coordinate 'e' 8)]) `shouldBe` False
+
+        it "does not allow a piece pinned to the king to be moved" $
+          execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 5, moveType = Standard })
+            discoveredCheckTest `shouldBe` discoveredCheckTest
+
+        it "returns false if a piece pinned to the king is moved" $
+          evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 5, moveType = Standard })
+            discoveredCheckTest `shouldBe` False
