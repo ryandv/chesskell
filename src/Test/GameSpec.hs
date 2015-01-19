@@ -466,8 +466,16 @@ main = hspec $ do
 
         it "does not allow the white king to kingside castle through check" $
           execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle })
-            castleThroughCheckTest `shouldBe` castleThroughCheckTest
+            whiteKingsideCastleThroughCheckTest `shouldBe` whiteKingsideCastleThroughCheckTest
 
         it "returns false if the white king kingside castles through check" $
           evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle })
-            castleThroughCheckTest `shouldBe` False
+            whiteKingsideCastleThroughCheckTest `shouldBe` False
+
+        it "does not allow the white king to queenside castle through check" $
+          execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle })
+            whiteQueensideCastleThroughCheckTest `shouldBe` whiteQueensideCastleThroughCheckTest
+
+        it "returns false if the white king queenside castles through check" $
+          evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle })
+            whiteQueensideCastleThroughCheckTest `shouldBe` False
