@@ -62,7 +62,8 @@ blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate
 blackDoubleJump b c                  = advance b c (-2)
 
 advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
-advance b (Coordinate f r) offset | (unoccupied b $ Coordinate f $ clampRank (r+offset)) = [Move { moveFrom = (Coordinate f r), moveTo = (Coordinate f $ clampRank (r+offset)), moveType = Standard }]
+advance b (Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
+                                  | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r), moveTo = (Coordinate f (r+offset)), moveType = Standard }]
                                   | otherwise                                = []
 
 whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
@@ -75,11 +76,12 @@ blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
                                         | f == 'h' = blackNWCapture b c
                                         | otherwise = blackNWCapture b c ++ blackNECapture b c
 
-capture                                   :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
-capture b (Coordinate f r) tf dr enemy | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
+capture                                :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
+capture b (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
+                                       | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
                                        | otherwise = [] where
-  target = pieceOn $ squareAt b (Coordinate tf $ clampRank (r+dr))
-  targetCoord = Coordinate tf $ clampRank (r+dr)
+  target = pieceOn $ squareAt b (Coordinate tf (r+dr))
+  targetCoord = Coordinate tf (r+dr)
 
 whiteNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteNWCapture b c@(Coordinate f _) = capture b c (pred f) 1 Black

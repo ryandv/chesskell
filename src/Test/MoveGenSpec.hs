@@ -518,6 +518,9 @@ main = hspec $
 
       context "movement" $ do
 
+        it "never produces moves off the board" $
+          property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialPawnMoves (placePiece emptyTest (Piece Pawn White) c) c
+
         it "allows double-jumping from the second rank for White" $
           potentialPawnMoves startingPos { enPassantSquare = Nothing } (Coordinate 'e' 2) `shouldBe`
             [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 4), moveType = Standard }

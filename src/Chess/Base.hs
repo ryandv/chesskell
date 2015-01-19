@@ -13,7 +13,6 @@ module Chess.Base
   , RegularGame(..)
   , Square(..)
 
-  , clampRank
   , coordinateEuclideanDistance
   , offsetBy
   , opponent
@@ -143,6 +142,3 @@ coordinateEuclideanDistance                                       :: Coordinate 
 coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
   x' = fromEnum cx' - fromEnum 'a'
   x  = fromEnum cx - fromEnum 'a'
-
-clampRank :: Rank -> Rank
-clampRank = min 8 . max 1
