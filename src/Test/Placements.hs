@@ -183,6 +183,12 @@ doubleCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
                              , (Piece King White, Coordinate 'e' 1)
                              ]) { activeColor = Black }
 
+castleIntoCheckTest :: RegularGame
+castleIntoCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece Rook Black, Coordinate 'g' 8)
+                                 , (Piece Rook White, Coordinate 'h' 1)
+                                 , (Piece King White, Coordinate 'e' 1)])
+
 
 emptyTest :: RegularGame
 emptyTest = RegularGame

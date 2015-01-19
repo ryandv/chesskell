@@ -455,3 +455,11 @@ main = hspec $ do
         it "returns false if the king does not move under double check" $
           evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'h' 7, moveTo = Coordinate 'e' 4, moveType = Capture })
             doubleCheckTest `shouldBe` False
+
+        it "does not allow the king to castle into check" $
+          execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle })
+            castleIntoCheckTest `shouldBe` castleIntoCheckTest
+
+        it "returns false if the king castles into check" $
+          evalState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle })
+            castleIntoCheckTest `shouldBe` False

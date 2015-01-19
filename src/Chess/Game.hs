@@ -82,14 +82,18 @@ makeCastle move@Move { moveFrom = from
     let originalPiece = pieceOn $ squareAt position from
     let rook = pieceOn $ squareAt position rookfrom
 
-    put $ game { activeColor = opponent (activeColor game)
-               , castlingRights = fupdaterights (castlingRights game)
-               }
+  --if moveIsPseudoLegal && moveIsByRightPlayer && (not $ isChecked game { placement = positionAfterMove position move})
+    if not $ isChecked game { placement = positionAfterMove (positionAfterMove position move) rookMove }
+      then do
+        put $ game { activeColor = opponent (activeColor game)
+                   , castlingRights = fupdaterights (castlingRights game)
+                   }
 
-    doMovePiece originalPiece move
-    doMovePiece rook rookMove
+        doMovePiece originalPiece move
+        doMovePiece rook rookMove
 
-    return True
+        return True
+    else return False
 
 makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
 makePromotion p@(Just Piece { pieceType  = _, pieceOwner = _ }) move@Move { moveFrom = _, moveTo = _ } = do
