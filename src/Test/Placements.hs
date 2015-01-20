@@ -213,6 +213,24 @@ blackQueensideCastleThroughCheckTest = (setupGame [ (Piece King Black, Coordinat
                                                   , (Piece Rook White, Coordinate 'd' 1)
                                                   , (Piece King White, Coordinate 'e' 1)])
 
+whitePromotionTest :: RegularGame
+whitePromotionTest = setupGame [ (Piece Pawn White, Coordinate 'e' 7)
+                               , (Piece King White, Coordinate 'a' 1)
+                               , (Piece King Black, Coordinate 'h' 1)
+                               ]
+
+blackPromotionTest :: RegularGame
+blackPromotionTest = (setupGame [ (Piece Pawn Black, Coordinate 'e' 2)
+                                , (Piece King White, Coordinate 'a' 8)
+                                , (Piece King Black, Coordinate 'h' 8)
+                                ]) { activeColor = Black }
+
+promotionPinTest :: RegularGame
+promotionPinTest = setupGame [ (Piece King White, Coordinate 'h' 7)
+                              , (Piece Pawn White, Coordinate 'e' 7)
+                              , (Piece King Black, Coordinate 'a' 1)
+                              , (Piece Rook Black, Coordinate 'a' 7)]
+
 
 emptyTest :: RegularGame
 emptyTest = RegularGame

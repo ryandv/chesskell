@@ -300,11 +300,17 @@ main = hspec $ do
 
       it "allows white to promote pawns" $
         execState (makeMove (Just (Piece Queen White)) $ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Promotion })
-          (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]) `shouldBe` (setupGame [ (Piece Queen White, Coordinate 'e' 8) ]) { activeColor = Black }
+          whitePromotionTest `shouldBe` 
+            (setupGame [ (Piece Queen White, Coordinate 'e' 8)
+                       , (Piece King White, Coordinate 'a' 1)
+                       , (Piece King Black, Coordinate 'h' 1)]) { activeColor = Black }
 
       it "allows black to promote pawns" $
         execState (makeMove (Just (Piece Queen Black)) $ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Promotion })
-          (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]) { activeColor = Black } `shouldBe` (setupGame [ (Piece Queen Black, Coordinate 'e' 1) ]) { activeColor = White }
+          blackPromotionTest `shouldBe`
+            (setupGame [ (Piece Queen Black, Coordinate 'e' 1)
+                       , (Piece King White, Coordinate 'a' 8)
+                       , (Piece King Black, Coordinate 'h' 8)]) { activeColor = White }
 
       it "allows white to en passant" $
         execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = EnPassant })
@@ -339,6 +345,10 @@ main = hspec $ do
       it "does not modify the game state for en passant moves when none are allowed" $
         execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant })
           whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } `shouldBe` whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing }
+
+      it "does not allow pawn promotion if the pawn is pinned to its king" $
+        execState (makeMove (Just (Piece Queen White)) $ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion })
+          promotionPinTest `shouldBe` promotionPinTest
 
       context "checks" $ do
 

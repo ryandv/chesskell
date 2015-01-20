@@ -97,10 +97,14 @@ makeCastle move@Move { moveFrom = from
 makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
 makePromotion p@(Just Piece { pieceType  = _, pieceOwner = _ }) move@Move { moveFrom = _, moveTo = _ } = do
   game <- get
-  put $ game { activeColor = opponent (activeColor game) }
+  --if moveIsPseudoLegal && moveIsByRightPlayer && 
+  if (not $ isChecked game { placement = positionAfterMove (placement game) move})
+    then do
+      put $ game { activeColor = opponent (activeColor game) }
 
-  doMovePiece p move
-  return True
+      doMovePiece p move
+      return True
+    else return False
 
 makeEnPassant   :: Move -> State RegularGame Bool
 makeEnPassant m@Move { moveTo = Coordinate f r
