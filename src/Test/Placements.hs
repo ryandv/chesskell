@@ -161,11 +161,15 @@ blackKingBothCastlesTest = setupGame [ (Piece King Black, Coordinate 'e' 8)
 whiteEnPassantTest :: RegularGame
 whiteEnPassantTest = (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                                 , (Piece Pawn White, Coordinate 'e' 5)
+                                , (Piece King White, Coordinate 'a' 1)
+                                , (Piece King Black, Coordinate 'h' 1)
                                 ]) { enPassantSquare = Just $ Coordinate 'd' 6 }
 
 blackEnPassantTest :: RegularGame
 blackEnPassantTest = (setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
                                 , (Piece Pawn White, Coordinate 'e' 4)
+                                , (Piece King White, Coordinate 'a' 1)
+                                , (Piece King Black, Coordinate 'h' 1)
                                 ]) { enPassantSquare = Just $ Coordinate 'e' 3 }
 
 discoveredCheckTest :: RegularGame
@@ -230,6 +234,13 @@ promotionPinTest = setupGame [ (Piece King White, Coordinate 'h' 7)
                               , (Piece Pawn White, Coordinate 'e' 7)
                               , (Piece King Black, Coordinate 'a' 1)
                               , (Piece Rook Black, Coordinate 'a' 7)]
+
+enPassantPinTest :: RegularGame
+enPassantPinTest = (setupGame [ (Piece King White, Coordinate 'e' 1)
+                              , (Piece Pawn White, Coordinate 'e' 5)
+                              , (Piece Pawn Black, Coordinate 'd' 5)
+                              , (Piece King Black, Coordinate 'e' 8)
+                              , (Piece Rook Black, Coordinate 'e' 7)]) { enPassantSquare = Just $ Coordinate 'd' 6 }
 
 
 emptyTest :: RegularGame

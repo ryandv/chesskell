@@ -110,7 +110,7 @@ makeEnPassant   :: Move -> State RegularGame Bool
 makeEnPassant m@Move { moveTo = Coordinate f r
                      , moveFrom = from } = do
   game <- get
-  if (m `elem` pseudoLegalMoves game)
+  if (m `elem` pseudoLegalMoves game) && (not $ isChecked game { placement = positionAfterMove (placement game) m })
     then do let position = placement game
             let originalPiece = pieceOn $ squareAt position from
             let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1

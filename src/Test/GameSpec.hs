@@ -314,11 +314,17 @@ main = hspec $ do
 
       it "allows white to en passant" $
         execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'e' 5), moveTo = (Coordinate 'd' 6), moveType = EnPassant })
-          whiteEnPassantTest { activeColor = White } `shouldBe` (setupGame [ (Piece Pawn White, Coordinate 'd' 6) ]) { activeColor = Black }
+          whiteEnPassantTest { activeColor = White } `shouldBe`
+            (setupGame [ (Piece Pawn White, Coordinate 'd' 6)
+                       , (Piece King White, Coordinate 'a' 1)
+                       , (Piece King Black, Coordinate 'h' 1)]) { activeColor = Black }
 
       it "allows black to en passant" $
         execState (makeMove Nothing $ Move { moveFrom = (Coordinate 'd' 4), moveTo = (Coordinate 'e' 3), moveType = EnPassant })
-          blackEnPassantTest { activeColor = Black } `shouldBe` (setupGame [ (Piece Pawn Black, Coordinate 'e' 3) ]) { activeColor = White }
+          blackEnPassantTest { activeColor = Black } `shouldBe`
+            (setupGame [ (Piece Pawn Black, Coordinate 'e' 3)
+                       , (Piece King White, Coordinate 'a' 1)
+                       , (Piece King Black, Coordinate 'h' 1)]) { activeColor = White }
 
     context "illegal moves" $ do
 
@@ -349,6 +355,10 @@ main = hspec $ do
       it "does not allow pawn promotion if the pawn is pinned to its king" $
         execState (makeMove (Just (Piece Queen White)) $ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion })
           promotionPinTest `shouldBe` promotionPinTest
+
+      it "does not allow en passant if the capturing pawn is pinned to its king" $
+        execState (makeMove Nothing $ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant })
+          enPassantPinTest `shouldBe` enPassantPinTest
 
       context "checks" $ do
 
