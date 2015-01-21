@@ -555,9 +555,9 @@ main = hspec $
 
         it "disallows White double-jumping from elsewhere" $
           potentialPawnMoves
-            (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]) { enPassantSquare = Nothing }
-            (Coordinate 'e' 7) `shouldBe`
-              [ Move { moveFrom = (Coordinate 'e' 7), moveTo = (Coordinate 'e' 8), moveType = Standard, movePromoteTo = Nothing } ]
+            (setupGame [ (Piece Pawn White, Coordinate 'e' 6) ]) { enPassantSquare = Nothing }
+            (Coordinate 'e' 6) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'e' 6), moveTo = (Coordinate 'e' 7), moveType = Standard, movePromoteTo = Nothing } ]
 
         it "allows double-jumping from the second rank for Black" $
           potentialPawnMoves startingPos { enPassantSquare = Nothing } (Coordinate 'e' 7) `shouldBe`
@@ -600,6 +600,15 @@ main = hspec $
                        , (Piece Pawn White, Coordinate 'd' 4)
                        ]) { enPassantSquare = Nothing }
             (Coordinate 'd' 5) `shouldBe` []
+
+      context "promotion" $ do
+        it "produces four separate promotion moves when a White pawn moves to the eighth rank" $
+          potentialPawnMoves (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]) (Coordinate 'e' 7) `shouldBe`
+            [ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Rook White }
+            , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Knight White }
+            , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Bishop White }
+            , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Queen White }
+            ]
 
       context "capturing" $ do
 

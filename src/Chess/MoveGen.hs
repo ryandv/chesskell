@@ -64,9 +64,14 @@ whiteDoubleJump b c                  = advance b c 2
 blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackDoubleJump b c                  = advance b c (-2)
 
-advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
-advance b (Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
-                                  | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r)
+advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
+advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
+                                    | (r+offset) == 8 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                      [ Just $ Piece Rook White
+                                      , Just $ Piece Knight White
+                                      , Just $ Piece Bishop White
+                                      , Just $ Piece Queen White ]
+                                    | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r)
                                                                                      , moveTo = (Coordinate f (r+offset))
                                                                                      , moveType = Standard
                                                                                      , movePromoteTo = Nothing}]
