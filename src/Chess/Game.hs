@@ -9,13 +9,11 @@ import Chess.MoveGen
 import Data.Maybe
 
 
-makeMove                                             :: Move -> State RegularGame Bool
-makeMove move@Move { moveType = movetype
-                   , movePromoteTo = promoteTo } | movetype == Standard  = makeStandardMove move
-                                                 | movetype == Capture   = makeStandardMove move
-                                                 | movetype == Castle    = makeCastle move
-                                                 | movetype == Promotion = makePromotion promoteTo move
-                                                 | movetype == EnPassant = makeEnPassant move
+makeMove                                   :: Move -> State RegularGame Bool
+makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
+                                           | movetype == Promotion = makePromotion move
+                                           | movetype == EnPassant = makeEnPassant move
+                                           | otherwise             = makeStandardMove move
 
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from } = do
@@ -99,8 +97,8 @@ makeCastle move@Move { moveFrom = from
         return True
     else return False
 
-makePromotion :: Maybe Piece -> Move -> State RegularGame Bool
-makePromotion p@(Just Piece { pieceType  = _, pieceOwner = _ }) move@Move { moveFrom = _, moveTo = _ } = do
+makePromotion :: Move -> State RegularGame Bool
+makePromotion move@Move { movePromoteTo = p } = do
   game <- get
   --if moveIsPseudoLegal && moveIsByRightPlayer && 
   if (not $ isChecked game { placement = positionAfterMove (placement game) move})
