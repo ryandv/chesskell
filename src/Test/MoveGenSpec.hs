@@ -567,9 +567,9 @@ main = hspec $
 
         it "disallows Black double-jumping from elsewhere" $
           potentialPawnMoves
-            (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]) { enPassantSquare = Nothing }
-            (Coordinate 'e' 2) `shouldBe`
-              [ Move { moveFrom = (Coordinate 'e' 2), moveTo = (Coordinate 'e' 1), moveType = Standard, movePromoteTo = Nothing } ]
+            (setupGame [ (Piece Pawn Black, Coordinate 'e' 3) ]) { enPassantSquare = Nothing }
+            (Coordinate 'e' 3) `shouldBe`
+              [ Move { moveFrom = (Coordinate 'e' 3), moveTo = (Coordinate 'e' 2), moveType = Standard, movePromoteTo = Nothing } ]
 
         it "does not allow White to advance onto an occupied square" $
           potentialPawnMoves
@@ -608,6 +608,14 @@ main = hspec $
             , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Knight White }
             , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Bishop White }
             , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Queen White }
+            ]
+
+        it "produces four separate promotion moves when a Black pawn moves to the first rank" $
+          potentialPawnMoves (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]) (Coordinate 'e' 2) `shouldBe`
+            [ Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Rook Black }
+            , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Knight Black }
+            , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Bishop Black }
+            , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Queen Black }
             ]
 
       context "capturing" $ do

@@ -71,6 +71,11 @@ advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
                                       , Just $ Piece Knight White
                                       , Just $ Piece Bishop White
                                       , Just $ Piece Queen White ]
+                                    | (r+offset) == 1 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                      [ Just $ Piece Rook Black
+                                      , Just $ Piece Knight Black
+                                      , Just $ Piece Bishop Black
+                                      , Just $ Piece Queen Black ]
                                     | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r)
                                                                                      , moveTo = (Coordinate f (r+offset))
                                                                                      , moveType = Standard
