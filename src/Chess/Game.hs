@@ -9,12 +9,13 @@ import Chess.MoveGen
 import Data.Maybe
 
 
-makeMove                                             :: Maybe Piece -> Move -> State RegularGame Bool
-makeMove promoteTo move@Move { moveType = movetype } | movetype == Standard  = makeStandardMove move
-                                                     | movetype == Capture   = makeStandardMove move
-                                                     | movetype == Castle    = makeCastle move
-                                                     | movetype == Promotion = makePromotion promoteTo move
-                                                     | movetype == EnPassant = makeEnPassant move
+makeMove                                             :: Move -> State RegularGame Bool
+makeMove move@Move { moveType = movetype
+                   , movePromoteTo = promoteTo } | movetype == Standard  = makeStandardMove move
+                                                 | movetype == Capture   = makeStandardMove move
+                                                 | movetype == Castle    = makeCastle move
+                                                 | movetype == Promotion = makePromotion promoteTo move
+                                                 | movetype == EnPassant = makeEnPassant move
 
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from } = do
@@ -45,6 +46,7 @@ makeCastle move@Move { moveFrom = from
     Move { moveFrom = Coordinate 'h' 1
          , moveTo   = Coordinate 'f' 1
          , moveType = Castle
+         , movePromoteTo = Nothing
          }
 
   makeWhiteQueensideCastle :: State RegularGame Bool
@@ -52,6 +54,7 @@ makeCastle move@Move { moveFrom = from
     Move { moveFrom = Coordinate 'a' 1
          , moveTo   = Coordinate 'd' 1
          , moveType = Castle
+         , movePromoteTo = Nothing
          }
 
   makeBlackKingsideCastle :: State RegularGame Bool
@@ -59,6 +62,7 @@ makeCastle move@Move { moveFrom = from
     Move { moveFrom = Coordinate 'h' 8
          , moveTo   = Coordinate 'f' 8
          , moveType = Castle
+         , movePromoteTo = Nothing
          }
 
   makeBlackQueensideCastle :: State RegularGame Bool
@@ -66,6 +70,7 @@ makeCastle move@Move { moveFrom = from
     Move { moveFrom = Coordinate 'a' 8
          , moveTo   = Coordinate 'd' 8
          , moveType = Castle
+         , movePromoteTo = Nothing
          }
 
   disableWhiteCastles :: CastleRights -> CastleRights

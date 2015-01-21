@@ -38,9 +38,10 @@ data Piece = Piece
   } deriving(Eq, Read)
 
 data Move = Move
-  { moveFrom     :: Coordinate
-  , moveTo       :: Coordinate
-  , moveType     :: MoveType
+  { moveFrom         :: Coordinate
+  , moveTo           :: Coordinate
+  , moveType         :: MoveType
+  , movePromoteTo    :: Maybe Piece
   } deriving(Eq, Read, Show)
 
 data MoveType = Standard | Capture | Castle | Promotion | EnPassant deriving(Eq, Read, Show)

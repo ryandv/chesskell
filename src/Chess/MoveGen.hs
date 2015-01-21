@@ -38,7 +38,10 @@ potentialPawnMoves RegularGame { placement = b, enPassantSquare = (Just enPassan
 
   enPassantMoves                      :: Coordinate -> [Move]
   enPassantMoves (Coordinate r' f')   | (toEnum $ fromEnum r' + fromEnum rankOffset) == r
-                                        && (f == (f' - 1) || f == (f' + 1))         = [Move { moveFrom = (Coordinate r f), moveTo = (Coordinate r' f'), moveType = EnPassant }]
+                                        && (f == (f' - 1) || f == (f' + 1))         = [Move { moveFrom = (Coordinate r f)
+                                                                                            , moveTo = (Coordinate r' f')
+                                                                                            , moveType = EnPassant
+                                                                                            , movePromoteTo = Nothing }]
                                       | otherwise                                   = []
 
 standardPawnMoves                      :: RegularBoardRepresentation -> Coordinate -> [Move]
@@ -63,7 +66,10 @@ blackDoubleJump b c                  = advance b c (-2)
 
 advance                           :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
 advance b (Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
-                                  | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r), moveTo = (Coordinate f (r+offset)), moveType = Standard }]
+                                  | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r)
+                                                                                     , moveTo = (Coordinate f (r+offset))
+                                                                                     , moveType = Standard
+                                                                                     , movePromoteTo = Nothing}]
                                   | otherwise                                = []
 
 whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
@@ -78,7 +84,10 @@ blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
 
 capture                                :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
 capture b (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
-                                       | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r), moveTo = targetCoord, moveType = Capture }]
+                                       | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r)
+                                                                                                           , moveTo = targetCoord
+                                                                                                           , moveType = Capture
+                                                                                                           , movePromoteTo = Nothing }]
                                        | otherwise = [] where
   target = pieceOn $ squareAt b (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
@@ -96,7 +105,10 @@ blackNECapture                      :: RegularBoardRepresentation -> Coordinate 
 blackNECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White
 
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c, moveTo = x, moveType = determineMoveType b c x }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
+potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
+                                                 , moveTo = x
+                                                 , moveType = determineMoveType b c x
+                                                 , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
 
 determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
 determineMoveType b from to       | isNothing . pieceOn $ squareAt b to                          = Standard
@@ -114,7 +126,10 @@ potentialQueenMoves     :: RegularGame -> Coordinate -> [Move]
 potentialQueenMoves g c = potentialRookMoves g c ++ potentialBishopMoves g c
 
 potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c, moveTo = x, moveType = determineMoveType b c x }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
+potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
+                                                    , moveTo = x
+                                                    , moveType = determineMoveType b c x 
+                                                    , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
 potentialKnightMoves     :: RegularGame -> Coordinate -> [Move]
 potentialKnightMoves RegularGame { placement = b } c = potentialOffsetMoves b c possibleJumps where
@@ -148,7 +163,10 @@ potentialKingMoves RegularGame { placement = b
   blackCastles (CastleRights _ oo _ ooo) = castles oo ooo Black
 
   ooCastle              :: Rank -> Player -> [Move]
-  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank, moveTo = Coordinate 'g' homeRank, moveType = Castle }]
+  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank
+                                                                                            , moveTo = Coordinate 'g' homeRank
+                                                                                            , moveType = Castle
+                                                                                            , movePromoteTo = Nothing }]
                         | otherwise = []
 
   ooRookIsPresent              :: Rank -> Player -> Bool
@@ -158,7 +176,10 @@ potentialKingMoves RegularGame { placement = b
   ooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
 
   oooCastle              :: Rank -> Player -> [Move]
-  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank, moveTo = Coordinate 'c' homeRank, moveType = Castle }]
+  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank
+                                                                                               , moveTo = Coordinate 'c' homeRank
+                                                                                               , moveType = Castle
+                                                                                               , movePromoteTo = Nothing }]
                          | otherwise = []
 
   oooRookIsPresent              :: Rank -> Player -> Bool
