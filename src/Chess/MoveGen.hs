@@ -59,10 +59,12 @@ blackAdvance                       :: RegularBoardRepresentation -> Coordinate -
 blackAdvance b c                   = advance b c (-1)
 
 whiteDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
-whiteDoubleJump b c                  = advance b c 2
+whiteDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r+1)) = []
+                                     | otherwise = advance b c 2
 
 blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
-blackDoubleJump b c                  = advance b c (-2)
+blackDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r-1)) = []
+                                     | otherwise = advance b c (-2)
 
 advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []

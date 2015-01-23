@@ -594,6 +594,21 @@ main = hspec $
             (Coordinate 'd' 7) `shouldBe`
               [ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing } ]
 
+        it "does not allow White to double-jump when the square in front is blocked" $
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 3)
+                       , (Piece Pawn White, Coordinate 'd' 2)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 2) `shouldBe` []
+
+        it "does not allow Black to double-jump when the square in front is blocked" $
+          potentialPawnMoves
+            (setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
+                       , (Piece Pawn White, Coordinate 'd' 6)
+                       ]) { enPassantSquare = Nothing }
+            (Coordinate 'd' 7) `shouldBe` []
+
+
         it "does not allow Black to advance onto an occupied square" $
           potentialPawnMoves
             (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
