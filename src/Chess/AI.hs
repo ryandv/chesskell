@@ -7,11 +7,16 @@ import Chess.MoveGen
 
 import Control.Applicative
 
-import Data.List
 import Data.Maybe
-import Data.Ord
 
-import Debug.Trace
+data GameTree = GameTree
+  { gameTreeValue    :: RegularGame
+  , gameTreeChildren :: [GameTree]
+  , gameTreeLastMove :: Move
+  } | GameTreeRoot
+  { gameTreeValue    :: RegularGame
+  , gameTreeChildren :: [GameTree]
+  }
 
 evalGame      :: RegularGame -> Int
 evalGame game | isCheckmate game (activeColor game) = checkmateValue
@@ -19,8 +24,8 @@ evalGame game | isCheckmate game (activeColor game) = checkmateValue
               | otherwise = evalPosition $ placement game
               where
 
-  checkmateValue | (activeColor game) == White = minBound
-                 | otherwise                   = maxBound
+  checkmateValue | activeColor game == White = minBound
+                 | otherwise                 = maxBound
 
 evalPosition          :: RegularBoardRepresentation -> Int
 evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
@@ -38,28 +43,13 @@ evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
                                                     | otherwise      = -900
   pieceValue _ = 0
 
-miniMax :: Int -> Player -> Maybe Move -> RegularGame -> (Move, Int)
-miniMax depth player lastMove game | depth == 0 = (fromJust lastMove, evalGame game)
-                                   | player == White = case scoredMoves of
-                                       [] -> (fromJust lastMove, evalGame game)
-                                       xs -> maximumBy (comparing snd) $ xs
-                                   | otherwise = case scoredMoves of
-                                       [] -> (fromJust lastMove, evalGame game)
-                                       xs -> minimumBy (comparing snd) $ xs
-                                   where
-  scoredMoves = mapMaybe (\move -> (move, ) <$> snd <$> miniMax (depth - 1) (opponent player) (Just move) <$> makeMoveFrom game move) $ pseudoLegalMoves game
---
---alphaBeta :: Int -> Player -> Maybe Move -> Int -> Int -> RegularGame -> (Move, Int)
---alphaBeta depth player alpha beta lastMove game | depth == 0 = (fromJust lastMove, evalGame game)
---                                                | player == White = case scoredMoves of
---                                                    [] -> (fromJust lastMove, evalGame game)
---                                                    xs -> maximumBy (comparing snd) $ xs
---                                                | otherwise = case scoredMoves of
---                                                    [] -> (fromJust lastMove, evalGame game)
---                                                    xs -> minimumBy (comparing snd) $ xs
---                                                where
---  scoredMoves = mapMaybe (\move -> (move, ) <$> snd <$> miniMax (depth - 1) (opponent player) (Just move) <$> makeMoveFrom game move) $ pseudoLegalMoves game
+gamesFrom      :: RegularGame -> [(Move, RegularGame)]
+gamesFrom game = mapMaybe (\move -> (move,) <$> makeMoveFrom game move) (pseudoLegalMoves game)
 
-decideOnMove :: Player -> RegularGame -> Move
-decideOnMove player game | player == White = fst $ miniMax 2 player Nothing game
-                         | otherwise = fst $ miniMax 2 player Nothing game
+gameTreeFrom          :: (RegularGame -> [RegularGame]) -> Move -> RegularGame -> GameTree
+gameTreeFrom f _ game = GameTreeRoot game (map (uncurry (gameTreeFrom f)) (gamesFrom game))
+
+
+--decideOnMove :: Player -> RegularGame -> Move
+--decideOnMove player game | player == White = fst $ miniMax 2 player Nothing game
+--                         | otherwise = fst $ miniMax 2 player Nothing game
