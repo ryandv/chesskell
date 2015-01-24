@@ -8,6 +8,10 @@ import Chess.MoveGen
 
 import Data.Maybe
 
+makeMoveFrom :: RegularGame -> Move -> Maybe RegularGame
+makeMoveFrom game move = case (evalState (makeMove move) game) of
+                           True -> Just $ execState (makeMove move) game
+                           False -> Nothing
 
 makeMove                                   :: Move -> State RegularGame Bool
 makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
