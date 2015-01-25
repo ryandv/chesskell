@@ -23,6 +23,33 @@ instance Functor GameTree where
 instance Ord RegularGame where
   compare = comparing evalGame
 
+whitePawnPieceSquareTable :: [[Int]]
+whitePawnPieceSquareTable =
+  [ [  0,   0,   0,   0,   0,   0,    0,   0]
+  , [ 50,  50,  50,  50,  50,  50,   50,  50]
+  , [ 10,  10,  20,  30,  30,  20,   10,  10]
+  , [  5,   5,  10,  27,  27,  10,    5,   5]
+  , [  0,   0,   0,  25,  25,   0,    0,   0]
+  , [  5,  -5, -10,   0,   0,  -10,  -5,   5]
+  , [  5,  10,  10, -25, -25,   10,  10,   5]
+  , [  0,   0,   0,   0,   0,   0,    0,   0]
+  ]
+
+blackPawnPieceSquareTable :: [[Int]]
+blackPawnPieceSquareTable =
+  [ [   0,  0,    0,   0,   0,   0,   0,   0]
+  , [  -5, -10, -10,  25,  25, -10, -10,  -5]
+  , [  -5,   5,  10,   0,   0,  10,   5,  -5]
+  , [   0,   0,   0, -25, -25,   0,   0,   0]
+  , [  -5,  -5, -10, -27, -27, -10,  -5,  -5]
+  , [ -10, -10, -20, -30, -30, -20, -10, -10]
+  , [ -50, -50, -50, -50, -50, -50, -50, -50]
+  , [   0,   0,   0,   0,   0,   0,   0,   0]
+  ]
+
+pieceSquareTableLookup :: [[Int]] -> Coordinate -> Int
+pieceSquareTableLookup t (Coordinate f r) = (t !! (r-1)) !! (fromEnum f - fromEnum 'a')
+
 evalGame      :: RegularGame -> Int
 evalGame game | isCheckmate game (activeColor game) = checkmateValue
               | isStalemate game (activeColor game) = 0
@@ -36,17 +63,23 @@ evalPosition          :: RegularBoardRepresentation -> Int
 evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
 
   pieceValue :: Square -> Int
-  pieceValue (Square (Just (Piece Pawn owner)) _)   | owner == White = 100
-                                                    | otherwise      = -100
-  pieceValue (Square (Just (Piece Knight owner)) _) | owner == White = 300
-                                                    | otherwise      = -300
-  pieceValue (Square (Just (Piece Bishop owner)) _) | owner == White = 300
-                                                    | otherwise      = -300
-  pieceValue (Square (Just (Piece Rook owner)) _)   | owner == White = 500
-                                                    | otherwise      = -500
-  pieceValue (Square (Just (Piece Queen owner)) _)  | owner == White = 900
-                                                    | otherwise      = -900
+  pieceValue (Square (Just (Piece Pawn owner)) loc)   | owner == White = 100 + whitePawnLocValue loc
+                                                      | otherwise      = -100 + blackPawnLocValue loc
+  pieceValue (Square (Just (Piece Knight owner)) _)   | owner == White = 300
+                                                      | otherwise      = -300
+  pieceValue (Square (Just (Piece Bishop owner)) _)   | owner == White = 300
+                                                      | otherwise      = -300
+  pieceValue (Square (Just (Piece Rook owner)) _)     | owner == White = 500
+                                                      | otherwise      = -500
+  pieceValue (Square (Just (Piece Queen owner)) _)    | owner == White = 900
+                                                      | otherwise      = -900
   pieceValue _ = 0
+
+  whitePawnLocValue                    :: Coordinate -> Int
+  whitePawnLocValue = pieceSquareTableLookup whitePawnPieceSquareTable
+
+  blackPawnLocValue                    :: Coordinate -> Int
+  blackPawnLocValue = pieceSquareTableLookup blackPawnPieceSquareTable
 
 -- Inspired by John Hughes' "Why Functional Programming Matters"
 
@@ -102,6 +135,6 @@ prune :: Int -> GameTree a -> GameTree a
 prune 0 (GameTree v _ moves) = GameTree v [] moves
 prune n (GameTree v children moves) = GameTree v (map (prune $ n - 1) children) moves
 
-decideOnMove :: Player -> RegularGame -> [Move]
-decideOnMove player game | player == White = gameTreeLastMove $ maximize $ prune 5 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
-                         | otherwise = gameTreeLastMove $ minimize $ prune 5 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+decideOnMove :: Player -> RegularGame -> Move
+decideOnMove player game | player == White = head $ reverse $ gameTreeLastMove $ maximize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+                         | otherwise = head $ reverse $ gameTreeLastMove $ minimize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
