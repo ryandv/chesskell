@@ -14,11 +14,14 @@ import Data.Ord
 data GameTree a = GameTree
   { gameTreeValue    :: a
   , gameTreeChildren :: [GameTree a]
-  , gameTreeLastMove :: Maybe Move
+  , gameTreeLastMove :: [Move]
   } deriving(Show)
 
 instance Functor GameTree where
-  fmap f (GameTree v children move) = GameTree (f v) ((fmap . fmap) f children) move
+  fmap f (GameTree v children moves) = GameTree (f v) ((fmap . fmap) f children) moves
+
+instance Ord RegularGame where
+  compare = comparing evalGame
 
 evalGame      :: RegularGame -> Int
 evalGame game | isCheckmate game (activeColor game) = checkmateValue
@@ -47,23 +50,58 @@ evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
 
 -- Inspired by John Hughes' "Why Functional Programming Matters"
 
-gamesFrom      :: RegularGame -> [(Maybe Move, RegularGame)]
-gamesFrom game = mapMaybe (\move -> (Just move,) <$> makeMoveFrom game move) (pseudoLegalMoves game)
+gamesFrom      :: RegularGame -> [(Move, RegularGame)]
+gamesFrom game = mapMaybe (\move -> (move,) <$> makeMoveFrom game move) (pseudoLegalMoves game)
 
-gameTreeFrom          :: (RegularGame -> [RegularGame]) -> Maybe Move -> RegularGame -> GameTree RegularGame
-gameTreeFrom f move game = GameTree game (map (uncurry (gameTreeFrom f)) (gamesFrom game)) move
+gameTreeFrom          :: (RegularGame -> [RegularGame]) -> [Move] -> RegularGame -> GameTree RegularGame
+gameTreeFrom f moves game = GameTree game (map (\edge -> (gameTreeFrom f ((fst edge):moves) (snd edge))) (gamesFrom game)) moves
+
+maxByGameValue :: [GameTree RegularGame] -> GameTree RegularGame
+maxByGameValue = maximumBy (comparing gameTreeValue)
+
+minByGameValue :: [GameTree RegularGame] -> GameTree RegularGame
+minByGameValue = minimumBy (comparing gameTreeValue)
 
 minimize :: GameTree RegularGame -> GameTree RegularGame
-minimize (GameTree v [] move) = GameTree v [] move
-minimize (GameTree v children move) = minimumBy (comparing (evalGame . gameTreeValue)) (map maximize children)
+minimize = minByGameValue . minimize'
+
+minimize' :: GameTree RegularGame -> [GameTree RegularGame]
+minimize' (GameTree v [] moves) = [GameTree v [] moves]
+minimize' (GameTree _ children _) = mapMax (map maximize' children) where
+
+  mapMax [] = []
+  mapMax (x:xs) = (maxByGameValue x):(omit (maxByGameValue x) xs)
+
+  omit pot [] = []
+  omit pot (x:xs) | mingeq x pot = omit pot xs
+                  | otherwise    = (maxByGameValue x):(omit (maxByGameValue x) xs)
+
+  mingeq [] pot = False
+  mingeq (x:xs) pot | (evalGame $ gameTreeValue x) >= (evalGame $ gameTreeValue pot) = True
+                    | otherwise = mingeq xs pot
 
 maximize :: GameTree RegularGame -> GameTree RegularGame
-maximize (GameTree v [] move) = GameTree v [] move
-maximize (GameTree v children move) = maximumBy (comparing (evalGame . gameTreeValue)) (map minimize children)
+maximize = maxByGameValue . maximize'
 
-prune 0 (GameTree v _ move) = GameTree v [] move
-prune n (GameTree v children move) = GameTree v (map (prune $ n - 1) children) move
+maximize' :: GameTree RegularGame -> [GameTree RegularGame]
+maximize' (GameTree v [] moves) = [GameTree v [] moves]
+maximize' (GameTree _ children _) = mapMin (map minimize' children) where
 
-decideOnMove :: Player -> RegularGame -> Move
-decideOnMove player game | player == White = fromJust $ gameTreeLastMove $ maximize $ prune 3 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) Nothing game
-                         | otherwise = fromJust $ gameTreeLastMove $ minimize $ prune 3 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) Nothing game
+  mapMin [] = []
+  mapMin (x:xs) = (minByGameValue x):(omit (minByGameValue x) xs)
+
+  omit pot [] = []
+  omit pot (x:xs) | minleq x pot = omit pot xs
+                  | otherwise    = (minByGameValue x):(omit (minByGameValue x) xs)
+
+  minleq [] pot = False
+  minleq (x:xs) pot | (evalGame $ gameTreeValue x) <= (evalGame $ gameTreeValue pot) = True
+                    | otherwise = minleq xs pot
+
+prune :: Int -> GameTree a -> GameTree a
+prune 0 (GameTree v _ moves) = GameTree v [] moves
+prune n (GameTree v children moves) = GameTree v (map (prune $ n - 1) children) moves
+
+decideOnMove :: Player -> RegularGame -> [Move]
+decideOnMove player game | player == White = gameTreeLastMove $ maximize $ prune 5 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+                         | otherwise = gameTreeLastMove $ minimize $ prune 5 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
