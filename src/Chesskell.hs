@@ -28,10 +28,11 @@ data JsonMove = JsonMove
   { fenString :: String
   , jsonMoveFrom  :: String
   , jsonMoveTo    :: String
+  , jsonMoveSuccessful :: Bool
   }
 
 instance ToJSON JsonMove where
-  toJSON (JsonMove fen from to) = object ["fen" .= fen, "from" .= from, "to" .= to]
+  toJSON (JsonMove fen from to successful) = object ["fen" .= fen, "from" .= from, "to" .= to, "successful" .= successful]
 
 coordPairToMove :: RegularGame -> Coordinate -> Coordinate -> [Move]
 coordPairToMove game from to = filter (\move -> (moveFrom move == from) && (moveTo move == to)) $ pseudoLegalMoves game
@@ -55,7 +56,7 @@ requestMoveHandler = do
 
   let positionAfterAIMove = fromJust $ makeMoveFrom position chosenAIMove
 
-  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo))
+  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo True))
 
 makeMoveHandler :: ServerPart Response
 makeMoveHandler = do
@@ -73,19 +74,25 @@ makeMoveHandler = do
   let fromCoord = either (const $ Coordinate 'a' 1) fromJust $ runParser enPassantSquareParser (FenParserState $ Coordinate 'a' 8) "" (jsonMoveFrom ++ " ")
   let toCoord = either (const $ Coordinate 'a' 1) fromJust $ runParser enPassantSquareParser (FenParserState $ Coordinate 'a' 8) "" (jsonMoveTo ++ " ")
 
-  let plyMove = head (coordPairToMove position fromCoord toCoord)
-  let plyMoveFrom = case (moveFrom plyMove) of
-                           Coordinate f r -> return f ++ show r
-  let plyMoveTo = case (moveTo plyMove) of
-                           Coordinate f r -> return f ++ show r
+  let plyMove = case (coordPairToMove position fromCoord toCoord) of
+                  [] -> Nothing
+                  xs -> Just $ head (coordPairToMove position fromCoord toCoord)
 
-  let positionAfterPlayerMove = makeMoveFrom position plyMove
+  case plyMove of
+    Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) "" "" False))
+    Just m -> do
+      let plyMoveFrom = case (moveFrom m) of
+                               Coordinate f r -> return f ++ show r
+      let plyMoveTo = case (moveTo m) of
+                               Coordinate f r -> return f ++ show r
 
-  let response = case positionAfterPlayerMove of
-                   Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo))
-                   Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) "" ""))
+      let positionAfterPlayerMove = makeMoveFrom position m
 
-  response
+      let response = case positionAfterPlayerMove of
+                       Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo False))
+                       Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) "" "" True))
+
+      response
 
 
 main :: IO ()
