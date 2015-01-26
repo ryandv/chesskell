@@ -136,5 +136,5 @@ prune 0 (GameTree v _ moves) = GameTree v [] moves
 prune n (GameTree v children moves) = GameTree v (map (prune $ n - 1) children) moves
 
 decideOnMove :: Player -> RegularGame -> Move
-decideOnMove player game | player == White = head $ reverse $ gameTreeLastMove $ maximize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
-                         | otherwise = head $ reverse $ gameTreeLastMove $ minimize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+decideOnMove player game | player == White = head $ reverse $ gameTreeLastMove $ maximize $ prune 3 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+                         | otherwise = head $ reverse $ gameTreeLastMove $ minimize $ prune 3 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game

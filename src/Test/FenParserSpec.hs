@@ -228,3 +228,6 @@ main = hspec $
 
     it "parses this position from the Opera Game" $
       (successful $ parseFen "" "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10") `shouldBe` operaGame
+
+    it "is the inverse of toFEN" $
+      toFEN operaGame `shouldBe` "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10"
