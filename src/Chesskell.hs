@@ -36,6 +36,27 @@ instance ToJSON JsonMove where
 coordPairToMove :: RegularGame -> Coordinate -> Coordinate -> [Move]
 coordPairToMove game from to = filter (\move -> (moveFrom move == from) && (moveTo move == to)) $ pseudoLegalMoves game
 
+requestMoveHandler :: ServerPart Response
+requestMoveHandler = do
+
+  req <- askRq
+
+  decodeBody (defaultBodyPolicy "/tmp/" 4096 4096 4096)
+
+  fenString <- look "fen"
+
+  let position = either (const undefined) id $ parseFen "" fenString
+
+  let chosenAIMove = decideOnMove (activeColor position) position
+  let chosenAIMoveFrom = case (moveFrom chosenAIMove) of
+                           Coordinate f r -> return f ++ show r
+  let chosenAIMoveTo = case (moveTo chosenAIMove) of
+                           Coordinate f r -> return f ++ show r
+
+  let positionAfterAIMove = fromJust $ makeMoveFrom position chosenAIMove
+
+  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo))
+
 makeMoveHandler :: ServerPart Response
 makeMoveHandler = do
 
@@ -52,19 +73,19 @@ makeMoveHandler = do
   let fromCoord = either (const $ Coordinate 'a' 1) fromJust $ runParser enPassantSquareParser (FenParserState $ Coordinate 'a' 8) "" (jsonMoveFrom ++ " ")
   let toCoord = either (const $ Coordinate 'a' 1) fromJust $ runParser enPassantSquareParser (FenParserState $ Coordinate 'a' 8) "" (jsonMoveTo ++ " ")
 
-  let move = head (coordPairToMove position fromCoord toCoord)
-
-  let positionAfterPlayerMove = fromJust $ makeMoveFrom position move
-
-  let chosenAIMove = decideOnMove (activeColor positionAfterPlayerMove) positionAfterPlayerMove
-  let chosenAIMoveFrom = case (moveFrom chosenAIMove) of
+  let plyMove = head (coordPairToMove position fromCoord toCoord)
+  let plyMoveFrom = case (moveFrom plyMove) of
                            Coordinate f r -> return f ++ show r
-  let chosenAIMoveTo = case (moveTo chosenAIMove) of
+  let plyMoveTo = case (moveTo plyMove) of
                            Coordinate f r -> return f ++ show r
 
-  let positionAfterAIMove = fromJust $ makeMoveFrom positionAfterPlayerMove chosenAIMove
+  let positionAfterPlayerMove = makeMoveFrom position plyMove
 
-  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo))
+  let response = case positionAfterPlayerMove of
+                   Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo))
+                   Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) "" ""))
+
+  response
 
 
 main :: IO ()
@@ -73,6 +94,8 @@ main = do
   simpleHTTP (nullConf { port = read envPort })
     $ msum [ dir "makemove" $ do method POST
                                  makeMoveHandler
+           , dir "requestmove" $ do method POST
+                                    requestMoveHandler
            , dir "js" $ serveDirectory DisableBrowsing ["index.html"] "cheskell/js"
            , dir "css" $ serveDirectory DisableBrowsing ["index.html"] "cheskell/css"
            , serveFile (guessContentTypeM mimeTypes) "cheskell/index.html"
