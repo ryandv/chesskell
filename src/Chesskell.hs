@@ -14,6 +14,7 @@ import Chess.MoveGen
 import Control.Monad
 import Control.Monad.Trans
 
+import qualified Data.ByteString.Char8 as C
 import Data.Maybe
 
 import Happstack.Server
@@ -63,7 +64,7 @@ makeMoveHandler = do
 
   let positionAfterAIMove = fromJust $ makeMoveFrom positionAfterPlayerMove chosenAIMove
 
-  ok (toResponse $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo))
+  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo))
 
 
 main :: IO ()
@@ -72,7 +73,7 @@ main = do
   simpleHTTP (nullConf { port = read envPort })
     $ msum [ dir "makemove" $ do method POST
                                  makeMoveHandler
-           , dir "js" $ serveDirectory DisableBrowsing ["index.html"] "/tmp/cheskell/js"
-           , dir "css" $ serveDirectory DisableBrowsing ["index.html"] "/tmp/cheskell/css"
-           , serveFile (guessContentTypeM mimeTypes) "/tmp/cheskell/index.html"
+           , dir "js" $ serveDirectory DisableBrowsing ["index.html"] "cheskell/js"
+           , dir "css" $ serveDirectory DisableBrowsing ["index.html"] "cheskell/css"
+           , serveFile (guessContentTypeM mimeTypes) "cheskell/index.html"
            ]

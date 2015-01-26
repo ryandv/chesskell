@@ -22,6 +22,7 @@ executable chesskell
   other-extensions:    TupleSections
   build-depends:       aeson >= 0.6,
                        base >=4.7,
+                       bytestring >= 0.10,
                        happstack-server >= 7.3.9,
                        hspec >=2.1.0,
                        mtl >=2.1,
