@@ -90,7 +90,7 @@ makeMoveHandler = do
 
       let response = case positionAfterPlayerMove of
                        Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo False))
-                       Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) "" "" True))
+                       Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) plyMoveFrom plyMoveTo True))
 
       response
 
