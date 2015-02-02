@@ -24,18 +24,33 @@ import System.Environment
 
 import Text.Parsec
 
+data GameStatus = InProgress | WhiteWin | BlackWin | Stalemate
+
 data JsonMove = JsonMove
   { fenString :: String
   , jsonMoveFrom  :: String
   , jsonMoveTo    :: String
   , jsonMoveSuccessful :: Bool
+  , jsonMoveGameStatus :: GameStatus
   }
 
 instance ToJSON JsonMove where
-  toJSON (JsonMove fen from to successful) = object ["fen" .= fen, "from" .= from, "to" .= to, "successful" .= successful]
+  toJSON (JsonMove fen from to successful status) = object ["fen" .= fen, "from" .= from, "to" .= to, "successful" .= successful, "status" .= status]
+
+instance ToJSON GameStatus where
+  toJSON InProgress = "*"
+  toJSON WhiteWin = "1-0"
+  toJSON BlackWin = "0-1"
+  toJSON Stalemate = "1/2-1/2"
 
 coordPairToMove :: RegularGame -> Coordinate -> Coordinate -> [Move]
 coordPairToMove game from to = filter (\move -> (moveFrom move == from) && (moveTo move == to)) $ pseudoLegalMoves game
+
+determineGameStatus :: RegularGame -> GameStatus
+determineGameStatus g = case ((isCheckmate g (activeColor g)), (isStalemate g (activeColor g))) of
+                          (True, _) -> if (activeColor g == White) then BlackWin else WhiteWin
+                          (False, True) -> Stalemate
+                          (False, False) -> InProgress
 
 requestMoveHandler :: ServerPart Response
 requestMoveHandler = do
@@ -56,7 +71,9 @@ requestMoveHandler = do
 
   let positionAfterAIMove = fromJust $ makeMoveFrom position chosenAIMove
 
-  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo True))
+  let gameStatus = determineGameStatus positionAfterAIMove
+
+  ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN positionAfterAIMove) chosenAIMoveFrom chosenAIMoveTo True gameStatus))
 
 makeMoveHandler :: ServerPart Response
 makeMoveHandler = do
@@ -79,7 +96,7 @@ makeMoveHandler = do
                   xs -> Just $ head (coordPairToMove position fromCoord toCoord)
 
   case plyMove of
-    Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) "" "" False))
+    Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) "" "" False (determineGameStatus position)))
     Just m -> do
       let plyMoveFrom = case (moveFrom m) of
                                Coordinate f r -> return f ++ show r
@@ -89,8 +106,8 @@ makeMoveHandler = do
       let positionAfterPlayerMove = makeMoveFrom position m
 
       let response = case positionAfterPlayerMove of
-                       Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo False))
-                       Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) plyMoveFrom plyMoveTo True))
+                       Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo False (determineGameStatus position)))
+                       Just newPosition -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN newPosition) plyMoveFrom plyMoveTo True (determineGameStatus newPosition)))
 
       response
 
