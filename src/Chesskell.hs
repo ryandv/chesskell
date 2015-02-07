@@ -104,7 +104,6 @@ makeMoveHandler = do
                                Coordinate f r -> return f ++ show r
 
       let positionAfterPlayerMove = makeMoveFrom position m
-      liftIO $ print positionAfterPlayerMove
 
       let response = case positionAfterPlayerMove of
                        Nothing -> ok (toResponseBS (C.pack "application/json") $ encode (JsonMove (toFEN position) plyMoveFrom plyMoveTo False BlackWin))
