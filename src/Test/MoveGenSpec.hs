@@ -633,6 +633,11 @@ main = hspec $
             , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Queen Black }
             ]
 
+        it "does not allow White to capture the Black king when promoting" $
+          potentialPawnMoves (setupGame [ (Piece Pawn White, Coordinate 'e' 7)
+                                        , (Piece King Black, Coordinate 'e' 8)
+                                        ]) (Coordinate 'e' 7) `shouldBe` []
+
       context "capturing" $ do
 
         it "allows White to capture pieces on the neighbouring NW and NE squares" $

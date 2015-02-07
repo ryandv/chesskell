@@ -68,12 +68,12 @@ blackDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r-1)) =
 
 advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
-                                    | (r+offset) == 8 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 8 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
                                       [ Just $ Piece Rook White
                                       , Just $ Piece Knight White
                                       , Just $ Piece Bishop White
                                       , Just $ Piece Queen White ]
-                                    | (r+offset) == 1 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 1 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
                                       [ Just $ Piece Rook Black
                                       , Just $ Piece Knight Black
                                       , Just $ Piece Bishop Black
