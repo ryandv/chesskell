@@ -177,7 +177,7 @@ toFEN RegularGame { placement       = position
   castlingRightsString (CastleRights False False False False) = "- "
 
   enPassantString Nothing = "- "
-  enPassantString (Just (Coordinate f r)) = show f ++ show r ++ " "
+  enPassantString (Just (Coordinate f r)) = return f ++ show r ++ " "
   halfMovesString = show hmc ++ " "
   fullMovesString = show fmn
 
