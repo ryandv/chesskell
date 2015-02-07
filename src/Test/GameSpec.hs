@@ -237,6 +237,12 @@ main = hspec $ do
                              , (Piece Queen Black, Coordinate 'h' 1)
                              , (Piece Rook Black, Coordinate 'h' 2)]) White `shouldBe` False
 
+    it "does not consider stalemated positions as checkmated positions" $
+      isCheckmate (setupGame [ (Piece King White, Coordinate 'f' 7)
+                             , (Piece Queen White, Coordinate 'g' 6)
+                             , (Piece King Black, Coordinate 'h' 8)
+                             ]) { activeColor = Black } Black `shouldBe` False
+
   describe "isStalemate" $ do
     it "accepts a game and a player, returning true if that player has been stalemated" $
       isStalemate (setupGame [ (Piece King White, Coordinate 'f' 7)

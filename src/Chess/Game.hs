@@ -158,7 +158,7 @@ updateSquare c p = do
   put $ game { placement = addPiece position p c }
 
 isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game where
+isCheckmate game ply = (isChecked game) && (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
 
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
