@@ -163,17 +163,17 @@ updateSquare c p = do
   let position = placement game
   put $ game { placement = addPiece position p c }
 
-isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = (isChecked game) && (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
+noLegalMovesRemaining :: RegularGame -> Player -> Bool
+noLegalMovesRemaining game ply = (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
 
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
+
+isCheckmate          :: RegularGame -> Player -> Bool
+isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
 
 isStalemate          :: RegularGame -> Player -> Bool
-isStalemate game ply = (not $ isChecked game) && (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
-
-  pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
+isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
 isAttacked :: RegularGame -> Coordinate -> Bool
 isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
