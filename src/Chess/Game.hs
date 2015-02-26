@@ -19,15 +19,20 @@ makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle 
                                            | movetype == EnPassant = makeEnPassant move
                                            | otherwise             = makeStandardMove move
 
+moveIsLegal :: Move -> RegularGame -> Bool
+moveIsLegal move@Move{ moveFrom = from} game = moveIsPseudoLegal && moveIsByRightPlayer && notCheckedAfterMove where
+
+  moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
+  moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
+  notCheckedAfterMove = (not $ isChecked game { placement = positionAfterMove position move})
+  position = placement game
+
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from } = do
   game <- get
   let position = placement game
 
-  let moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  let moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
-
-  if moveIsPseudoLegal && moveIsByRightPlayer && (not $ isChecked game { placement = positionAfterMove position move})
+  if moveIsLegal move game
     then do let originalPiece = pieceOn $ squareAt position from
 
             put $ game { activeColor = opponent (activeColor game) }
@@ -104,8 +109,8 @@ makeCastle move@Move { moveFrom = from
 makePromotion :: Move -> State RegularGame Bool
 makePromotion move@Move { movePromoteTo = p } = do
   game <- get
-  --if moveIsPseudoLegal && moveIsByRightPlayer && 
-  if (not $ isChecked game { placement = positionAfterMove (placement game) move})
+
+  if moveIsLegal move game
     then do
       put $ game { activeColor = opponent (activeColor game) }
 
@@ -117,7 +122,8 @@ makeEnPassant   :: Move -> State RegularGame Bool
 makeEnPassant m@Move { moveTo = Coordinate f r
                      , moveFrom = from } = do
   game <- get
-  if (m `elem` pseudoLegalMoves game) && (not $ isChecked game { placement = positionAfterMove (placement game) m })
+
+  if moveIsLegal m game
     then do let position = placement game
             let originalPiece = pieceOn $ squareAt position from
             let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
