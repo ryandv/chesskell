@@ -49,24 +49,27 @@ nextRank (FenParserState (Coordinate f r)) = FenParserState $ Coordinate f (r+1)
 squareParser             :: GenParser Char FenParserState [Square]
 squareParser             = do
   piece         <- oneOf "rnbqkpRNBQKP12345678"
-  currentSquare <- fmap currentLocation getState
+  currentCoordinate <- fmap currentLocation getState
   case piece of
-    'r' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Rook Black) currentSquare)
-    'n' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Knight Black) currentSquare)
-    'b' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Bishop Black) currentSquare)
-    'q' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Queen Black) currentSquare)
-    'k' -> modifyState nextFile >> (return . return) (Square (Just $ Piece King Black) currentSquare)
-    'p' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Pawn Black) currentSquare)
-    'R' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Rook White) currentSquare)
-    'N' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Knight White) currentSquare)
-    'B' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Bishop White) currentSquare)
-    'Q' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Queen White) currentSquare)
-    'K' -> modifyState nextFile >> (return . return) (Square (Just $ Piece King White) currentSquare)
-    'P' -> modifyState nextFile >> (return . return) (Square (Just $ Piece Pawn White) currentSquare)
+    'r' -> createSquare currentCoordinate Rook Black
+    'n' -> createSquare currentCoordinate Knight Black
+    'b' -> createSquare currentCoordinate Bishop Black
+    'q' -> createSquare currentCoordinate Queen Black
+    'k' -> createSquare currentCoordinate King Black
+    'p' -> createSquare currentCoordinate Pawn Black
+    'R' -> createSquare currentCoordinate Rook White
+    'N' -> createSquare currentCoordinate Knight White
+    'B' -> createSquare currentCoordinate Bishop White
+    'Q' -> createSquare currentCoordinate Queen White
+    'K' -> createSquare currentCoordinate King White
+    'P' -> createSquare currentCoordinate Pawn White
     n   -> let num = read $ return n in replicateM num $ do
-             currentSquare <- fmap currentLocation getState
+             currentCoordinate <- fmap currentLocation getState
              modifyState nextFile
-             return (Square Nothing currentSquare)
+             return (Square Nothing currentCoordinate)
+  where
+    createSquare          :: Coordinate -> PieceType -> Player -> GenParser Char FenParserState [Square]
+    createSquare c pt ply = modifyState nextFile >> (return . return) (Square (Just $ Piece pt ply) c)
 
 nextFile                                   :: FenParserState -> FenParserState
 nextFile (FenParserState (Coordinate f r)) | f == 'h'    = FenParserState $ Coordinate 'a' (r-1)

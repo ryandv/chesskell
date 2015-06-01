@@ -13,9 +13,8 @@ import Test.QuickCheck
 coords :: Gen Coordinate
 coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
 
-main :: IO ()
-main = hspec $
-
+spec :: Spec
+spec =
   context "potential move generation" $ do
 
     describe "alongRay" $ do

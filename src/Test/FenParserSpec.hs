@@ -1,4 +1,4 @@
-module MoveGenSpec where
+module FenParserSpec where
 
 import Chess.Base
 import Chess.FenParser
@@ -220,8 +220,8 @@ operaGame = RegularGame
   , fullMoveNumber  = 10
   }
 
-main :: IO ()
-main = hspec $
+spec :: Spec
+spec =
   describe "FEN string parsing" $ do
     it "parses the starting position correctly" $
       (successful $ parseFen "" "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") `shouldBe` startingPos

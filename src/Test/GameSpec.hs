@@ -1,4 +1,4 @@
-module BaseSpec where
+module GameSpec where
 
 import Chess.Base
 import Chess.Game
@@ -220,9 +220,8 @@ kingOpening = RegularGame
   , fullMoveNumber  = 1
   }
 
-main :: IO ()
-main = hspec $ do
-
+spec :: Spec
+spec = do
   describe "isCheckmate" $ do
     it "accepts a game and a player, returning true if that player has been checkmated" $
       isCheckmate (setupGame [ (Piece King White, Coordinate 'a' 1)
