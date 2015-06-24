@@ -9,7 +9,7 @@ import Test.Hspec
 import Test.Placements
 
 kingOpening :: RegularGame
-kingOpening = RegularGame
+kingOpening = Game
   { placement =
     [
       [ Square { pieceOn = Just (Piece Rook White)

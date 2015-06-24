@@ -1,4 +1,6 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Chess.AI where
 
 import Chess.Base
@@ -20,7 +22,7 @@ data GameTree a = GameTree
 instance Functor GameTree where
   fmap f (GameTree v children moves) = GameTree (f v) ((fmap . fmap) f children) moves
 
-instance Ord RegularGame where
+instance Ord (Game RegularBoardRepresentation) where
   compare = comparing evalGame
 
 whitePawnPieceSquareTable :: [[Int]]

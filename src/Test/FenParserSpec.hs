@@ -9,7 +9,7 @@ import Test.Placements
 successful (Right x) = x
 
 operaGame :: RegularGame
-operaGame = RegularGame
+operaGame = Game
   { placement =
     [
       [ Square { pieceOn = Just (Piece Rook White)

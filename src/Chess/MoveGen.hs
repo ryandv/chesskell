@@ -17,7 +17,7 @@ import Data.Maybe
 import Control.Applicative
 
 pseudoLegalMoves               :: RegularGame -> [Move]
-pseudoLegalMoves game@RegularGame { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b where
+pseudoLegalMoves game@Game { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b where
 
 pseudoLegalMovesFrom :: RegularGame -> Square -> [Move]
 pseudoLegalMovesFrom _ (Square Nothing _)            = []
@@ -29,8 +29,8 @@ pseudoLegalMovesFrom game (Square (Just (Piece p _)) l) | p == Pawn   = potentia
                                                         | p == King   = potentialKingMoves game l
 
 potentialPawnMoves                                       :: RegularGame -> Coordinate -> [Move]
-potentialPawnMoves RegularGame { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
-potentialPawnMoves RegularGame { placement = b, enPassantSquare = (Just enPassant) } c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
+potentialPawnMoves Game { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
+potentialPawnMoves Game { placement = b, enPassantSquare = (Just enPassant) } c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
   rankOffset :: Int
   rankOffset = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
                  Just White -> 1
@@ -127,11 +127,11 @@ determineMoveType b from to       | isNothing . pieceOn $ squareAt b to         
                                   | (fmap pieceOwner . pieceOn $ squareAt b to) /= (fmap pieceOwner . pieceOn $ squareAt b from) = Capture
 
 potentialBishopMoves     :: RegularGame -> Coordinate -> [Move]
-potentialBishopMoves RegularGame { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c diagonals where
+potentialBishopMoves Game { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c diagonals where
   diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
 
 potentialRookMoves     :: RegularGame -> Coordinate -> [Move]
-potentialRookMoves RegularGame { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c straights where
+potentialRookMoves Game { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c straights where
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
 
 potentialQueenMoves     :: RegularGame -> Coordinate -> [Move]
@@ -144,11 +144,11 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
 potentialKnightMoves     :: RegularGame -> Coordinate -> [Move]
-potentialKnightMoves RegularGame { placement = b } c = potentialOffsetMoves b c possibleJumps where
+potentialKnightMoves Game { placement = b } c = potentialOffsetMoves b c possibleJumps where
   possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
 
 potentialKingMoves                                   :: RegularGame -> Coordinate -> [Move]
-potentialKingMoves RegularGame { placement = b
+potentialKingMoves Game { placement = b
                                , castlingRights = castlerights
                                } c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
                                                     | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights

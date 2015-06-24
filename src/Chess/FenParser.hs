@@ -25,7 +25,7 @@ fenParser              = do
   enPassant <- enPassantSquareParser
   halfMoves <- halfMoveClockParser
   fullMoves <- fullMoveNumberParser
-  return $ RegularGame position toMove castleRights enPassant halfMoves fullMoves
+  return $ Game position toMove castleRights enPassant halfMoves fullMoves
 
 positionParser             :: GenParser Char FenParserState RegularBoardRepresentation
 positionParser             = do

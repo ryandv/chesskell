@@ -1,7 +1,11 @@
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Chess.Base
   ( CastleRights(..)
   , Coordinate(..)
   , File
+  , Game(..)
   , isOnBoard
   , Move(..)
   , MoveType(..)
@@ -75,8 +79,8 @@ data CastleRights = CastleRights Bool Bool Bool Bool deriving(Eq, Show)
 
 type RegularBoardRepresentation   = [[Square]]
 
-data RegularGame = RegularGame
-  { placement       :: RegularBoardRepresentation
+data Game r = Game
+  { placement       :: r
   , activeColor     :: Player
   , castlingRights  :: CastleRights
   , enPassantSquare :: Maybe Coordinate
@@ -84,7 +88,9 @@ data RegularGame = RegularGame
   , fullMoveNumber  :: Int
   } deriving(Eq)
 
-instance Show RegularGame where
+type RegularGame = Game RegularBoardRepresentation
+
+instance Show (Game RegularBoardRepresentation) where
   show g =    "\n"
            ++ "  abcdefgh \n"
            ++ "8 " ++ concatMap (maybe "-" show) eighthRank  ++ " 8\n"
@@ -147,7 +153,7 @@ coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 
   x  = fromEnum cx - fromEnum 'a'
 
 toFEN :: RegularGame -> String
-toFEN RegularGame { placement       = position
+toFEN Game { placement       = position
                   , activeColor     = ac
                   , castlingRights  = cr
                   , enPassantSquare = eps

@@ -244,7 +244,7 @@ enPassantPinTest = (setupGame [ (Piece King White, Coordinate 'e' 1)
 
 
 emptyTest :: RegularGame
-emptyTest = RegularGame
+emptyTest = Game
   { placement =
     [
       [ Square { pieceOn = Nothing
@@ -456,7 +456,7 @@ emptyTest = RegularGame
   }
 
 startingPos :: RegularGame
-startingPos = RegularGame
+startingPos = Game
   { placement =
     [
       [ Square { pieceOn = Just (Piece Rook White)
