@@ -2,7 +2,7 @@ module Chess.MoveGen
   ( alongRay
   , isBlocked
   , pseudoLegalMoves
-  , potentialBishopMoves
+  , module Chess.MoveGen.Bishop
   , potentialKingMoves
   , potentialKnightMoves
   , potentialPawnMoves
@@ -11,6 +11,9 @@ module Chess.MoveGen
   ) where
 
 import Chess.Base
+
+import Chess.MoveGen.Bishop
+import Chess.MoveGen.Common
 
 import Data.Maybe
 
@@ -116,20 +119,6 @@ whiteNECapture b c@(Coordinate f _) = capture b c (succ f) 1 Black
 blackNECapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
 blackNECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White
 
-potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
-                                                 , moveTo = x
-                                                 , moveType = determineMoveType b c x
-                                                 , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
-
-determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b from to       | isNothing . pieceOn $ squareAt b to                          = Standard
-                                  | (fmap pieceOwner . pieceOn $ squareAt b to) /= (fmap pieceOwner . pieceOn $ squareAt b from) = Capture
-
-potentialBishopMoves     :: RegularGame -> Coordinate -> [Move]
-potentialBishopMoves Game { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c diagonals where
-  diagonals = [(-1,1),(1,1),(1,-1),(-1,-1)]
-
 potentialRookMoves     :: RegularGame -> Coordinate -> [Move]
 potentialRookMoves Game { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c straights where
   straights = [(1,0),(-1,0),(0,1),(0,-1)]
@@ -200,34 +189,3 @@ potentialKingMoves Game { placement = b
   oooSquaresAreFree          :: Rank -> Bool
   oooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]
 
-isBlocked                       :: RegularBoardRepresentation -> Move -> Bool
-isBlocked b Move { moveFrom = from
-                 , moveTo = to }  = not $ to `elem` (validMoves $ alongRay (from, to)) where
-
-  validMoves    :: [Coordinate] -> [Coordinate]
-  validMoves cs = validMoves' cs False
-
-  validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
-  validMoves' (c:cs) blocked | blocked == True = []
-                             | otherwise       = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
-                                                   Nothing                -> c:validMoves' cs False
-                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceOn $ squareAt b from))
-                                                                               then []
-                                                                               else c:validMoves' cs True
-
-alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
-alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
-                    $ filter isOnBoard
-                    $ fmap (from `offsetBy`)
-                    $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
-
-rayFromMove                                    :: (Coordinate, Coordinate) -> (Int, Int)
-rayFromMove (Coordinate f r, Coordinate f' r') | fromEnum f' > fromEnum f && r' > r = (1,1)
-                                               | fromEnum f' > fromEnum f && r' < r = (1,-1)
-                                               | fromEnum f' > fromEnum f && r' == r = (1,0)
-                                               | fromEnum f' < fromEnum f && r' > r = (-1,1)
-                                               | fromEnum f' < fromEnum f && r' < r = (-1,-1)
-                                               | fromEnum f' < fromEnum f && r' == r = (-1,0)
-                                               | fromEnum f' == fromEnum f && r' > r = (0,1)
-                                               | fromEnum f' == fromEnum f && r' < r = (0,-1)
-                                               | fromEnum f' == fromEnum f && r' == r = (0,0)

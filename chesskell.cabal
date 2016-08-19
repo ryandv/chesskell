@@ -16,6 +16,8 @@ library
                      , Chess.FenParser
                      , Chess.Game
                      , Chess.MoveGen
+                     , Chess.MoveGen.Bishop
+                     , Chess.MoveGen.Common
 
   build-depends:       base >=4.7
                      , mtl >=2.1
