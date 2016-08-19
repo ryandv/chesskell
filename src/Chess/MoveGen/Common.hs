@@ -4,6 +4,12 @@ import Chess.Base
 
 import Data.Maybe
 
+potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
+potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
+                                                    , moveTo = x
+                                                    , moveType = determineMoveType b c x 
+                                                    , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
+
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
 potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                  , moveTo = x

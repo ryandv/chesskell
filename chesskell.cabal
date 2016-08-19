@@ -17,6 +17,7 @@ library
                      , Chess.Game
                      , Chess.MoveGen
                      , Chess.MoveGen.Bishop
+                     , Chess.MoveGen.King
                      , Chess.MoveGen.Common
 
   build-depends:       base >=4.7
