@@ -1,4 +1,4 @@
-module Test.Placements.MoveGen.Knight where
+module Test.Placements.Knight where
 
 import Chess.Base
 import Chess.Game

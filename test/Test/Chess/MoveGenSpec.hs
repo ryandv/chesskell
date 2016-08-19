@@ -6,12 +6,12 @@ import Chess.MoveGen
 import Control.Monad
 
 import Test.Placements
-import Test.Placements.MoveGen.Bishop
-import Test.Placements.MoveGen.King
-import Test.Placements.MoveGen.Knight
-import Test.Placements.MoveGen.Pawn
-import Test.Placements.MoveGen.Queen
-import Test.Placements.MoveGen.Rook
+import Test.Placements.Bishop
+import Test.Placements.King
+import Test.Placements.Knight
+import Test.Placements.Pawn
+import Test.Placements.Queen
+import Test.Placements.Rook
 
 import Test.Hspec
 import Test.QuickCheck

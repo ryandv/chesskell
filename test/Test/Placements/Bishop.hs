@@ -1,4 +1,4 @@
-module Test.Placements.MoveGen.Bishop where
+module Test.Placements.Bishop where
 
 import Chess.Base
 import Chess.Game
