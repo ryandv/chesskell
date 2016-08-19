@@ -1,4 +1,4 @@
-module GameSpec where
+module Test.Chess.GameSpec where
 
 import Chess.Base
 import Chess.Game

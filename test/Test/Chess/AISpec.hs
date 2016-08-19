@@ -1,4 +1,4 @@
-module AISpec where
+module Test.Chess.AISpec where
 
 import Chess.AI
 import Chess.Base

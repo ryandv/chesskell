@@ -1,4 +1,4 @@
-module MoveGenSpec where
+module Test.Chess.MoveGenSpec where
 
 import Chess.Base
 import Chess.MoveGen

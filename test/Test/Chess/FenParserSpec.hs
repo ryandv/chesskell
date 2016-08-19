@@ -1,4 +1,4 @@
-module FenParserSpec where
+module Test.Chess.FenParserSpec where
 
 import Chess.Base
 import Chess.FenParser
