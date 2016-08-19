@@ -12,20 +12,32 @@ cabal-version:       >=1.10
 executable chesskell
   main-is: Chesskell.hs
   hs-source-dirs: src
+  other-extensions: TupleSections
+
   other-modules:  Chess.AI
                 , Chess.Base
                 , Chess.FenParser
                 , Chess.Game
                 , Chess.MoveGen
-  other-extensions:    TupleSections
-  build-depends:       aeson >= 0.6,
-                       base >=4.7,
-                       bytestring >= 0.10,
-                       happstack-server >= 7.3.9,
-                       hspec >=2.1.0,
-                       mtl >=2.1,
-                       parsec >=3.1 && <3.2,
-                       QuickCheck >=2.6 && <2.9
+
+  build-depends:   aeson >= 0.6
+                 , base >=4.7
+                 , bytestring >= 0.10
+                 , happstack-server >= 7.3.9
+                 , mtl >=2.1
+                 , parsec >=3.1 && <3.2
 
   hs-source-dirs:      src
   default-language:    Haskell2010
+
+Test-Suite test
+  main-is: Test/Spec.hs
+  hs-source-dirs:  src
+                 , src/Test/
+  type: exitcode-stdio-1.0
+
+  build-depends:   base >= 4.7
+                 , hspec >=2.1.0
+                 , mtl >=2.1
+                 , parsec >=3.1 && <3.2
+                 , QuickCheck >=2.6 && <2.9
