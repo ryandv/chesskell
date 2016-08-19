@@ -7,6 +7,8 @@ import Control.Monad.State.Lazy
 
 import Test.Hspec
 import Test.Placements
+import Test.Placements.MoveGen.King
+import Test.Placements.MoveGen.Pawn
 
 kingOpening :: RegularGame
 kingOpening = Game

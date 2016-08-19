@@ -47,7 +47,7 @@ Test-Suite test
                      , Test.Chess.FenParserSpec
                      , Test.Chess.GameSpec
                      , Test.Chess.MoveGenSpec
-                       Test.Placements
+                     , Test.Placements
 
   build-depends:       chesskell,
                        base >= 4.7
