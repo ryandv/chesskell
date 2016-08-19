@@ -1,4 +1,10 @@
 *.swp
 *.hi
 *.o
+
+.cabal-sandbox
+cabal.sandbox.config
+
+dist
+
 .stack-work
