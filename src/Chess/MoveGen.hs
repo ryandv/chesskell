@@ -4,7 +4,7 @@ module Chess.MoveGen
   , pseudoLegalMoves
   , module Chess.MoveGen.Bishop
   , module Chess.MoveGen.King
-  , potentialKnightMoves
+  , module Chess.MoveGen.Knight
   , potentialPawnMoves
   , potentialQueenMoves
   , potentialRookMoves
@@ -14,6 +14,7 @@ import Chess.Base
 
 import Chess.MoveGen.Bishop
 import Chess.MoveGen.King
+import Chess.MoveGen.Knight
 import Chess.MoveGen.Common
 
 import Data.Maybe
@@ -126,8 +127,3 @@ potentialRookMoves Game { placement = b } c = filter (not . (isBlocked b)) $ pot
 
 potentialQueenMoves     :: RegularGame -> Coordinate -> [Move]
 potentialQueenMoves g c = potentialRookMoves g c ++ potentialBishopMoves g c
-
-potentialKnightMoves     :: RegularGame -> Coordinate -> [Move]
-potentialKnightMoves Game { placement = b } c = potentialOffsetMoves b c possibleJumps where
-  possibleJumps = [(-2,-1),(-2,1),(-1,-2),(-1,2),(1,-2),(1,2),(2,-1),(2,1)]
-
