@@ -1,14 +1,14 @@
-module Test.Chess.MoveGen.KingSpec where
+module Test.Chess.MoveGen.KnightSpec where
 
 import Chess.Base
 
 import Chess.MoveGen
-import Chess.MoveGen.King
+import Chess.MoveGen.Knight
 
 import Control.Monad
 
 import Test.Placements
-import Test.Placements.King
+import Test.Placements.Knight
 
 import Test.Hspec
 import Test.QuickCheck
