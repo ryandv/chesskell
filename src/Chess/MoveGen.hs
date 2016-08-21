@@ -2,12 +2,6 @@ module Chess.MoveGen
   ( alongRay
   , isBlocked
   , pseudoLegalMoves
-  , module Chess.MoveGen.Bishop
-  , module Chess.MoveGen.King
-  , module Chess.MoveGen.Knight
-  , module Chess.MoveGen.Pawn
-  , potentialQueenMoves
-  , potentialRookMoves
   ) where
 
 import Chess.Base

@@ -3,16 +3,11 @@ module Test.Chess.MoveGenSpec where
 import Chess.Base
 
 import Chess.MoveGen
-import Chess.MoveGen.Bishop
 
 import Control.Monad
 
 import Test.Placements
 import Test.Placements.Bishop
-import Test.Placements.King
-import Test.Placements.Knight
-import Test.Placements.Pawn
-import Test.Placements.Queen
 import Test.Placements.Rook
 
 import Test.Hspec
@@ -24,7 +19,6 @@ coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
 spec :: Spec
 spec =
   context "potential move generation" $ do
-
     describe "alongRay" $ do
       context "verticals" $ do
         it "returns a list of coordinates along the north vertical ray, including the destination" $
@@ -127,4 +121,3 @@ spec =
 
         it "returns False if the destination square is occupied by an enemy piece" $
           isBlocked (placement bishopCaptureTest) Move { moveFrom = Coordinate 'a' 1, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing } `shouldBe` False
-

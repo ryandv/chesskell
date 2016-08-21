@@ -7,6 +7,12 @@ import Control.Monad.State.Lazy
 
 import Chess.Base
 import Chess.MoveGen
+import Chess.MoveGen.Bishop
+import Chess.MoveGen.King
+import Chess.MoveGen.Knight
+import Chess.MoveGen.Pawn
+import Chess.MoveGen.Queen
+import Chess.MoveGen.Rook
 
 import Data.Maybe
 
