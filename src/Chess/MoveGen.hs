@@ -12,11 +12,13 @@ module Chess.MoveGen
 
 import Chess.Base
 
+import Chess.MoveGen.Common
 import Chess.MoveGen.Bishop
 import Chess.MoveGen.King
 import Chess.MoveGen.Knight
 import Chess.MoveGen.Pawn
-import Chess.MoveGen.Common
+import Chess.MoveGen.Queen
+import Chess.MoveGen.Rook
 
 import Data.Maybe
 
@@ -33,12 +35,3 @@ pseudoLegalMovesFrom game (Square (Just (Piece p _)) l) | p == Pawn   = potentia
                                                         | p == Rook   = potentialRookMoves game l
                                                         | p == Queen  = potentialQueenMoves game l
                                                         | p == King   = potentialKingMoves game l
-
-
-
-potentialRookMoves     :: RegularGame -> Coordinate -> [Move]
-potentialRookMoves Game { placement = b } c = filter (not . (isBlocked b)) $ potentialRayMoves b c straights where
-  straights = [(1,0),(-1,0),(0,1),(0,-1)]
-
-potentialQueenMoves     :: RegularGame -> Coordinate -> [Move]
-potentialQueenMoves g c = potentialRookMoves g c ++ potentialBishopMoves g c
