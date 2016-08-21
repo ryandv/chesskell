@@ -16,6 +16,13 @@ library
                      , Chess.FenParser
                      , Chess.Game
                      , Chess.MoveGen
+                     , Chess.MoveGen.Bishop
+                     , Chess.MoveGen.King
+                     , Chess.MoveGen.Knight
+                     , Chess.MoveGen.Pawn
+                     , Chess.MoveGen.Queen
+                     , Chess.MoveGen.Rook
+                     , Chess.MoveGen.Common
 
   build-depends:       base >=4.7
                      , mtl >=2.1
@@ -47,7 +54,7 @@ Test-Suite test
                      , Test.Chess.FenParserSpec
                      , Test.Chess.GameSpec
                      , Test.Chess.MoveGenSpec
-                       Test.Placements
+                     , Test.Placements
 
   build-depends:       chesskell,
                        base >= 4.7
