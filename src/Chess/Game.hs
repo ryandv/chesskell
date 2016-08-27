@@ -183,6 +183,14 @@ isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
 isStalemate          :: RegularGame -> Player -> Bool
 isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
+-- cut
+
+isChecking            :: RegularGame -> Coordinate -> PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
+isChecking game sq pt movegen = not
+                              $ null
+                              $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt (placement game) $ moveTo x)))
+                              $ movegen (game { placement = addPiece (placement game) (Just (Piece pt (activeColor game))) sq }) sq
+
 isAttacked :: RegularGame -> Coordinate -> Bool
 isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
@@ -190,34 +198,30 @@ isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || is
 
   activePly = (activeColor game)
 
-  isChecking            :: PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
-  isChecking pt movegen = not
-                        $ null
-                        $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x)))
-                        $ movegen (game { placement = addPiece nextState (Just (Piece pt activePly)) sq }) sq
-
   isQueenChecking :: Bool
-  isQueenChecking = isChecking Queen potentialQueenMoves
+  isQueenChecking = isChecking game sq Queen potentialQueenMoves
 
   isRookChecking :: Bool
-  isRookChecking = isChecking Rook potentialRookMoves
+  isRookChecking = isChecking game sq Rook potentialRookMoves
 
   isBishopChecking :: Bool
-  isBishopChecking = isChecking Bishop potentialBishopMoves
+  isBishopChecking = isChecking game sq Bishop potentialBishopMoves
 
   isKnightChecking :: Bool
-  isKnightChecking = isChecking Knight potentialKnightMoves
+  isKnightChecking = isChecking game sq Knight potentialKnightMoves
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = isChecking Pawn potentialPawnMoves
+  isPawnChecking = isChecking game sq Pawn potentialPawnMoves
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = isChecking King potentialKingMoves
+  isKingChecking = isChecking game sq King potentialKingMoves
 
 isChecked      :: RegularGame -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
 
   kingSquare     :: Player -> Coordinate
   kingSquare ply = location $ head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] (placement game)
+
+-- cut
