@@ -188,8 +188,14 @@ isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 isChecking            :: RegularGame -> Coordinate -> PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
 isChecking game sq pt movegen = not
                               $ null
-                              $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt (placement game) $ moveTo x)))
-                              $ movegen (game { placement = addPiece (placement game) (Just (Piece pt (activeColor game))) sq }) sq
+                              $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
+                              $ movegen (game { placement = addPiece (placement game) (Just (Piece pt (activeColor game))) sq }) sq where
+
+  moveIsCapture :: Move -> Bool
+  moveIsCapture = (== Capture) . moveType
+
+  moveMatchesPieceType :: Move -> Bool
+  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceOn . squareAt (placement game) . moveTo
 
 isAttacked :: RegularGame -> Coordinate -> Bool
 isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
