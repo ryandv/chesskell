@@ -5,16 +5,12 @@ import Chess.Base
 import Chess.MoveGen
 import Chess.MoveGen.Queen
 
-import Control.Monad
-
 import Test.Placements
 import Test.Placements.Queen
 
 import Test.Hspec
 import Test.QuickCheck
-
-coords :: Gen Coordinate
-coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
+import Test.Util
 
 spec :: Spec
 spec = describe "potentialQueenMoves" $

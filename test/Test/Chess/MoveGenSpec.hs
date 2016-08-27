@@ -13,9 +13,6 @@ import Test.Placements.Rook
 import Test.Hspec
 import Test.QuickCheck
 
-coords :: Gen Coordinate
-coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
-
 spec :: Spec
 spec =
   context "potential move generation" $ do
