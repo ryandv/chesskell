@@ -13,6 +13,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Chess.AI
                      , Chess.Base
+                     , Chess.Board
                      , Chess.FenParser
                      , Chess.Game
                      , Chess.MoveGen
@@ -23,6 +24,7 @@ library
                      , Chess.MoveGen.Queen
                      , Chess.MoveGen.Rook
                      , Chess.MoveGen.Common
+                     , Chess.Predicates
 
   build-depends:       base >=4.7
                      , mtl >=2.1

@@ -6,6 +6,7 @@ module Chess.AI where
 import Chess.Base
 import Chess.Game
 import Chess.MoveGen
+import Chess.Predicates
 
 import Control.Applicative
 

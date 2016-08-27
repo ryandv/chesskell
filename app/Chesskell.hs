@@ -10,6 +10,7 @@ import Chess.Base
 import Chess.FenParser
 import Chess.Game
 import Chess.MoveGen
+import Chess.Predicates
 
 import Control.Monad
 import Control.Monad.Trans

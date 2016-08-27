@@ -1,6 +1,7 @@
 module Test.Placements where
 
 import Chess.Base
+import Chess.Board
 import Chess.Game
 
 import Control.Monad.State.Lazy
