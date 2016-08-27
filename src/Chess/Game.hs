@@ -183,19 +183,19 @@ isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
 isStalemate          :: RegularGame -> Player -> Bool
 isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
--- cut
-
+-- Given an opponent's PieceType, this function works by placing down a ghost piece of the same PieceType but the active player's color,
+-- and checks to see if the ghost piece can capture any of the opponent's pieces.
 isChecking            :: RegularGame -> Coordinate -> PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
-isChecking game sq pt movegen = not
-                              $ null
-                              $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
-                              $ movegen (game { placement = addPiece (placement game) (Just (Piece pt (activeColor game))) sq }) sq where
+isChecking gameWithGhostPiece sq pt movegen = not
+                                            $ null
+                                            $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
+                                            $ movegen gameWithGhostPiece sq where
 
   moveIsCapture :: Move -> Bool
   moveIsCapture = (== Capture) . moveType
 
   moveMatchesPieceType :: Move -> Bool
-  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceOn . squareAt (placement game) . moveTo
+  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceOn . squareAt (placement gameWithGhostPiece) . moveTo
 
 isAttacked :: RegularGame -> Coordinate -> Bool
 isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
@@ -204,30 +204,31 @@ isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || is
 
   activePly = (activeColor game)
 
+  placeGhostPiece :: PieceType -> RegularGame
+  placeGhostPiece pt = game { placement = addPiece nextState (Just (Piece pt activePly)) sq }
+
   isQueenChecking :: Bool
-  isQueenChecking = isChecking game sq Queen potentialQueenMoves
+  isQueenChecking = isChecking (placeGhostPiece Queen) sq Queen potentialQueenMoves
 
   isRookChecking :: Bool
-  isRookChecking = isChecking game sq Rook potentialRookMoves
+  isRookChecking = isChecking (placeGhostPiece Rook) sq Rook potentialRookMoves
 
   isBishopChecking :: Bool
-  isBishopChecking = isChecking game sq Bishop potentialBishopMoves
+  isBishopChecking = isChecking (placeGhostPiece Bishop) sq Bishop potentialBishopMoves
 
   isKnightChecking :: Bool
-  isKnightChecking = isChecking game sq Knight potentialKnightMoves
+  isKnightChecking = isChecking (placeGhostPiece Knight) sq Knight potentialKnightMoves
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = isChecking game sq Pawn potentialPawnMoves
+  isPawnChecking = isChecking (placeGhostPiece Pawn) sq Pawn potentialPawnMoves
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = isChecking game sq King potentialKingMoves
+  isKingChecking = isChecking (placeGhostPiece King) sq King potentialKingMoves
 
 isChecked      :: RegularGame -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
 
   kingSquare     :: Player -> Coordinate
   kingSquare ply = location $ head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] (placement game)
-
--- cut
