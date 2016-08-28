@@ -1,5 +1,8 @@
 {-# LANGUAGE DoAndIfThenElse #-} 
-module Chess.Game where
+module Chess.Game
+  ( makeMove
+  , makeMoveFrom
+  ) where
 
 import Chess.Base
 import Chess.Board
@@ -9,6 +12,11 @@ import Control.Applicative
 import Control.Monad.State.Lazy
 
 import Data.Maybe
+
+makeMoveFrom :: RegularGame -> Move -> Maybe RegularGame
+makeMoveFrom game move = case (evalState (makeMove move) game) of
+                           True -> Just $ execState (makeMove move) game
+                           False -> Nothing
 
 makeMove                                   :: Move -> State RegularGame Bool
 makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
@@ -131,17 +139,8 @@ doMovePiece p m = do
   let position = placement game
   put $ game { placement = movePiece position p m }
 
--- TODO: extract non-monadic operations
 updateSquare     :: Coordinate -> Maybe Piece -> State RegularGame ()
 updateSquare c p = do
   game <- get
   let position = placement game
   put $ game { placement = addPiece position p c }
-
-
--- CUT: non-monadic functions
-
-makeMoveFrom :: RegularGame -> Move -> Maybe RegularGame
-makeMoveFrom game move = case (evalState (makeMove move) game) of
-                           True -> Just $ execState (makeMove move) game
-                           False -> Nothing
