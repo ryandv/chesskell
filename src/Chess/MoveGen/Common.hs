@@ -51,3 +51,24 @@ rayFromMove (Coordinate f r, Coordinate f' r') | fromEnum f' > fromEnum f && r' 
                                                | fromEnum f' == fromEnum f && r' > r = (0,1)
                                                | fromEnum f' == fromEnum f && r' < r = (0,-1)
                                                | fromEnum f' == fromEnum f && r' == r = (0,0)
+
+coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
+coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
+  x' = fromEnum cx' - fromEnum 'a'
+  x  = fromEnum cx - fromEnum 'a'
+
+offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
+offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
+
+scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
+scaleBy s (x,y)                   = (x*s, y*s)
+
+unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
+unoccupied b c = isNothing . pieceOn $ squareAt b c
+
+unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
+unoccupiedByAlly b c ply | isNothing targetOwner = True
+                         | ply /= targetOwner = True
+                         | ply == targetOwner = False where
+  targetPiece = pieceOn $ squareAt b c
+  targetOwner = pieceOwner <$> targetPiece

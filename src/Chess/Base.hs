@@ -17,14 +17,9 @@ module Chess.Base
   , RegularGame(..)
   , Square(..)
 
-  , coordinateEuclideanDistance
-  , offsetBy
   , opponent
-  , scaleBy
   , squareAt
   , toFEN
-  , unoccupied
-  , unoccupiedByAlly
   ) where
 
 import Control.Applicative
@@ -124,33 +119,12 @@ isOnBoard (Coordinate f r) | f < 'a'   = False
                            | r > 8     = False
                            | otherwise = True
 
-unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
-unoccupiedByAlly b c ply | isNothing targetOwner = True
-                         | ply /= targetOwner = True
-                         | ply == targetOwner = False where
-  targetPiece = pieceOn $ squareAt b c
-  targetOwner = pieceOwner <$> targetPiece
-
-unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
-unoccupied b c = isNothing . pieceOn $ squareAt b c
-
 squareAt                    :: RegularBoardRepresentation -> Coordinate -> Square
 squareAt b (Coordinate f r) = (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
-
-scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
-scaleBy s (x,y)                   = (x*s, y*s)
-
-offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
-offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
 
 opponent               :: Player -> Player
 opponent White         = Black
 opponent Black         = White
-
-coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
-coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
-  x' = fromEnum cx' - fromEnum 'a'
-  x  = fromEnum cx - fromEnum 'a'
 
 toFEN :: RegularGame -> String
 toFEN Game { placement       = position
