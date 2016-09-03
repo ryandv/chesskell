@@ -17,14 +17,8 @@ module Chess.Base
   , RegularGame(..)
   , Square(..)
 
-  , coordinateEuclideanDistance
-  , offsetBy
   , opponent
-  , scaleBy
-  , squareAt
-  , toFEN
-  , unoccupied
-  , unoccupiedByAlly
+  , pieceAt
   ) where
 
 import Control.Applicative
@@ -124,87 +118,9 @@ isOnBoard (Coordinate f r) | f < 'a'   = False
                            | r > 8     = False
                            | otherwise = True
 
-unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
-unoccupiedByAlly b c ply | isNothing targetOwner = True
-                         | ply /= targetOwner = True
-                         | ply == targetOwner = False where
-  targetPiece = pieceOn $ squareAt b c
-  targetOwner = pieceOwner <$> targetPiece
-
-unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
-unoccupied b c = isNothing . pieceOn $ squareAt b c
-
-squareAt                    :: RegularBoardRepresentation -> Coordinate -> Square
-squareAt b (Coordinate f r) = (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
-
-scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
-scaleBy s (x,y)                   = (x*s, y*s)
-
-offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
-offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
+pieceAt                    :: RegularBoardRepresentation -> Coordinate -> Maybe Piece
+pieceAt b (Coordinate f r) = pieceOn $ (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
 
 opponent               :: Player -> Player
 opponent White         = Black
 opponent Black         = White
-
-coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
-coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
-  x' = fromEnum cx' - fromEnum 'a'
-  x  = fromEnum cx - fromEnum 'a'
-
-toFEN :: RegularGame -> String
-toFEN Game { placement       = position
-                  , activeColor     = ac
-                  , castlingRights  = cr
-                  , enPassantSquare = eps
-                  , halfMoveClock   = hmc
-                  , fullMoveNumber  = fmn
-                  } = positionString ++ toMoveString ++ castlingRightsString cr ++ enPassantString eps ++ halfMovesString ++ fullMovesString where
-  positionString = (++ " ") $ intercalate "/" $ map stringifyRank $ reverse position
-
-  toMoveString | ac == White = "w "
-               | otherwise   = "b "
-
-  castlingRightsString (CastleRights True True True True) = "KQkq "
-  castlingRightsString (CastleRights True True True False) = "KQk "
-  castlingRightsString (CastleRights True True False True) = "KQq "
-  castlingRightsString (CastleRights True True False False) = "KQ "
-  castlingRightsString (CastleRights True False True True) = "Kkq "
-  castlingRightsString (CastleRights True False True False) = "Kk "
-  castlingRightsString (CastleRights True False False True) = "Kq "
-  castlingRightsString (CastleRights True False False False) = "K "
-  castlingRightsString (CastleRights False True True True) = "Qkq "
-  castlingRightsString (CastleRights False True True False) = "Qk "
-  castlingRightsString (CastleRights False True False True) = "Qq "
-  castlingRightsString (CastleRights False True False False) = "Q "
-  castlingRightsString (CastleRights False False True True) = "kq "
-  castlingRightsString (CastleRights False False True False) = "k "
-  castlingRightsString (CastleRights False False False True) = "q "
-  castlingRightsString (CastleRights False False False False) = "- "
-
-  enPassantString Nothing = "- "
-  enPassantString (Just (Coordinate f r)) = return f ++ show r ++ " "
-  halfMovesString = show hmc ++ " "
-  fullMovesString = show fmn
-
-  stringifyRank :: [Square] -> String
-  stringifyRank = concatMap squishEmptySquares . group . foldr stringifyPiece "" . reverse
-
-  stringifyPiece :: Square -> String -> String
-  stringifyPiece (Square (Just (Piece Rook Black)) _)   acc = acc ++ "r"
-  stringifyPiece (Square (Just (Piece Knight Black)) _) acc = acc ++ "n"
-  stringifyPiece (Square (Just (Piece Bishop Black)) _) acc = acc ++ "b"
-  stringifyPiece (Square (Just (Piece Queen Black)) _)  acc = acc ++ "q"
-  stringifyPiece (Square (Just (Piece King Black)) _)   acc = acc ++ "k"
-  stringifyPiece (Square (Just (Piece Pawn Black)) _)   acc = acc ++ "p"
-  stringifyPiece (Square (Just (Piece Rook White)) _)   acc = acc ++ "R"
-  stringifyPiece (Square (Just (Piece Knight White)) _) acc = acc ++ "N"
-  stringifyPiece (Square (Just (Piece Bishop White)) _) acc = acc ++ "B"
-  stringifyPiece (Square (Just (Piece Queen White)) _)  acc = acc ++ "Q"
-  stringifyPiece (Square (Just (Piece King White)) _)   acc = acc ++ "K"
-  stringifyPiece (Square (Just (Piece Pawn White)) _)   acc = acc ++ "P"
-  stringifyPiece _ acc = acc ++ "-"
-
-  squishEmptySquares :: String -> String
-  squishEmptySquares ('-':xs) = show $ length ('-':xs)
-  squishEmptySquares xs = xs

@@ -1,18 +1,15 @@
-{-# LANGUAGE DoAndIfThenElse #-}
+{-# LANGUAGE DoAndIfThenElse #-} 
+module Chess.Game
+  ( makeMove
+  , makeMoveFrom
+  ) where
 
-module Chess.Game where
+import Chess.Base
+import Chess.Board
+import Chess.Predicates
 
 import Control.Applicative
 import Control.Monad.State.Lazy
-
-import Chess.Base
-import Chess.MoveGen
-import Chess.MoveGen.Bishop
-import Chess.MoveGen.King
-import Chess.MoveGen.Knight
-import Chess.MoveGen.Pawn
-import Chess.MoveGen.Queen
-import Chess.MoveGen.Rook
 
 import Data.Maybe
 
@@ -27,21 +24,13 @@ makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle 
                                            | movetype == EnPassant = makeEnPassant move
                                            | otherwise             = makeStandardMove move
 
-moveIsLegal :: Move -> RegularGame -> Bool
-moveIsLegal move@Move{ moveFrom = from} game = moveIsPseudoLegal && moveIsByRightPlayer && notCheckedAfterMove where
-
-  moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
-  notCheckedAfterMove = (not $ isChecked game { placement = positionAfterMove position move})
-  position = placement game
-
 makeStandardMove                              :: Move -> State RegularGame Bool
 makeStandardMove move@Move { moveFrom = from } = do
   game <- get
   let position = placement game
 
   if moveIsLegal move game
-    then do let originalPiece = pieceOn $ squareAt position from
+    then do let originalPiece = pieceAt position from
 
             put $ game { activeColor = opponent (activeColor game) }
             doMovePiece originalPiece move
@@ -99,8 +88,8 @@ makeCastle move@Move { moveFrom = from
     game <- get
     let position = placement game
 
-    let originalPiece = pieceOn $ squareAt position from
-    let rook = pieceOn $ squareAt position rookfrom
+    let originalPiece = pieceAt position from
+    let rook = pieceAt position rookfrom
 
     if (not $ isChecked game { placement = positionAfterMove (positionAfterMove position move) rookMove }) && (all (not . isAttacked game) castlingSquares)
       then do
@@ -133,7 +122,7 @@ makeEnPassant m@Move { moveTo = Coordinate f r
 
   if moveIsLegal m game
     then do let position = placement game
-            let originalPiece = pieceOn $ squareAt position from
+            let originalPiece = pieceAt position from
             let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
             put $ game { activeColor = opponent (activeColor game) 
                        , enPassantSquare = Nothing }
@@ -144,80 +133,14 @@ makeEnPassant m@Move { moveTo = Coordinate f r
             return True
     else return False
 
-addPiece                        :: RegularBoardRepresentation -> Maybe Piece -> Coordinate -> RegularBoardRepresentation
-addPiece b p c@(Coordinate f r) = newPlacement where
-  newPlacement = fst splitBoard ++ [fst splitRank ++ [Square p c] ++ (tail . snd $ splitRank)] ++ (tail . snd $ splitBoard)
-  splitBoard = splitAt (r - 1) b
-  splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
-  targetRank = head . snd $ splitBoard
-
 doMovePiece     :: Maybe Piece -> Move -> State RegularGame ()
 doMovePiece p m = do
   game <- get
   let position = placement game
   put $ game { placement = movePiece position p m }
 
-movePiece :: RegularBoardRepresentation -> Maybe Piece -> Move -> RegularBoardRepresentation
-movePiece position piece Move { moveFrom = from
-                              , moveTo   = to } = addPiece (addPiece position Nothing from) piece to
-
-positionAfterMove :: RegularBoardRepresentation -> Move -> RegularBoardRepresentation
-positionAfterMove position move@Move { moveFrom = from } = movePiece position (pieceOn $ (squareAt position from)) move
-
--- TODO: extract non-monadic operations
 updateSquare     :: Coordinate -> Maybe Piece -> State RegularGame ()
 updateSquare c p = do
   game <- get
   let position = placement game
   put $ game { placement = addPiece position p c }
-
-noLegalMovesRemaining :: RegularGame -> Player -> Bool
-noLegalMovesRemaining game ply = (null $ filter (\x -> pieceIsOwnedByPly x && (not $ isChecked game { placement = positionAfterMove (placement game) x })) $ pseudoLegalMoves game) where
-
-  pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
-
-isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
-
-isStalemate          :: RegularGame -> Player -> Bool
-isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
-
-isAttacked :: RegularGame -> Coordinate -> Bool
-isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
-
-  nextState = (placement game)
-
-  activePly = (activeColor game)
-
-  isChecking            :: PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
-  isChecking pt movegen = not
-                        $ null
-                        $ filter (\x -> ((== Capture) $ moveType x) && ((== pt) . fromJust $ pieceType <$> (pieceOn . squareAt nextState $ moveTo x)))
-                        $ movegen (game { placement = addPiece nextState (Just (Piece pt activePly)) sq }) sq
-
-  isQueenChecking :: Bool
-  isQueenChecking = isChecking Queen potentialQueenMoves
-
-  isRookChecking :: Bool
-  isRookChecking = isChecking Rook potentialRookMoves
-
-  isBishopChecking :: Bool
-  isBishopChecking = isChecking Bishop potentialBishopMoves
-
-  isKnightChecking :: Bool
-  isKnightChecking = isChecking Knight potentialKnightMoves
-
-  -- TODO: do we need to consider en passant? I think not.
-  isPawnChecking :: Bool
-  isPawnChecking = isChecking Pawn potentialPawnMoves
-
-  -- TODO: do we need to consider castling? I think not.
-  isKingChecking :: Bool
-  isKingChecking = isChecking King potentialKingMoves
-
-isChecked      :: RegularGame -> Bool
-isChecked game = isAttacked game (kingSquare (activeColor game)) where
-
-  kingSquare     :: Player -> Coordinate
-  kingSquare ply = location $ head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] (placement game)
