@@ -12,7 +12,7 @@ potentialPawnMoves                                       :: RegularGame -> Coord
 potentialPawnMoves Game { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
 potentialPawnMoves Game { placement = b, enPassantSquare = (Just enPassant) } c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
   rankOffset :: Int
-  rankOffset = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
+  rankOffset = case (fmap pieceOwner $ pieceAt b c) of
                  Just White -> 1
                  Just Black -> -1
 
@@ -30,7 +30,7 @@ standardPawnMoves b c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  
                                        | ((Just White) == pawnOwner) = whiteAdvance b c ++ whiteCaptures b c
                                        | ((Just Black) == pawnOwner) = blackAdvance b c ++ blackCaptures b c where
   pawnOwner :: Maybe Player
-  pawnOwner = (fmap pieceOwner . pieceOn $ squareAt b c)
+  pawnOwner = (fmap pieceOwner $ pieceAt b c)
 
 whiteAdvance                       :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteAdvance b c                   = advance b c 1
@@ -48,12 +48,12 @@ blackDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r-1)) =
 
 advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
-                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 8 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 8 && ((pieceAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
                                       [ Just $ Piece Rook White
                                       , Just $ Piece Knight White
                                       , Just $ Piece Bishop White
                                       , Just $ Piece Queen White ]
-                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 1 && ((pieceOn $ squareAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 1 && ((pieceAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
                                       [ Just $ Piece Rook Black
                                       , Just $ Piece Knight Black
                                       , Just $ Piece Bishop Black
@@ -81,7 +81,7 @@ capture b (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
                                                                                                            , moveType = Capture
                                                                                                            , movePromoteTo = Nothing }]
                                        | otherwise = [] where
-  target = pieceOn $ squareAt b (Coordinate tf (r+dr))
+  target = pieceAt b (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
 
 whiteNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]

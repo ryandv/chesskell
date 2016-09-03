@@ -3,7 +3,7 @@ module Chess.Board where
 import Chess.Base
 
 positionAfterMove :: RegularBoardRepresentation -> Move -> RegularBoardRepresentation
-positionAfterMove position move@Move { moveFrom = from } = movePiece position (pieceOn $ (squareAt position from)) move
+positionAfterMove position move@Move { moveFrom = from } = movePiece position (pieceAt position from) move
 
 movePiece :: RegularBoardRepresentation -> Maybe Piece -> Move -> RegularBoardRepresentation
 movePiece position piece Move { moveFrom = from

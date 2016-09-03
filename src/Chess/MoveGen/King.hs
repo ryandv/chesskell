@@ -13,7 +13,7 @@ potentialKingMoves Game { placement = b
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
-  kingOwner = fmap pieceOwner . pieceOn $ squareAt b c
+  kingOwner = fmap pieceOwner $ pieceAt b c
 
   castles                        :: Bool -> Bool -> Player -> [Move]
   castles kingside queenside ply | kingside && queenside = ooCastle (getHomeRank ply) ply ++ oooCastle (getHomeRank ply) ply
@@ -39,7 +39,7 @@ potentialKingMoves Game { placement = b
                         | otherwise = []
 
   ooRookIsPresent              :: Rank -> Player -> Bool
-  ooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceOn . squareAt b $ (Coordinate 'h' homeRank))
+  ooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt b $ (Coordinate 'h' homeRank))
 
   ooSquaresAreFree          :: Rank -> Bool
   ooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
@@ -52,7 +52,7 @@ potentialKingMoves Game { placement = b
                          | otherwise = []
 
   oooRookIsPresent              :: Rank -> Player -> Bool
-  oooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceOn . squareAt b $ (Coordinate 'a' homeRank))
+  oooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt b $ (Coordinate 'a' homeRank))
 
   oooSquaresAreFree          :: Rank -> Bool
   oooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]

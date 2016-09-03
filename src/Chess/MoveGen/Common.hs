@@ -8,7 +8,7 @@ potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> 
 potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveTo = x
                                                     , moveType = determineMoveType b c x 
-                                                    , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceOn $ squareAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
+                                                    , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
 potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
@@ -17,8 +17,8 @@ potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                  , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
 
 determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b from to       | isNothing . pieceOn $ squareAt b to                          = Standard
-                                  | (fmap pieceOwner . pieceOn $ squareAt b to) /= (fmap pieceOwner . pieceOn $ squareAt b from) = Capture
+determineMoveType b from to       | isNothing $ pieceAt b to                          = Standard
+                                  | (fmap pieceOwner $ pieceAt b to) /= (fmap pieceOwner $ pieceAt b from) = Capture
 
 isBlocked                       :: RegularBoardRepresentation -> Move -> Bool
 isBlocked b Move { moveFrom = from
@@ -29,9 +29,9 @@ isBlocked b Move { moveFrom = from
 
   validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
   validMoves' (c:cs) blocked | blocked == True = []
-                             | otherwise       = case (fmap pieceOwner $ pieceOn $ squareAt b c) of
+                             | otherwise       = case (fmap pieceOwner $ pieceAt b c) of
                                                    Nothing                -> c:validMoves' cs False
-                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceOn $ squareAt b from))
+                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceAt b from))
                                                                                then []
                                                                                else c:validMoves' cs True
 
@@ -64,11 +64,11 @@ scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
 scaleBy s (x,y)                   = (x*s, y*s)
 
 unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
-unoccupied b c = isNothing . pieceOn $ squareAt b c
+unoccupied b c = isNothing $ pieceAt b c
 
 unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
 unoccupiedByAlly b c ply | isNothing targetOwner = True
                          | ply /= targetOwner = True
                          | ply == targetOwner = False where
-  targetPiece = pieceOn $ squareAt b c
+  targetPiece = pieceAt b c
   targetOwner = pieceOwner <$> targetPiece

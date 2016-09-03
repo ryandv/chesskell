@@ -18,7 +18,7 @@ module Chess.Base
   , Square(..)
 
   , opponent
-  , squareAt
+  , pieceAt
   ) where
 
 import Control.Applicative
@@ -118,8 +118,8 @@ isOnBoard (Coordinate f r) | f < 'a'   = False
                            | r > 8     = False
                            | otherwise = True
 
-squareAt                    :: RegularBoardRepresentation -> Coordinate -> Square
-squareAt b (Coordinate f r) = (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
+pieceAt                    :: RegularBoardRepresentation -> Coordinate -> Maybe Piece
+pieceAt b (Coordinate f r) = pieceOn $ (b !! (r-1)) !! (fromEnum f - fromEnum 'a')
 
 opponent               :: Player -> Player
 opponent White         = Black

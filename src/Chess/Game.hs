@@ -30,7 +30,7 @@ makeStandardMove move@Move { moveFrom = from } = do
   let position = placement game
 
   if moveIsLegal move game
-    then do let originalPiece = pieceOn $ squareAt position from
+    then do let originalPiece = pieceAt position from
 
             put $ game { activeColor = opponent (activeColor game) }
             doMovePiece originalPiece move
@@ -88,8 +88,8 @@ makeCastle move@Move { moveFrom = from
     game <- get
     let position = placement game
 
-    let originalPiece = pieceOn $ squareAt position from
-    let rook = pieceOn $ squareAt position rookfrom
+    let originalPiece = pieceAt position from
+    let rook = pieceAt position rookfrom
 
     if (not $ isChecked game { placement = positionAfterMove (positionAfterMove position move) rookMove }) && (all (not . isAttacked game) castlingSquares)
       then do
@@ -122,7 +122,7 @@ makeEnPassant m@Move { moveTo = Coordinate f r
 
   if moveIsLegal m game
     then do let position = placement game
-            let originalPiece = pieceOn $ squareAt position from
+            let originalPiece = pieceAt position from
             let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1
             put $ game { activeColor = opponent (activeColor game) 
                        , enPassantSquare = Nothing }

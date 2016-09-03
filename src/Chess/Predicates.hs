@@ -62,7 +62,7 @@ moveIsLegal :: Move -> RegularGame -> Bool
 moveIsLegal move@Move{ moveFrom = from} game = moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
 
   moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  moveIsByRightPlayer = (pieceOwner <$> (pieceOn $ (squareAt position from))) == (Just (activeColor game))
+  moveIsByRightPlayer = (pieceOwner <$> (pieceAt position from)) == (Just (activeColor game))
   position = placement game
 
 notCheckedAfterMove :: RegularGame -> Move -> Bool
@@ -74,7 +74,7 @@ noLegalMovesRemaining game ply = null
                                $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceOn $ (squareAt (placement game) from))) == (Just ply)
+  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceAt (placement game) from)) == (Just ply)
 
 isChecking            :: RegularGame -> Coordinate -> PieceType -> Bool
 isChecking gameWithGhostPiece coord pt = not
@@ -87,7 +87,7 @@ isChecking gameWithGhostPiece coord pt = not
   moveIsCapture = (== Capture) . moveType
 
   moveMatchesPieceType :: Move -> Bool
-  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceOn . squareAt (placement gameWithGhostPiece) . moveTo
+  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceAt (placement gameWithGhostPiece) . moveTo
 
   moveIsFromTargetCoordinate :: Move -> Bool
   moveIsFromTargetCoordinate = (== coord) . moveFrom
