@@ -3,12 +3,6 @@ module Chess.Predicates where
 import Chess.Base
 import Chess.Board
 import Chess.MoveGen
-import Chess.MoveGen.Bishop
-import Chess.MoveGen.King
-import Chess.MoveGen.Knight
-import Chess.MoveGen.Pawn
-import Chess.MoveGen.Queen
-import Chess.MoveGen.Rook
 
 import Control.Applicative
 
@@ -36,11 +30,12 @@ isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
 -- Given an opponent's PieceType, this function works by placing down a ghost piece of the same PieceType but the active player's color,
 -- and checks to see if the ghost piece can capture any of the opponent's pieces.
-isChecking            :: RegularGame -> Coordinate -> PieceType -> (RegularGame -> Coordinate -> [Move]) -> Bool
-isChecking gameWithGhostPiece sq pt movegen = not
-                                            $ null
-                                            $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
-                                            $ movegen gameWithGhostPiece sq where
+isChecking            :: RegularGame -> Coordinate -> PieceType -> (RegularGame -> [Move]) -> Bool
+isChecking gameWithGhostPiece coord pt movegen = not
+                                               $ null
+                                               $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
+                                               $ filter moveIsFromTargetCoordinate
+                                               $ movegen gameWithGhostPiece where
 
   moveIsCapture :: Move -> Bool
   moveIsCapture = (== Capture) . moveType
@@ -48,35 +43,38 @@ isChecking gameWithGhostPiece sq pt movegen = not
   moveMatchesPieceType :: Move -> Bool
   moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceOn . squareAt (placement gameWithGhostPiece) . moveTo
 
+  moveIsFromTargetCoordinate :: Move -> Bool
+  moveIsFromTargetCoordinate = (== coord) . moveFrom
+
 isAttacked :: RegularGame -> Coordinate -> Bool
-isAttacked game sq = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
+isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
   nextState = (placement game)
 
   activePly = (activeColor game)
 
   placeGhostPiece :: PieceType -> RegularGame
-  placeGhostPiece pt = game { placement = addPiece nextState (Just (Piece pt activePly)) sq }
+  placeGhostPiece pt = game { placement = addPiece nextState (Just (Piece pt activePly)) coord }
 
   isQueenChecking :: Bool
-  isQueenChecking = isChecking (placeGhostPiece Queen) sq Queen potentialQueenMoves
+  isQueenChecking = isChecking (placeGhostPiece Queen) coord Queen pseudoLegalMoves
 
   isRookChecking :: Bool
-  isRookChecking = isChecking (placeGhostPiece Rook) sq Rook potentialRookMoves
+  isRookChecking = isChecking (placeGhostPiece Rook) coord Rook pseudoLegalMoves
 
   isBishopChecking :: Bool
-  isBishopChecking = isChecking (placeGhostPiece Bishop) sq Bishop potentialBishopMoves
+  isBishopChecking = isChecking (placeGhostPiece Bishop) coord Bishop pseudoLegalMoves
 
   isKnightChecking :: Bool
-  isKnightChecking = isChecking (placeGhostPiece Knight) sq Knight potentialKnightMoves
+  isKnightChecking = isChecking (placeGhostPiece Knight) coord Knight pseudoLegalMoves
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = isChecking (placeGhostPiece Pawn) sq Pawn potentialPawnMoves
+  isPawnChecking = isChecking (placeGhostPiece Pawn) coord Pawn pseudoLegalMoves
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = isChecking (placeGhostPiece King) sq King potentialKingMoves
+  isKingChecking = isChecking (placeGhostPiece King) coord King pseudoLegalMoves
 
 isChecked      :: RegularGame -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
