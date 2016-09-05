@@ -5,5 +5,5 @@ import Chess.Base
 import Chess.MoveGen.Bishop
 import Chess.MoveGen.Rook
 
-potentialQueenMoves     :: RegularGame -> Coordinate -> [Move]
-potentialQueenMoves g c = potentialRookMoves g c ++ potentialBishopMoves g c
+potentialQueenMoves             :: RegularBoardRepresentation -> Coordinate -> [Move]
+potentialQueenMoves placement c = potentialRookMoves placement c ++ potentialBishopMoves placement c

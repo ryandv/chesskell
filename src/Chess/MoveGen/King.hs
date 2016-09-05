@@ -4,16 +4,14 @@ import Chess.Base
 
 import Chess.MoveGen.Common
 
-potentialKingMoves                                   :: RegularGame -> Coordinate -> [Move]
-potentialKingMoves Game { placement = b
-                               , castlingRights = castlerights
-                               } c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves b c possibleMoves ++ whiteCastles castlerights
-                                                    | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves b c possibleMoves ++ blackCastles castlerights
-                                                    | otherwise = potentialOffsetMoves b c possibleMoves where
+potentialKingMoves                                           :: CastleRights -> RegularBoardRepresentation -> Coordinate -> [Move]
+potentialKingMoves castlerights placement c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves placement c possibleMoves ++ whiteCastles castlerights
+                                                             | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves placement c possibleMoves ++ blackCastles castlerights
+                                                             | otherwise = potentialOffsetMoves placement c possibleMoves where
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
-  kingOwner = fmap pieceOwner $ pieceAt b c
+  kingOwner = fmap pieceOwner $ pieceAt placement c
 
   castles                        :: Bool -> Bool -> Player -> [Move]
   castles kingside queenside ply | kingside && queenside = ooCastle (getHomeRank ply) ply ++ oooCastle (getHomeRank ply) ply
@@ -39,10 +37,10 @@ potentialKingMoves Game { placement = b
                         | otherwise = []
 
   ooRookIsPresent              :: Rank -> Player -> Bool
-  ooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt b $ (Coordinate 'h' homeRank))
+  ooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt placement $ (Coordinate 'h' homeRank))
 
   ooSquaresAreFree          :: Rank -> Bool
-  ooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
+  ooSquaresAreFree homeRank = all (unoccupied placement) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
 
   oooCastle              :: Rank -> Player -> [Move]
   oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank
@@ -52,8 +50,7 @@ potentialKingMoves Game { placement = b
                          | otherwise = []
 
   oooRookIsPresent              :: Rank -> Player -> Bool
-  oooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt b $ (Coordinate 'a' homeRank))
+  oooRookIsPresent homeRank ply = (Just (Piece Rook ply)) == (pieceAt placement $ (Coordinate 'a' homeRank))
 
   oooSquaresAreFree          :: Rank -> Bool
-  oooSquaresAreFree homeRank = all (unoccupied b) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]
-
+  oooSquaresAreFree homeRank = all (unoccupied placement) [(Coordinate 'b' homeRank), (Coordinate 'c' homeRank), (Coordinate 'd' homeRank)]
