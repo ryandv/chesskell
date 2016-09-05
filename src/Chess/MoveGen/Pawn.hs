@@ -8,11 +8,11 @@ import Chess.MoveGen.Common
 
 import Data.Maybe
 
-potentialPawnMoves                                       :: RegularGame -> Coordinate -> [Move]
-potentialPawnMoves Game { placement = b, enPassantSquare = Nothing } c                           = standardPawnMoves b c
-potentialPawnMoves Game { placement = b, enPassantSquare = (Just enPassant) } c@(Coordinate r f) = standardPawnMoves b c ++ enPassantMoves enPassant where
+potentialPawnMoves                                               :: Maybe Coordinate -> RegularBoardRepresentation -> Coordinate -> [Move]
+potentialPawnMoves Nothing placement c                           = standardPawnMoves placement c
+potentialPawnMoves (Just enPassant) placement c@(Coordinate r f) = standardPawnMoves placement c ++ enPassantMoves enPassant where
   rankOffset :: Int
-  rankOffset = case (fmap pieceOwner $ pieceAt b c) of
+  rankOffset = case (fmap pieceOwner $ pieceAt placement c) of
                  Just White -> 1
                  Just Black -> -1
 
