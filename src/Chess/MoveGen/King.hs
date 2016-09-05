@@ -1,6 +1,7 @@
 module Chess.MoveGen.King where
 
 import Chess.Base
+import Chess.Board
 
 import Chess.MoveGen.Common
 

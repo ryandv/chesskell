@@ -1,6 +1,7 @@
 module Chess.MoveGen.Common where
 
 import Chess.Base
+import Chess.Board
 
 import Data.Maybe
 

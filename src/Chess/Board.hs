@@ -15,3 +15,6 @@ addPiece b p c@(Coordinate f r) = newPlacement where
   splitBoard = splitAt (r - 1) b
   splitRank = splitAt (fromEnum f - fromEnum 'a') targetRank
   targetRank = head . snd $ splitBoard
+
+pieceAt                    :: RegularBoardRepresentation -> Coordinate -> Maybe Piece
+pieceAt b (Coordinate f r) = pieceOn $ (b !! (r-1)) !! (fromEnum f - fromEnum 'a')

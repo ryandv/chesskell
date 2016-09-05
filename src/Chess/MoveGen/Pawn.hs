@@ -3,6 +3,7 @@ module Chess.MoveGen.Pawn
   ) where
 
 import Chess.Base
+import Chess.Board
 
 import Chess.MoveGen.Common
 
