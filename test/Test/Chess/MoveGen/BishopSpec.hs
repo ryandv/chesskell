@@ -15,10 +15,10 @@ import Test.Util
 spec :: Spec
 spec = describe "potentialBishopMoves" $ do
          it "never produces moves off the board" $
-           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialBishopMoves (placePiece emptyTest (Piece Bishop White) c) c
+           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialBishopMoves (placement (placePiece emptyTest (Piece Bishop White) c)) c
 
          it "produces the correct set of moves without being blocked by pieces" $
-           potentialBishopMoves onlyBishopTest (Coordinate 'e' 5) `shouldBe`
+           potentialBishopMoves (placement onlyBishopTest) (Coordinate 'e' 5) `shouldBe`
              [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
@@ -35,7 +35,7 @@ spec = describe "potentialBishopMoves" $ do
              ]
 
          it "produces the correct set of moves when blocked by some pieces" $
-           potentialBishopMoves bishopTest (Coordinate 'e' 5) `shouldBe`
+           potentialBishopMoves (placement bishopTest) (Coordinate 'e' 5) `shouldBe`
              [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
@@ -47,7 +47,7 @@ spec = describe "potentialBishopMoves" $ do
              ]
 
          it "produces the correct set of moves, including captures" $
-           potentialBishopMoves bishopAllCapturesTest (Coordinate 'e' 5) `shouldBe`
+           potentialBishopMoves (placement bishopAllCapturesTest) (Coordinate 'e' 5) `shouldBe`
              [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
