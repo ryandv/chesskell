@@ -15,11 +15,12 @@ import Test.Util
 spec :: Spec
 spec = describe "potentialKingMoves" $
          context "movement" $ do
+           -- TODO: add quickcheck spec for when CastleRights are True
            it "never produces moves off the board" $
-             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialKingMoves (placePiece emptyTest (Piece King White) c) c
+             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialKingMoves (CastleRights False False False False) (placement (placePiece emptyTest (Piece King White) c)) c
 
            it "allows the king to move to any square in its Moore neighbourhood" $
-             potentialKingMoves onlyKingTest { castlingRights = CastleRights False False False False } (Coordinate 'd' 4) `shouldBe`
+             potentialKingMoves (CastleRights False False False False) (placement onlyKingTest) (Coordinate 'd' 4) `shouldBe`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
@@ -31,7 +32,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the white king to castle kingside, if he has the right to" $
-             potentialKingMoves whiteKingOOTest { castlingRights = CastleRights True False False False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights True False False False) (placement whiteKingOOTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -41,7 +42,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the white king to castle kingside, if he does not have the right to" $
-             potentialKingMoves whiteKingOOTest { castlingRights = CastleRights False False False False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights False False False False) (placement whiteKingOOTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -50,7 +51,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the white king to castle queenside, if he has the right to" $
-             potentialKingMoves whiteKingOOOTest { castlingRights = CastleRights False False True False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights False False True False) (placement whiteKingOOOTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -60,7 +61,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the white king to castle queenside, if he does not have the right to" $
-             potentialKingMoves whiteKingOOOTest { castlingRights = CastleRights False False False False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights False False False False) (placement whiteKingOOOTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -69,7 +70,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the white king to castle both kingside or queenside, if he has the option" $
-             potentialKingMoves whiteKingBothCastlesTest { castlingRights = CastleRights True False True False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights True False True False) (placement whiteKingBothCastlesTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -80,7 +81,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the white king to castle when he is not on his home square" $
-             potentialKingMoves whiteKingMovedNoOOTest { castlingRights = CastleRights True True True True } (Coordinate 'd' 4) `shouldBe`
+             potentialKingMoves (CastleRights True True True True) (placement whiteKingMovedNoOOTest) (Coordinate 'd' 4) `shouldBe`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
@@ -92,7 +93,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the white king to castle kingside when the rook is not on its home square" $
-             potentialKingMoves whiteKingNoRookCastleTest { castlingRights = CastleRights True False False False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights True False False False) (placement whiteKingNoRookCastleTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -101,7 +102,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the white king to castle queenside when the rook is not on its home square" $
-             potentialKingMoves whiteKingNoRookCastleTest { castlingRights = CastleRights False False True False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights False False True False) (placement whiteKingNoRookCastleTest) (Coordinate 'e' 1) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing }
@@ -110,7 +111,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the black king to castle kingside, if he has the right to" $
-             potentialKingMoves blackKingOOTest { castlingRights = CastleRights False True False False } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False True False False) (placement blackKingOOTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -120,7 +121,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle kingside, if he does not have the right to" $
-             potentialKingMoves blackKingOOTest { castlingRights = CastleRights False False False False } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False False False False) (placement blackKingOOTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -129,7 +130,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the black king to castle queenside, if he has the right to" $
-             potentialKingMoves blackKingOOOTest { castlingRights = CastleRights False False False True } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False False False True) (placement blackKingOOOTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -139,7 +140,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle queenside, if he does not have the right to" $
-             potentialKingMoves blackKingOOOTest { castlingRights = CastleRights False False False False } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False False False False) (placement blackKingOOOTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -148,7 +149,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "allows the black king to castle both kingside or queenside, if he has the option" $
-             potentialKingMoves blackKingBothCastlesTest { castlingRights = CastleRights False True False True } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False True False True) (placement blackKingBothCastlesTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -159,7 +160,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle when he is not on his home square" $
-             potentialKingMoves blackKingMovedNoOOTest { castlingRights = CastleRights True True True True } (Coordinate 'd' 4) `shouldBe`
+             potentialKingMoves (CastleRights True True True True) (placement blackKingMovedNoOOTest) (Coordinate 'd' 4) `shouldBe`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
@@ -171,7 +172,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle kingside when the rook is not on its home square" $
-             potentialKingMoves blackKingNoRookCastleTest { castlingRights = CastleRights False True False False } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False True False False) (placement blackKingNoRookCastleTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -180,7 +181,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle queenside when the rook is not on its home square" $
-             potentialKingMoves blackKingNoRookCastleTest { castlingRights = CastleRights False False False True } (Coordinate 'e' 8) `shouldBe`
+             potentialKingMoves (CastleRights False False False True) (placement blackKingNoRookCastleTest) (Coordinate 'e' 8) `shouldBe`
                [ Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 8, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing }
@@ -189,5 +190,5 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the king to castle if the intermediate squares are occupied" $
-             potentialKingMoves startingPos { castlingRights = CastleRights True False False False } (Coordinate 'e' 1) `shouldBe`
+             potentialKingMoves (CastleRights True False False False) (placement startingPos) (Coordinate 'e' 1) `shouldBe`
                []
