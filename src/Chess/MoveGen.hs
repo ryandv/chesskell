@@ -24,7 +24,7 @@ pseudoLegalMoves game@Game { placement = b } = (concatMap . concatMap) (pseudoLe
 pseudoLegalMovesFrom :: RegularGame -> Square -> [Move]
 pseudoLegalMovesFrom _ (Square Nothing _)            = []
 pseudoLegalMovesFrom game@Game { placement = placement } (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves game l
-                                                                                       | p == Knight = potentialKnightMoves game l
+                                                                                       | p == Knight = potentialKnightMoves placement l
                                                                                        | p == Bishop = potentialBishopMoves placement l
                                                                                        | p == Rook   = potentialRookMoves placement l
                                                                                        | p == Queen  = potentialQueenMoves placement l
