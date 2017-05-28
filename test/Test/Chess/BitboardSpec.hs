@@ -10,4 +10,4 @@ spec = describe "bitboard representation" $ do
   it "uses little-endian rank-file mapping" $ do
     let board = emptyBitboard
 
-    all (isOccupied board) [0..64] `shouldBe` False
+    forAll (choose (0, 64)) $ (not . isOccupied board)
