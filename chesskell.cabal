@@ -13,6 +13,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     Chess.AI
                      , Chess.Base
+                     , Chess.Bitboard
                      , Chess.Board
                      , Chess.FenParser
                      , Chess.Game
@@ -53,6 +54,7 @@ Test-Suite test
   type:                exitcode-stdio-1.0
 
   other-modules:       Test.Chess.AISpec
+                     , Test.Chess.BitboardSpec
                      , Test.Chess.FenParserSpec
                      , Test.Chess.GameSpec
                      , Test.Chess.MoveGenSpec
