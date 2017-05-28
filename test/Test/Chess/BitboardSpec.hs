@@ -8,6 +8,4 @@ import Test.QuickCheck
 spec :: Spec
 spec = describe "bitboard representation" $ do
   it "uses little-endian rank-file mapping" $ do
-    let board = emptyBitboard
-
-    forAll (choose (0, 64)) $ (not . isOccupied board)
+    forAll (choose (0, 64)) $ (not . isOccupied emptyBitboard)
