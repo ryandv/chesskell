@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Chess.Bitboard
-  ( BoardIndex
+  ( Bitboard(..)
+  , BoardIndex
   , emptyBitboard
   , isOccupied
   ) where
@@ -18,7 +19,7 @@ instance BoardIndex Int where
 instance BoardIndex (Int, Int) where
   isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
 
-data Bitboard = Bitboard Word64
+data Bitboard = Bitboard Word64 deriving (Eq, Show)
 
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
