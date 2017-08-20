@@ -2,6 +2,8 @@
 
 module Chess.Bitboard
   ( Bitboard(..)
+  , bitboardIntersect
+  , bitboardUnion
   , BoardIndex
   , emptyBitboard
   , isOccupied
@@ -24,3 +26,8 @@ data Bitboard = Bitboard Word64 deriving (Eq, Show)
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
 
+bitboardIntersect                             :: Bitboard -> Bitboard -> Bitboard
+bitboardIntersect (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..&. b2
+
+bitboardUnion                             :: Bitboard -> Bitboard -> Bitboard
+bitboardUnion (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..|. b2
