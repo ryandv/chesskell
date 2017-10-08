@@ -29,6 +29,10 @@ bitboardsAnd gen = do
 
 spec :: Spec
 spec = describe "bitboard" $ do
+  describe "formatting" $ do
+    it "is showable" $ do
+      show (Bitboard 9820426766351346249) `shouldBe` ". . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n"
+
   describe "representation" $ do
     it "uses little-endian rank-file mapping" $ do
       forAll (choose (0, 64)) $ ((not . isOccupied emptyBitboard) :: Int -> Bool)
@@ -71,3 +75,11 @@ spec = describe "bitboard" $ do
       let bishopMoves = Bitboard 675578369
       let queenMoves  = Bitboard 945066513
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
+
+
+
+
+
+
+
+
