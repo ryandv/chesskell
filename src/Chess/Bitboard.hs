@@ -26,11 +26,6 @@ instance BoardIndex Int where
 instance BoardIndex (Int, Int) where
   isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
 
-instance Show Bitboard where
-  show (Bitboard b) = (intercalate "\n" $
-    map printWord8AsBinary $
-    turnWord64IntoWord8s b) ++ "\n"
-
 data Bitboard = Bitboard Word64 deriving (Eq)
 
 emptyBitboard :: Bitboard
@@ -50,10 +45,19 @@ extractWord8 w = fromIntegral $ w Data.Bits..&. mask where
 turnWord64IntoWord8s :: Word64 -> [Word8]
 turnWord64IntoWord8s w = map (extractWord8 . (shiftR w)) [56, 48, 40, 32, 24, 16, 8, 0]
 
+instance Show Bitboard where
+  show (Bitboard b) = (intercalate "\n" $
+    map printWord8AsBinary $
+    turnWord64IntoWord8s b) ++ "\n"
+
 printWord8AsBinary   :: Word8 -> String
 printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where
 
-  wordAsBitString = foldr (\bitIndex acc -> acc ++ (show (((nthBitAtFront w bitIndex) Data.Bits..&. (fromIntegral 1 :: Word8))))) "" (reverse [0..7])
+  wordAsBitString :: String
+  wordAsBitString = foldr (flip (++) . getNthBit) "" (reverse [0..7])
+
+  getNthBit :: Int -> String
+  getNthBit bitIndex = show (((nthBitAtFront w bitIndex) Data.Bits..&. (fromIntegral 1 :: Word8)))
 
   bitToSquare :: Char -> Char
   bitToSquare '0' = '.'
