@@ -55,7 +55,7 @@ spec = describe "bitboard" $ do
 
     --}
     it "include intersection" $ do
-      let allMoves       = Bitboard 945066513
+      let allMoves       = Bitboard 10544115227674579473
       let enemyPieces    = Bitboard 65280
       let attackedPieces = Bitboard 37376
       (allMoves `bitboardIntersect` enemyPieces) `shouldBe` attackedPieces
@@ -78,6 +78,7 @@ spec = describe "bitboard" $ do
       let bishopMoves = Bitboard 675578369
       let queenMoves  = Bitboard 945066513
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
+
 
   describe "conversion from regular board representations" $ do
 
