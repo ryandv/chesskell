@@ -17,6 +17,8 @@ module Chess.Bitboard
   , blackKnightOccupancyFor
   , whiteBishopOccupancyFor
   , blackBishopOccupancyFor
+  , whiteRookOccupancyFor
+  , blackRookOccupancyFor
   ) where
 
 import Chess.Base
@@ -103,3 +105,9 @@ whiteBishopOccupancyFor = occupancyFor (Piece Bishop White)
 
 blackBishopOccupancyFor :: RegularBoardRepresentation -> Bitboard
 blackBishopOccupancyFor = occupancyFor (Piece Bishop Black)
+
+whiteRookOccupancyFor :: RegularBoardRepresentation -> Bitboard
+whiteRookOccupancyFor = occupancyFor (Piece Rook White)
+
+blackRookOccupancyFor :: RegularBoardRepresentation -> Bitboard
+blackRookOccupancyFor = occupancyFor (Piece Rook Black)
