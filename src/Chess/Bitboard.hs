@@ -10,8 +10,11 @@ module Chess.Bitboard
   , turnWord64IntoWord8s
   , extractWord8
   , printWord8AsBinary
+
   , whitePawnOccupancyFor
   , blackPawnOccupancyFor
+  , whiteKnightOccupancyFor
+  , blackKnightOccupancyFor
   ) where
 
 import Chess.Base
@@ -87,3 +90,19 @@ pawnOccupancyFor p = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat whe
 
   isPawnForPlayer     :: Player -> Square -> Bool
   isPawnForPlayer p s = pieceOn s == Just (Piece Pawn p)
+
+whiteKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
+whiteKnightOccupancyFor = knightOccupancyFor White
+
+blackKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
+blackKnightOccupancyFor = knightOccupancyFor Black
+
+knightOccupancyFor :: Player -> RegularBoardRepresentation -> Bitboard
+knightOccupancyFor p = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
+
+  addPieceToBitboard          :: Square -> (Int, Bitboard) -> (Int, Bitboard)
+  addPieceToBitboard s (i, b) | isKnightForPlayer p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
+                              | otherwise             = (i + 1, b)
+
+  isKnightForPlayer     :: Player -> Square -> Bool
+  isKnightForPlayer p s = pieceOn s == Just (Piece Knight p)
