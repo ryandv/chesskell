@@ -33,7 +33,7 @@ spec :: Spec
 spec = describe "bitboard" $ do
   describe "formatting" $ do
     it "is showable" $ do
-      show (Bitboard 9820426766351346249) `shouldBe` ". . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n"
+      show (Bitboard 9820426766351346249) `shouldBe` "\n. . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n"
 
   describe "representation" $ do
     it "uses little-endian rank-file mapping" $ do
@@ -90,7 +90,7 @@ spec = describe "bitboard" $ do
     it "can produce an occupancy bitboard for white knights" $ do
       whiteKnightOccupancyFor (placement startingPos) `shouldBe` Bitboard 4755801206503243776
 
-    it "can produce an occupancy bitboard for white knights" $ do
+    it "can produce an occupancy bitboard for black knights" $ do
       blackKnightOccupancyFor (placement startingPos) `shouldBe` Bitboard 66
 
     it "can produce an occupancy bitboard for white bishops" $ do
@@ -116,3 +116,19 @@ spec = describe "bitboard" $ do
 
     it "can produce an occupancy bitboard for black kings" $ do
       blackKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 8
+
+    it "can convert a RegularBoardRepresentation into a BitboardRepresentation" $ do
+      regularToBitboard (placement startingPos) `shouldBe` BitboardRepresentation
+        { whitePawns   = Bitboard 71776119061217280
+        , blackPawns   = Bitboard 65280
+        , whiteKnights = Bitboard 4755801206503243776
+        , blackKnights = Bitboard 66
+        , whiteBishops = Bitboard 2594073385365405696
+        , blackBishops = Bitboard 36
+        , whiteRooks   = Bitboard 9295429630892703744
+        , blackRooks   = Bitboard 129
+        , whiteQueens  = Bitboard 1152921504606846976
+        , blackQueens  = Bitboard 16
+        , whiteKings   = Bitboard 576460752303423488
+        , blackKings   = Bitboard 8
+        }

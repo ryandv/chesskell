@@ -2,6 +2,7 @@
 
 module Chess.Bitboard
   ( Bitboard(..)
+  , BitboardRepresentation(..)
   , bitboardIntersect
   , bitboardUnion
   , BoardIndex
@@ -23,6 +24,8 @@ module Chess.Bitboard
   , blackQueenOccupancyFor
   , whiteKingOccupancyFor
   , blackKingOccupancyFor
+
+  , regularToBitboard
   ) where
 
 import Chess.Base
@@ -44,6 +47,21 @@ instance BoardIndex (Int, Int) where
 
 data Bitboard = Bitboard Word64 deriving (Eq)
 
+data BitboardRepresentation = BitboardRepresentation
+  { whitePawns   :: Bitboard
+  , blackPawns   :: Bitboard
+  , whiteBishops :: Bitboard
+  , blackBishops :: Bitboard
+  , whiteKnights :: Bitboard
+  , blackKnights :: Bitboard
+  , whiteRooks   :: Bitboard
+  , blackRooks   :: Bitboard
+  , whiteQueens  :: Bitboard
+  , blackQueens  :: Bitboard
+  , whiteKings   :: Bitboard
+  , blackKings   :: Bitboard
+  } deriving (Eq, Show)
+
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
 
@@ -62,7 +80,7 @@ turnWord64IntoWord8s :: Word64 -> [Word8]
 turnWord64IntoWord8s w = map (extractWord8 . (shiftR w)) [56, 48, 40, 32, 24, 16, 8, 0]
 
 instance Show Bitboard where
-  show (Bitboard b) = (intercalate "\n" $
+  show (Bitboard b) = "\n" ++ (intercalate "\n" $
     map printWord8AsBinary $
     turnWord64IntoWord8s b) ++ "\n"
 
@@ -127,3 +145,19 @@ whiteKingOccupancyFor = occupancyFor (Piece King White)
 
 blackKingOccupancyFor :: RegularBoardRepresentation -> Bitboard
 blackKingOccupancyFor = occupancyFor (Piece King Black)
+
+regularToBitboard   :: RegularBoardRepresentation -> BitboardRepresentation
+regularToBitboard b = BitboardRepresentation
+  { whitePawns   = whitePawnOccupancyFor b
+  , blackPawns   = blackPawnOccupancyFor b
+  , whiteBishops = whiteBishopOccupancyFor b
+  , blackBishops = blackBishopOccupancyFor b
+  , whiteKnights = whiteKnightOccupancyFor b
+  , blackKnights = blackKnightOccupancyFor b
+  , whiteRooks   = whiteRookOccupancyFor b
+  , blackRooks   = blackRookOccupancyFor b
+  , whiteQueens  = whiteQueenOccupancyFor b
+  , blackQueens  = blackQueenOccupancyFor b
+  , whiteKings   = whiteKingOccupancyFor b
+  , blackKings   = blackKingOccupancyFor b
+  }
