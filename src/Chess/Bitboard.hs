@@ -15,6 +15,8 @@ module Chess.Bitboard
   , blackPawnOccupancyFor
   , whiteKnightOccupancyFor
   , blackKnightOccupancyFor
+  , whiteBishopOccupancyFor
+  , blackBishopOccupancyFor
   ) where
 
 import Chess.Base
@@ -77,9 +79,9 @@ printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where
 occupancyFor   :: Piece -> RegularBoardRepresentation -> Bitboard
 occupancyFor p = snd . foldr (addPieceToBitboard p) (0, Bitboard 0) . concat where
 
-  addPieceToBitboard          :: Piece -> Square -> (Int, Bitboard) -> (Int, Bitboard)
+  addPieceToBitboard            :: Piece -> Square -> (Int, Bitboard) -> (Int, Bitboard)
   addPieceToBitboard p s (i, b) | isRelevantPiece p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
-                              | otherwise         = (i + 1, b)
+                                | otherwise         = (i + 1, b)
 
   isRelevantPiece     :: Piece -> Square -> Bool
   isRelevantPiece p s = pieceOn s == Just p
@@ -95,3 +97,9 @@ whiteKnightOccupancyFor = occupancyFor (Piece Knight White)
 
 blackKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
 blackKnightOccupancyFor = occupancyFor (Piece Knight Black)
+
+whiteBishopOccupancyFor :: RegularBoardRepresentation -> Bitboard
+whiteBishopOccupancyFor = occupancyFor (Piece Bishop White)
+
+blackBishopOccupancyFor :: RegularBoardRepresentation -> Bitboard
+blackBishopOccupancyFor = occupancyFor (Piece Bishop Black)
