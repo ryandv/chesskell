@@ -74,35 +74,24 @@ printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where
   nthBitAtFront :: Word8 -> Int -> Word8
   nthBitAtFront w bitIndex = shiftR w bitIndex
 
+occupancyFor   :: Piece -> RegularBoardRepresentation -> Bitboard
+occupancyFor p = snd . foldr (addPieceToBitboard p) (0, Bitboard 0) . concat where
 
-whitePawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whitePawnOccupancyFor = pawnOccupancyFor White
-
-blackPawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackPawnOccupancyFor = pawnOccupancyFor Black
-
-pawnOccupancyFor   :: Player -> RegularBoardRepresentation -> Bitboard
-pawnOccupancyFor p = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
-
-  addPieceToBitboard          :: Square -> (Int, Bitboard) -> (Int, Bitboard)
-  addPieceToBitboard s (i, b) | isPawnForPlayer p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
+  addPieceToBitboard          :: Piece -> Square -> (Int, Bitboard) -> (Int, Bitboard)
+  addPieceToBitboard p s (i, b) | isRelevantPiece p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
                               | otherwise         = (i + 1, b)
 
-  isPawnForPlayer     :: Player -> Square -> Bool
-  isPawnForPlayer p s = pieceOn s == Just (Piece Pawn p)
+  isRelevantPiece     :: Piece -> Square -> Bool
+  isRelevantPiece p s = pieceOn s == Just p
+
+whitePawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
+whitePawnOccupancyFor = occupancyFor (Piece Pawn White)
+
+blackPawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
+blackPawnOccupancyFor = occupancyFor (Piece Pawn Black)
 
 whiteKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteKnightOccupancyFor = knightOccupancyFor White
+whiteKnightOccupancyFor = occupancyFor (Piece Knight White)
 
 blackKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackKnightOccupancyFor = knightOccupancyFor Black
-
-knightOccupancyFor :: Player -> RegularBoardRepresentation -> Bitboard
-knightOccupancyFor p = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
-
-  addPieceToBitboard          :: Square -> (Int, Bitboard) -> (Int, Bitboard)
-  addPieceToBitboard s (i, b) | isKnightForPlayer p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
-                              | otherwise             = (i + 1, b)
-
-  isKnightForPlayer     :: Player -> Square -> Bool
-  isKnightForPlayer p s = pieceOn s == Just (Piece Knight p)
+blackKnightOccupancyFor = occupancyFor (Piece Knight Black)
