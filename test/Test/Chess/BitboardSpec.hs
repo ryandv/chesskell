@@ -110,3 +110,9 @@ spec = describe "bitboard" $ do
 
     it "can produce an occupancy bitboard for black queens" $ do
       blackQueenOccupancyFor (placement startingPos) `shouldBe` Bitboard 16
+
+    it "can produce an occupancy bitboard for white kings" $ do
+      whiteKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 576460752303423488
+
+    it "can produce an occupancy bitboard for black kings" $ do
+      blackKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 8
