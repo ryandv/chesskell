@@ -11,6 +11,7 @@ module Chess.Bitboard
   , extractWord8
   , printWord8AsBinary
   , whitePawnOccupancyFor
+  , blackPawnOccupancyFor
   ) where
 
 import Chess.Base
@@ -70,12 +71,19 @@ printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where
   nthBitAtFront :: Word8 -> Int -> Word8
   nthBitAtFront w bitIndex = shiftR w bitIndex
 
+
 whitePawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whitePawnOccupancyFor = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
+whitePawnOccupancyFor = pawnOccupancyFor White
 
-  addPieceToBitboard         :: Square -> (Int, Bitboard) -> (Int, Bitboard)
-  addPieceToBitboard s (i, b) | isWhitePawn s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
-                              | otherwise     = (i + 1, b)
+blackPawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
+blackPawnOccupancyFor = pawnOccupancyFor Black
 
-  isWhitePawn   :: Square -> Bool
-  isWhitePawn s = pieceOn s == Just (Piece Pawn White)
+pawnOccupancyFor   :: Player -> RegularBoardRepresentation -> Bitboard
+pawnOccupancyFor p = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
+
+  addPieceToBitboard          :: Square -> (Int, Bitboard) -> (Int, Bitboard)
+  addPieceToBitboard s (i, b) | isPawnForPlayer p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
+                              | otherwise         = (i + 1, b)
+
+  isPawnForPlayer     :: Player -> Square -> Bool
+  isPawnForPlayer p s = pieceOn s == Just (Piece Pawn p)
