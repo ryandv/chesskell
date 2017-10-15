@@ -10,9 +10,13 @@ module Chess.Bitboard
   , turnWord64IntoWord8s
   , extractWord8
   , printWord8AsBinary
+  , whitePawnOccupancyFor
   ) where
 
+import Chess.Base
+
 import Data.Bits
+import Data.Functor
 import Data.List
 import Data.Word
 import Text.Show
@@ -65,3 +69,13 @@ printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where
 
   nthBitAtFront :: Word8 -> Int -> Word8
   nthBitAtFront w bitIndex = shiftR w bitIndex
+
+whitePawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
+whitePawnOccupancyFor = snd . foldr addPieceToBitboard (0, Bitboard 0) . concat where
+
+  addPieceToBitboard         :: Square -> (Int, Bitboard) -> (Int, Bitboard)
+  addPieceToBitboard s (i, b) | isWhitePawn s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
+                              | otherwise     = (i + 1, b)
+
+  isWhitePawn   :: Square -> Bool
+  isWhitePawn s = pieceOn s == Just (Piece Pawn White)
