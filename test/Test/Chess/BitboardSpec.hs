@@ -79,6 +79,20 @@ spec = describe "bitboard" $ do
       let queenMoves  = Bitboard 945066513
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
 
+  describe "translations" $ do
+    it "can translate bitboards in the north direction" $ do
+      {--
+      . . . 1 . . . 1     1 . . 1 . . 1 .
+      1 . . 1 . . 1 .     . 1 . 1 . 1 . .
+      . 1 . 1 . 1 . .     . . 1 1 1 . . .
+      . . 1 1 1 . . .     1 1 1 * 1 1 1 1
+      1 1 1 * 1 1 1 1 =>  . . 1 1 1 . . .
+      . . 1 1 1 . . .     . 1 . 1 . 1 . .
+      . 1 . 1 . 1 . .     1 . . 1 . . 1 .
+      1 . . 1 . . 1 .     . . . 1 . . . 1
+      --}
+
+      translateNorth (Bitboard 10544115227674579473) `shouldBe` Bitboard 1266167048752878738
 
   describe "conversion from regular board representations" $ do
 

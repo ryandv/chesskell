@@ -26,6 +26,8 @@ module Chess.Bitboard
   , blackKingOccupancyFor
 
   , regularToBitboard
+
+  , translateNorth
   ) where
 
 import Chess.Base
@@ -161,3 +163,6 @@ regularToBitboard b = BitboardRepresentation
   , whiteKings   = whiteKingOccupancyFor b
   , blackKings   = blackKingOccupancyFor b
   }
+
+translateNorth :: Bitboard -> Bitboard
+translateNorth (Bitboard b) = Bitboard $ rotateR b 8
