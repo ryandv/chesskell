@@ -45,7 +45,7 @@ instance BoardIndex Int where
   isOccupied (Bitboard word) squareIndex = testBit word squareIndex
 
 instance BoardIndex (Int, Int) where
-  isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
+  isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ (63 - 8 * rankIndex + fileIndex)
 
 data Bitboard = Bitboard Word64 deriving (Eq)
 
@@ -106,7 +106,7 @@ occupancyFor   :: Piece -> RegularBoardRepresentation -> Bitboard
 occupancyFor p = snd . foldr (addPieceToBitboard p) (0, Bitboard 0) . concat where
 
   addPieceToBitboard            :: Piece -> Square -> (Int, Bitboard) -> (Int, Bitboard)
-  addPieceToBitboard p s (i, b) | isRelevantPiece p s = (i + 1, Bitboard (2^i) `bitboardUnion` b)
+  addPieceToBitboard p s (i, b) | isRelevantPiece p s = (i + 1, Bitboard (2^(63 - i)) `bitboardUnion` b)
                                 | otherwise         = (i + 1, b)
 
   isRelevantPiece     :: Piece -> Square -> Bool
@@ -165,4 +165,4 @@ regularToBitboard b = BitboardRepresentation
   }
 
 translateNorth :: Bitboard -> Bitboard
-translateNorth (Bitboard b) = Bitboard $ rotateR b 8
+translateNorth (Bitboard b) = Bitboard $ rotateL b 8
