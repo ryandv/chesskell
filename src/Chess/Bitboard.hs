@@ -30,6 +30,7 @@ module Chess.Bitboard
   , translateNorth
 
   , rankMask
+  , fileMask
   ) where
 
 import Chess.Base
@@ -171,3 +172,7 @@ translateNorth (Bitboard b) = Bitboard $ rotateL b 8
 
 rankMask :: Rank -> Bitboard
 rankMask r = Bitboard $ shiftL 255 ((r * 8) .&. 56)
+
+fileMask :: File -> Bitboard
+fileMask f = Bitboard $ shiftL 72340172838076673 (fileIndex .&. 7) where
+  fileIndex = fromEnum f - 97
