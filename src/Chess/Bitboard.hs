@@ -28,6 +28,8 @@ module Chess.Bitboard
   , regularToBitboard
 
   , translateNorth
+
+  , rankMask
   ) where
 
 import Chess.Base
@@ -166,3 +168,6 @@ regularToBitboard b = BitboardRepresentation
 
 translateNorth :: Bitboard -> Bitboard
 translateNorth (Bitboard b) = Bitboard $ rotateL b 8
+
+rankMask :: Rank -> Bitboard
+rankMask r = Bitboard $ shiftL 255 ((r * 8) .&. 56)

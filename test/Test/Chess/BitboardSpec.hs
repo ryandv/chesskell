@@ -13,9 +13,12 @@ import Test.QuickCheck.Arbitrary
 
 rankAndFileIndices :: Gen (Int, Int)
 rankAndFileIndices = do
-  ri  <- choose (0, 7)
+  ri  <- rankIndices
   fi  <- choose (0, 7)
   return (ri, fi)
+
+rankIndices :: Gen Int
+rankIndices = choose (0, 7)
 
 bitboards :: Gen Bitboard
 bitboards = do
@@ -88,6 +91,10 @@ spec = describe "bitboard" $ do
       let bishopMoves = Bitboard 9241705379636978241
       let queenMoves  = Bitboard 9820426766351346249
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
+
+  describe "ray attacks" $ do
+    it "can calculate ray attacks for any given rank" $ do
+      forAll rankIndices $ (\r -> rankMask r == (Bitboard (255 * (256 ^ r))))
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
