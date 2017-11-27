@@ -43,8 +43,11 @@ spec :: Spec
 spec = describe "bitboard" $ do
 
   describe "integrations with Base" $ do
-    it "can convert 0-based (rank, file) indices to Coordinates" $ do
+    it "can convert Coordinates to 0-based (rank, file) indices" $ do
       forAll coords (\c@(Coordinate f r) -> coordinateToIndices c == (r - 1, fromEnum f - 97))
+
+    it "can convert 0-based (rank, file) indices to Coordinates" $ do
+      forAll rankAndFileIndices (\(r, f) -> indicesToCoordinate (r, f) == (Coordinate (toEnum $ f + 97) (r + 1)))
 
   describe "formatting" $ do
     it "is showable" $ do

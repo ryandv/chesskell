@@ -6,6 +6,7 @@ module Chess.Bitboard
   , bitboardIntersect
   , bitboardUnion
   , BoardIndex
+  , indicesToCoordinate
   , coordinateToIndices
   , emptyBitboard
   , isOccupied
@@ -70,6 +71,9 @@ data BitboardRepresentation = BitboardRepresentation
   , whiteKings   :: Bitboard
   , blackKings   :: Bitboard
   } deriving (Eq, Show)
+
+indicesToCoordinate :: (Int, Int) -> Coordinate
+indicesToCoordinate (r, f) = Coordinate (toEnum $ 97 + f) (r + 1)
 
 coordinateToIndices :: Coordinate -> (Int, Int)
 coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
