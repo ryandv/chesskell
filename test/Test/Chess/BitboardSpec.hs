@@ -41,6 +41,11 @@ bitboardsAnd gen = do
 
 spec :: Spec
 spec = describe "bitboard" $ do
+
+  describe "integrations with Base" $ do
+    it "can convert 0-based (rank, file) indices to Coordinates" $ do
+      forAll coords (\c@(Coordinate f r) -> indicesToCoordinate c == (r - 1, fromEnum f - 97))
+
   describe "formatting" $ do
     it "is showable" $ do
       show (Bitboard 9820426766351346249) `shouldBe` "\n. . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n"

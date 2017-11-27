@@ -6,6 +6,7 @@ module Chess.Bitboard
   , bitboardIntersect
   , bitboardUnion
   , BoardIndex
+  , indicesToCoordinate
   , emptyBitboard
   , isOccupied
   , turnWord64IntoWord8s
@@ -69,6 +70,9 @@ data BitboardRepresentation = BitboardRepresentation
   , whiteKings   :: Bitboard
   , blackKings   :: Bitboard
   } deriving (Eq, Show)
+
+indicesToCoordinate :: Coordinate -> (Int, Int)
+indicesToCoordinate (Coordinate f r) = (r - 1, fromEnum f - 97)
 
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
