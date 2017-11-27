@@ -24,6 +24,9 @@ rankIndices = choose (0, 7)
 fileIndices :: Gen Int
 fileIndices = choose (0, 7)
 
+diagonalIndices :: Gen Int
+diagonalIndices = choose (-7, 7)
+
 files :: Gen File
 files = choose ('a', 'h')
 
@@ -122,6 +125,12 @@ spec = describe "bitboard" $ do
 
     it "can calculate ray attacks for any given file" $ do
       forAll files $ (\f -> fileMask f == (Bitboard (72340172838076673 * (2 ^ (fromEnum f - 97)))))
+
+    it "can calculate ray attacks for any given diagonal" $ do
+      forAll diagonalIndices $ (\d -> all (\indexOnDiagonal -> isOccupied (diagonalMask d) indexOnDiagonal) $
+        map (\offset -> if d >= 0
+          then 8 * d + 9 * offset
+          else (-1) * d + 9 * offset) [0..(7 - abs d)])
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
