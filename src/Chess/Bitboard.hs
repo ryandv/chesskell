@@ -7,6 +7,7 @@ module Chess.Bitboard
   , bitboardUnion
   , BoardIndex
   , indicesToCoordinate
+  , indicesToSquareIndex
   , coordinateToIndices
   , emptyBitboard
   , isOccupied
@@ -74,6 +75,9 @@ data BitboardRepresentation = BitboardRepresentation
 
 indicesToCoordinate :: (Int, Int) -> Coordinate
 indicesToCoordinate (r, f) = Coordinate (toEnum $ 97 + f) (r + 1)
+
+indicesToSquareIndex :: (Int, Int) -> Int
+indicesToSquareIndex (r, f) = 8 * r + f
 
 coordinateToIndices :: Coordinate -> (Int, Int)
 coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
