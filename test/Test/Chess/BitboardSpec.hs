@@ -59,7 +59,7 @@ spec = describe "bitboard" $ do
       isOccupied (Bitboard 9241421688590303745) (0 :: Int) && isOccupied (Bitboard 9241421688590303745) (63 :: Int) `shouldBe` True
 
     it "has a squareIndex defined in terms of a rankIndex and a fileIndex" $ do
-      forAll (bitboardsAnd rankAndFileIndices) $ (\(bitboard, (ri, fi)) -> (isOccupied bitboard (63 - 8 * ri + fi)) == isOccupied bitboard (ri, fi))
+      forAll (bitboardsAnd rankAndFileIndices) $ (\(bitboard, (ri, fi)) -> (isOccupied bitboard $ 8 * ri + fi) == isOccupied bitboard (ri, fi))
 
   describe "setwise operations" $ do
     {--

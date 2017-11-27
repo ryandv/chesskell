@@ -48,7 +48,7 @@ instance BoardIndex Int where
   isOccupied (Bitboard word) squareIndex = testBit word squareIndex
 
 instance BoardIndex (Int, Int) where
-  isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ (63 - 8 * rankIndex + fileIndex)
+  isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
 
 data Bitboard = Bitboard Word64 deriving (Eq)
 
