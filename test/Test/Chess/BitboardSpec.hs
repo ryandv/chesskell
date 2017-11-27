@@ -121,10 +121,12 @@ spec = describe "bitboard" $ do
 
   describe "ray attacks" $ do
     it "can calculate ray attacks for any given rank" $ do
-      forAll rankIndices $ (\r -> rankMask r == (Bitboard (255 * (256 ^ r))))
+      forAll rankIndices $ (\r -> all (\indexOnRank -> isOccupied (rankMask r) indexOnRank) $
+        map (\offset -> 8 * r + offset) [0..7])
 
     it "can calculate ray attacks for any given file" $ do
-      forAll files $ (\f -> fileMask f == (Bitboard (72340172838076673 * (2 ^ (fromEnum f - 97)))))
+      forAll files $ (\f -> all (\indexOnFile -> isOccupied (fileMask f) indexOnFile) $
+        map (\offset -> (fromEnum f - 97) + 8 * offset) [0..7])
 
     it "can calculate ray attacks for any given diagonal" $ do
       forAll diagonalIndices $ (\d -> all (\indexOnDiagonal -> isOccupied (diagonalMask d) indexOnDiagonal) $
