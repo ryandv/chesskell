@@ -8,6 +8,7 @@ module Chess.Bitboard
   , BoardIndex
   , indicesToCoordinate
   , indicesToSquareIndex
+  , squareIndexToIndices
   , coordinateToIndices
   , emptyBitboard
   , isOccupied
@@ -78,6 +79,9 @@ indicesToCoordinate (r, f) = Coordinate (toEnum $ 97 + f) (r + 1)
 
 indicesToSquareIndex :: (Int, Int) -> Int
 indicesToSquareIndex (r, f) = 8 * r + f
+
+squareIndexToIndices :: Int -> (Int, Int)
+squareIndexToIndices i = (i `div` 8, i `mod` 8)
 
 coordinateToIndices :: Coordinate -> (Int, Int)
 coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)

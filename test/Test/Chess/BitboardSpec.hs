@@ -49,8 +49,11 @@ spec = describe "bitboard" $ do
     it "can convert 0-based (rank, file) indices to Coordinates" $ do
       forAll rankAndFileIndices (\(r, f) -> indicesToCoordinate (r, f) == (Coordinate (toEnum $ f + 97) (r + 1)))
 
-    it "can convert (rank, file) indices to a single index from [0..63]" $ do
+    it "can convert (rank, file) indices to a single square index from [0..63]" $ do
       forAll rankAndFileIndices (\(r, f) -> indicesToSquareIndex (r, f) == 8 * r + f)
+
+    it "can convert single square indices to (rank, file) indices" $ do
+      forAll rankAndFileIndices (\(r, f) -> squareIndexToIndices (8 * r + f) == (r, f))
 
   describe "formatting" $ do
     it "is showable" $ do
