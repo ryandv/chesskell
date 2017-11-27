@@ -44,7 +44,7 @@ spec = describe "bitboard" $ do
 
   describe "integrations with Base" $ do
     it "can convert 0-based (rank, file) indices to Coordinates" $ do
-      forAll coords (\c@(Coordinate f r) -> indicesToCoordinate c == (r - 1, fromEnum f - 97))
+      forAll coords (\c@(Coordinate f r) -> coordinateToIndices c == (r - 1, fromEnum f - 97))
 
   describe "formatting" $ do
     it "is showable" $ do
@@ -68,7 +68,7 @@ spec = describe "bitboard" $ do
       forAll (bitboardsAnd rankAndFileIndices) $ (\(bitboard, (ri, fi)) -> (isOccupied bitboard $ 8 * ri + fi) == isOccupied bitboard (ri, fi))
 
     it "can be indexed by Coordinate" $ do
-      forAll (bitboardsAnd coords) $ (\(bitboard, c@(Coordinate f r)) -> (isOccupied bitboard c) == isOccupied bitboard (r - 1, fromEnum f - 97))
+      forAll (bitboardsAnd coords) $ (\(bitboard, c@(Coordinate f r)) -> (isOccupied bitboard c) == isOccupied bitboard (coordinateToIndices c))
 
   describe "setwise operations" $ do
     {--

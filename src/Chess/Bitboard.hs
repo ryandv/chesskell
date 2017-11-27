@@ -6,7 +6,7 @@ module Chess.Bitboard
   , bitboardIntersect
   , bitboardUnion
   , BoardIndex
-  , indicesToCoordinate
+  , coordinateToIndices
   , emptyBitboard
   , isOccupied
   , turnWord64IntoWord8s
@@ -52,7 +52,7 @@ instance BoardIndex (Int, Int) where
   isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
 
 instance BoardIndex Coordinate where
-  isOccupied b (Coordinate file rank) = isOccupied b (rank - 1, fromEnum file - 97)
+  isOccupied b c = isOccupied b $ coordinateToIndices c
 
 data Bitboard = Bitboard Word64 deriving (Eq)
 
@@ -71,8 +71,8 @@ data BitboardRepresentation = BitboardRepresentation
   , blackKings   :: Bitboard
   } deriving (Eq, Show)
 
-indicesToCoordinate :: Coordinate -> (Int, Int)
-indicesToCoordinate (Coordinate f r) = (r - 1, fromEnum f - 97)
+coordinateToIndices :: Coordinate -> (Int, Int)
+coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
 
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
