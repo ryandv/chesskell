@@ -10,6 +10,7 @@ import Test.Hspec
 import Test.Placements
 import Test.QuickCheck
 import Test.QuickCheck.Arbitrary
+import Test.Util
 
 rankAndFileIndices :: Gen (Int, Int)
 rankAndFileIndices = do
@@ -60,6 +61,9 @@ spec = describe "bitboard" $ do
 
     it "has a squareIndex defined in terms of a rankIndex and a fileIndex" $ do
       forAll (bitboardsAnd rankAndFileIndices) $ (\(bitboard, (ri, fi)) -> (isOccupied bitboard $ 8 * ri + fi) == isOccupied bitboard (ri, fi))
+
+    it "can be indexed by Coordinate" $ do
+      forAll (bitboardsAnd coords) $ (\(bitboard, c@(Coordinate f r)) -> (isOccupied bitboard c) == isOccupied bitboard (r - 1, fromEnum f - 97))
 
   describe "setwise operations" $ do
     {--

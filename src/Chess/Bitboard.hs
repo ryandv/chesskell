@@ -50,6 +50,9 @@ instance BoardIndex Int where
 instance BoardIndex (Int, Int) where
   isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
 
+instance BoardIndex Coordinate where
+  isOccupied b (Coordinate file rank) = isOccupied b (rank - 1, fromEnum file - 97)
+
 data Bitboard = Bitboard Word64 deriving (Eq)
 
 data BitboardRepresentation = BitboardRepresentation
