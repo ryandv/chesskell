@@ -124,29 +124,29 @@ spec = describe "bitboard" $ do
       let queenMoves  = Bitboard 9820426766351346249
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
 
-  describe "ray attacks" $ do
-    it "can calculate ray attacks for any given rank" $ do
+  describe "line attacks" $ do
+    it "can calculate line attacks for any given rank" $ do
       let squareOnRankIsPresent r = isOccupied (rankMask r)
       let squaresOnRank r = map (8 * r +) [0..7]
       let allSquaresOnRankArePresent = liftA2 all squareOnRankIsPresent squaresOnRank
 
       forAll rankIndices allSquaresOnRankArePresent
 
-    it "can calculate ray attacks for any given file" $ do
+    it "can calculate line attacks for any given file" $ do
       let squareOnFileIsPresent f = isOccupied (fileMask f)
       let squaresOnFile f = map (\offset -> (fromEnum f - 97) + 8 * offset) [0..7]
       let allSquaresOnFileArePresent = liftA2 all squareOnFileIsPresent squaresOnFile
 
       forAll files allSquaresOnFileArePresent
 
-    it "can calculate ray attacks for any given diagonal" $ do
+    it "can calculate line attacks for any given diagonal" $ do
       let squareOnDiagonalIsPresent d = isOccupied (diagonalMask d)
       let squaresOnDiagonal d = map (\offset -> if d >= 0 then 8 * d + 9 * offset else (-1) * d + 9 * offset) [0..(7 - abs d)]
       let allSquaresOnDiagonalArePresent = liftA2 all squareOnDiagonalIsPresent squaresOnDiagonal
 
       forAll diagonalIndices allSquaresOnDiagonalArePresent
 
-    it "can calculate ray attacks for any given diagonal" $ do
+    it "can calculate line attacks for any given diagonal" $ do
       let squareOnAntiDiagonalIsPresent d = isOccupied (antiDiagonalMask d)
       let squaresOnAntiDiagonal d = map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))]
       let allSquaresOnAntiDiagonalArePresent = liftA2 all squareOnAntiDiagonalIsPresent squaresOnAntiDiagonal
