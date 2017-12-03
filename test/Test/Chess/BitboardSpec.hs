@@ -3,6 +3,8 @@ module Test.Chess.BitboardSpec where
 import Chess.Base
 import Chess.Bitboard
 
+import Control.Applicative
+
 import Data.Int
 import Data.Word
 
@@ -121,18 +123,25 @@ spec = describe "bitboard" $ do
 
   describe "ray attacks" $ do
     it "can calculate ray attacks for any given rank" $ do
-      forAll rankIndices $ (\r -> all (\indexOnRank -> isOccupied (rankMask r) indexOnRank) $
-        map (\offset -> 8 * r + offset) [0..7])
+      let squareOnRankIsPresent r = isOccupied (rankMask r)
+      let squaresOnRank r = map (8 * r +) [0..7]
+      let allSquaresOnRankArePresent = liftA2 all squareOnRankIsPresent squaresOnRank
+
+      forAll rankIndices allSquaresOnRankArePresent
 
     it "can calculate ray attacks for any given file" $ do
-      forAll files $ (\f -> all (\indexOnFile -> isOccupied (fileMask f) indexOnFile) $
-        map (\offset -> (fromEnum f - 97) + 8 * offset) [0..7])
+      let squareOnFileIsPresent f = isOccupied (fileMask f)
+      let squaresOnFile f = map (\offset -> (fromEnum f - 97) + 8 * offset) [0..7]
+      let allSquaresOnFileArePresent = liftA2 all squareOnFileIsPresent squaresOnFile
+
+      forAll files allSquaresOnFileArePresent
 
     it "can calculate ray attacks for any given diagonal" $ do
-      forAll diagonalIndices $ (\d -> all (\indexOnDiagonal -> isOccupied (diagonalMask d) indexOnDiagonal) $
-        map (\offset -> if d >= 0
-          then 8 * d + 9 * offset
-          else (-1) * d + 9 * offset) [0..(7 - abs d)])
+      let squareOnDiagonalIsPresent d = isOccupied (diagonalMask d)
+      let squaresOnDiagonal d = map (\offset -> if d >= 0 then 8 * d + 9 * offset else (-1) * d + 9 * offset) [0..(7 - abs d)]
+      let allSquaresOnDiagonalArePresent = liftA2 all squareOnDiagonalIsPresent squaresOnDiagonal
+
+      forAll diagonalIndices allSquaresOnDiagonalArePresent
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do

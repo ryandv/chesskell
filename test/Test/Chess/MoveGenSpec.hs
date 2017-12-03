@@ -14,8 +14,7 @@ import Test.Hspec
 import Test.QuickCheck
 
 spec :: Spec
-spec =
-  context "potential move generation" $ do
+spec = context "potential move generation" $ do
     describe "alongRay" $ do
       context "verticals" $ do
         it "returns a list of coordinates along the north vertical ray, including the destination" $
