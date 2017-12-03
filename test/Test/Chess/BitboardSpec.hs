@@ -29,6 +29,9 @@ fileIndices = choose (0, 7)
 diagonalIndices :: Gen Int
 diagonalIndices = choose (-7, 7)
 
+antiDiagonalIndices :: Gen Int
+antiDiagonalIndices = choose (0, 14)
+
 files :: Gen File
 files = choose ('a', 'h')
 
@@ -142,6 +145,13 @@ spec = describe "bitboard" $ do
       let allSquaresOnDiagonalArePresent = liftA2 all squareOnDiagonalIsPresent squaresOnDiagonal
 
       forAll diagonalIndices allSquaresOnDiagonalArePresent
+
+    it "can calculate ray attacks for any given diagonal" $ do
+      let squareOnAntiDiagonalIsPresent d = isOccupied (antiDiagonalMask d)
+      let squaresOnAntiDiagonal d = map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))]
+      let allSquaresOnAntiDiagonalArePresent = liftA2 all squareOnAntiDiagonalIsPresent squaresOnAntiDiagonal
+
+      forAll antiDiagonalIndices allSquaresOnAntiDiagonalArePresent
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do

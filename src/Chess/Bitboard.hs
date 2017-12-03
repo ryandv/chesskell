@@ -36,6 +36,7 @@ module Chess.Bitboard
   , rankMask
   , fileMask
   , diagonalMask
+  , antiDiagonalMask
   ) where
 
 import Chess.Base
@@ -200,5 +201,11 @@ fileMask f = Bitboard $ shiftL 72340172838076673 (fileIndex .&. 7) where
 diagonalMask :: Int -> Bitboard
 diagonalMask diagonal = Bitboard $ shiftL (shiftR 9241421688590303745 south) north where
   diag = (-8) * diagonal
+  north = ((-1) * diag) .&. (shiftR diag 31)
+  south = diag .&. (shiftR ((-1) * diag) 31)
+
+antiDiagonalMask :: Int -> Bitboard
+antiDiagonalMask antiDiagonal = Bitboard $ shiftL (shiftR 72624976668147840 south) north where
+  diag = 56 - 8 * antiDiagonal
   north = ((-1) * diag) .&. (shiftR diag 31)
   south = diag .&. (shiftR ((-1) * diag) 31)
