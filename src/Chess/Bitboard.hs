@@ -39,6 +39,7 @@ module Chess.Bitboard
   , antiDiagonalMask
 
   , northRay
+  , southRay
   ) where
 
 import Chess.Base
@@ -215,3 +216,7 @@ antiDiagonalMask antiDiagonal = Bitboard $ shiftL (shiftR 72624976668147840 sout
 northRay :: (Int, Int) -> Bitboard
 northRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
   Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+
+southRay :: (Int, Int) -> Bitboard
+southRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
+  Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
