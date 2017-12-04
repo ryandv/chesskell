@@ -222,12 +222,13 @@ eastRay :: (Int, Int) -> Bitboard
 eastRay (rank, file) = positiveRayFromLine (rankMask rank) (rank, file)
 
 southRay :: (Int, Int) -> Bitboard
-southRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
-  Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
+southRay (rank, file) = negativeRayFromLine (fileMask (toEnum $ 97 + file)) (rank, file)
 
 westRay :: (Int, Int) -> Bitboard
-westRay (rank, file) = let (Bitboard bits) = rankMask rank in
-  Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
+westRay (rank, file) = negativeRayFromLine (rankMask rank) (rank, file)
 
 positiveRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
 positiveRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+
+negativeRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
+negativeRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
