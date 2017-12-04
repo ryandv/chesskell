@@ -39,6 +39,7 @@ module Chess.Bitboard
   , antiDiagonalMask
 
   , northRay
+  , eastRay
   , southRay
   ) where
 
@@ -215,6 +216,10 @@ antiDiagonalMask antiDiagonal = Bitboard $ shiftL (shiftR 72624976668147840 sout
 
 northRay :: (Int, Int) -> Bitboard
 northRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
+  Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+
+eastRay :: (Int, Int) -> Bitboard
+eastRay (rank, file) = let (Bitboard bits) = rankMask rank in
   Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
 
 southRay :: (Int, Int) -> Bitboard
