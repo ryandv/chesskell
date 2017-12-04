@@ -41,6 +41,7 @@ module Chess.Bitboard
   , northRay
   , eastRay
   , southRay
+  , westRay
   ) where
 
 import Chess.Base
@@ -224,4 +225,8 @@ eastRay (rank, file) = let (Bitboard bits) = rankMask rank in
 
 southRay :: (Int, Int) -> Bitboard
 southRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
+  Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
+
+westRay :: (Int, Int) -> Bitboard
+westRay (rank, file) = let (Bitboard bits) = rankMask rank in
   Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)

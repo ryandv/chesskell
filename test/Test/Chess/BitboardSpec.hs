@@ -175,6 +175,13 @@ spec = describe "bitboard" $ do
 
       forAll rankAndFileIndices allSquaresOnEastRayArePresent
 
+    it "can calculate the west ray attack starting from an origin square" $ do
+      let squareOnWestRayIsPresent origin = isOccupied (westRay origin)
+      let squaresOnWestRay (rank, file) = map (\offset -> (8 * rank + file) - offset) [1..file]
+      let allSquaresOnWestRayArePresent = liftA2 all squareOnWestRayIsPresent squaresOnWestRay
+
+      forAll rankAndFileIndices allSquaresOnWestRayArePresent
+
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
       {--
