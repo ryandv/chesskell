@@ -215,13 +215,11 @@ antiDiagonalMask antiDiagonal = Bitboard $ shiftL (shiftR 72624976668147840 sout
   north = ((-1) * diag) .&. (shiftR diag 31)
   south = diag .&. (shiftR ((-1) * diag) 31)
 
-northRay :: (Int, Int) -> Bitboard
-northRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
-  Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+northRay              :: (Int, Int) -> Bitboard
+northRay (rank, file) = positiveRayFromLine (fileMask (toEnum $ 97 + file)) (rank, file)
 
 eastRay :: (Int, Int) -> Bitboard
-eastRay (rank, file) = let (Bitboard bits) = rankMask rank in
-  Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+eastRay (rank, file) = positiveRayFromLine (rankMask rank) (rank, file)
 
 southRay :: (Int, Int) -> Bitboard
 southRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
@@ -230,3 +228,6 @@ southRay (rank, file) = let (Bitboard bits) = fileMask (toEnum $ 97 + file) in
 westRay :: (Int, Int) -> Bitboard
 westRay (rank, file) = let (Bitboard bits) = rankMask rank in
   Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
+
+positiveRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
+positiveRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
