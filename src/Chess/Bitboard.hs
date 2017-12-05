@@ -59,7 +59,7 @@ instance BoardIndex Int where
   isOccupied (Bitboard word) squareIndex = testBit word squareIndex
 
 instance BoardIndex (Int, Int) where
-  isOccupied (Bitboard word) (rankIndex, fileIndex) = testBit word $ 8 * rankIndex + fileIndex
+  isOccupied (Bitboard word) = testBit word . indicesToSquareIndex
 
 instance BoardIndex Coordinate where
   isOccupied b c = isOccupied b $ coordinateToIndices c

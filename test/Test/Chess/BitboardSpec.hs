@@ -153,28 +153,28 @@ spec = describe "bitboard" $ do
   describe "ray attacks" $ do
     it "can calculate the north ray attack starting from an origin square" $ do
       let squareOnNorthRayIsPresent origin = isOccupied (northRay origin)
-      let squaresOnNorthRay (rank, file) = map (\offset -> (8 * rank + file) + 8 * offset) [1..7-rank]
+      let squaresOnNorthRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) + 8 * offset) [1..7-rank]
       let allSquaresOnNorthRayArePresent = liftA2 all squareOnNorthRayIsPresent squaresOnNorthRay
 
       forAll rankAndFileIndices allSquaresOnNorthRayArePresent
 
     it "can calculate the south ray attack starting from an origin square" $ do
       let squareOnSouthRayIsPresent origin = isOccupied (southRay origin)
-      let squaresOnSouthRay (rank, file) = map (\offset -> (8 * rank + file) - 8 * offset) [1..rank]
+      let squaresOnSouthRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) - 8 * offset) [1..rank]
       let allSquaresOnSouthRayArePresent = liftA2 all squareOnSouthRayIsPresent squaresOnSouthRay
 
       forAll rankAndFileIndices allSquaresOnSouthRayArePresent
 
     it "can calculate the east ray attack starting from an origin square" $ do
       let squareOnEastRayIsPresent origin = isOccupied (eastRay origin)
-      let squaresOnEastRay (rank, file) = map (\offset -> (8 * rank + file) + offset) [1..7-file]
+      let squaresOnEastRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) + offset) [1..7-file]
       let allSquaresOnEastRayArePresent = liftA2 all squareOnEastRayIsPresent squaresOnEastRay
 
       forAll rankAndFileIndices allSquaresOnEastRayArePresent
 
     it "can calculate the west ray attack starting from an origin square" $ do
       let squareOnWestRayIsPresent origin = isOccupied (westRay origin)
-      let squaresOnWestRay (rank, file) = map (\offset -> (8 * rank + file) - offset) [1..file]
+      let squaresOnWestRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file]
       let allSquaresOnWestRayArePresent = liftA2 all squareOnWestRayIsPresent squaresOnWestRay
 
       forAll rankAndFileIndices allSquaresOnWestRayArePresent
