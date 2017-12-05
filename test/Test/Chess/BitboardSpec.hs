@@ -16,24 +16,21 @@ import Test.Util
 
 rankAndFileIndices :: Gen (Int, Int)
 rankAndFileIndices = do
-  ri  <- rankIndices
-  fi  <- fileIndices
+  ri  <- ranks
+  fi  <- files
   return (ri, fi)
 
-rankIndices :: Gen Int
-rankIndices = choose (0, 7)
+ranks :: Gen Int
+ranks = choose (0, 7)
 
-fileIndices :: Gen Int
-fileIndices = choose (0, 7)
+files :: Gen Int
+files = choose (0, 7)
 
-diagonalIndices :: Gen Int
-diagonalIndices = choose (-7, 7)
+diagonals :: Gen Int
+diagonals = choose (-7, 7)
 
-antiDiagonalIndices :: Gen Int
-antiDiagonalIndices = choose (0, 14)
-
-files :: Gen File
-files = choose ('a', 'h')
+antiDiagonals :: Gen Int
+antiDiagonals = choose (0, 14)
 
 bitboards :: Gen Bitboard
 bitboards = do
@@ -130,11 +127,11 @@ spec = describe "bitboard" $ do
       let squaresOnRank r = map (8 * r +) [0..7]
       let allSquaresOnRankArePresent = liftA2 all squareOnRankIsPresent squaresOnRank
 
-      forAll rankIndices allSquaresOnRankArePresent
+      forAll ranks allSquaresOnRankArePresent
 
     it "can calculate line attacks for any given file" $ do
       let squareOnFileIsPresent f = isOccupied (fileMask f)
-      let squaresOnFile f = map (\offset -> (fromEnum f - 97) + 8 * offset) [0..7]
+      let squaresOnFile f = map (\offset -> f + 8 * offset) [0..7]
       let allSquaresOnFileArePresent = liftA2 all squareOnFileIsPresent squaresOnFile
 
       forAll files allSquaresOnFileArePresent
@@ -144,14 +141,14 @@ spec = describe "bitboard" $ do
       let squaresOnDiagonal d = map (\offset -> if d >= 0 then 8 * d + 9 * offset else (-1) * d + 9 * offset) [0..(7 - abs d)]
       let allSquaresOnDiagonalArePresent = liftA2 all squareOnDiagonalIsPresent squaresOnDiagonal
 
-      forAll diagonalIndices allSquaresOnDiagonalArePresent
+      forAll diagonals allSquaresOnDiagonalArePresent
 
     it "can calculate line attacks for any given diagonal" $ do
       let squareOnAntiDiagonalIsPresent d = isOccupied (antiDiagonalMask d)
       let squaresOnAntiDiagonal d = map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))]
       let allSquaresOnAntiDiagonalArePresent = liftA2 all squareOnAntiDiagonalIsPresent squaresOnAntiDiagonal
 
-      forAll antiDiagonalIndices allSquaresOnAntiDiagonalArePresent
+      forAll antiDiagonals allSquaresOnAntiDiagonalArePresent
 
   describe "ray attacks" $ do
     it "can calculate the north ray attack starting from an origin square" $ do

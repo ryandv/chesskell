@@ -196,12 +196,11 @@ regularToBitboard b = BitboardRepresentation
 translateNorth :: Bitboard -> Bitboard
 translateNorth (Bitboard b) = Bitboard $ rotateL b 8
 
-rankMask :: Rank -> Bitboard
+rankMask :: Int -> Bitboard
 rankMask r = Bitboard $ shiftL 255 ((r * 8) .&. 56)
 
-fileMask :: File -> Bitboard
-fileMask f = Bitboard $ shiftL 72340172838076673 (fileIndex .&. 7) where
-  fileIndex = fromEnum f - 97
+fileMask :: Int -> Bitboard
+fileMask f = Bitboard $ shiftL 72340172838076673 (f .&. 7) where
 
 diagonalMask :: Int -> Bitboard
 diagonalMask diagonal = Bitboard $ shiftL (shiftR 9241421688590303745 south) north where
@@ -216,13 +215,13 @@ antiDiagonalMask antiDiagonal = Bitboard $ shiftL (shiftR 72624976668147840 sout
   south = diag .&. (shiftR ((-1) * diag) 31)
 
 northRay              :: (Int, Int) -> Bitboard
-northRay (rank, file) = positiveRayFromLine (fileMask (toEnum $ 97 + file)) (rank, file)
+northRay (rank, file) = positiveRayFromLine (fileMask file) (rank, file)
 
 eastRay :: (Int, Int) -> Bitboard
 eastRay (rank, file) = positiveRayFromLine (rankMask rank) (rank, file)
 
 southRay :: (Int, Int) -> Bitboard
-southRay (rank, file) = negativeRayFromLine (fileMask (toEnum $ 97 + file)) (rank, file)
+southRay (rank, file) = negativeRayFromLine (fileMask file) (rank, file)
 
 westRay :: (Int, Int) -> Bitboard
 westRay (rank, file) = negativeRayFromLine (rankMask rank) (rank, file)
