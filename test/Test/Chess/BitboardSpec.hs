@@ -43,6 +43,8 @@ bitboardsAnd gen = do
   a <- gen
   return (bitboard, a)
 
+generatesAllTheSquaresIn :: (BoardIndex a) => (a -> Bitboard) -> (a -> [Int]) -> (a -> Bool)
+generatesAllTheSquaresIn expected actual i = all ((isOccupied . expected) i) (actual i)
 
 spec :: Spec
 spec = describe "bitboard" $ do
@@ -123,61 +125,31 @@ spec = describe "bitboard" $ do
 
   describe "line attacks" $ do
     it "can calculate line attacks for any given rank" $ do
-      let squareOnRankIsPresent r = isOccupied (rankMask r)
-      let squaresOnRank r = map (8 * r +) [0..7]
-      let allSquaresOnRankArePresent = liftA2 all squareOnRankIsPresent squaresOnRank
-
-      forAll ranks allSquaresOnRankArePresent
+      forAll ranks $ rankMask `generatesAllTheSquaresIn` (\rank -> map (\i -> 8 * rank + i) [0..7])
 
     it "can calculate line attacks for any given file" $ do
-      let squareOnFileIsPresent f = isOccupied (fileMask f)
-      let squaresOnFile f = map (\offset -> f + 8 * offset) [0..7]
-      let allSquaresOnFileArePresent = liftA2 all squareOnFileIsPresent squaresOnFile
-
-      forAll files allSquaresOnFileArePresent
+      forAll files $ fileMask `generatesAllTheSquaresIn`(\file -> map (\offset -> file + 8 * offset) [0..7])
 
     it "can calculate line attacks for any given diagonal" $ do
-      let squareOnDiagonalIsPresent d = isOccupied (diagonalMask d)
-      let squaresOnDiagonal d = map (\offset -> if d >= 0 then 8 * d + 9 * offset else (-1) * d + 9 * offset) [0..(7 - abs d)]
-      let allSquaresOnDiagonalArePresent = liftA2 all squareOnDiagonalIsPresent squaresOnDiagonal
-
-      forAll diagonals allSquaresOnDiagonalArePresent
+      forAll diagonals $ diagonalMask `generatesAllTheSquaresIn` (\diagonal -> map (\offset -> if diagonal >= 0
+        then 8 * diagonal + 9 * offset
+        else (-1) * diagonal + 9 * offset) [0..(7 - abs diagonal)])
 
     it "can calculate line attacks for any given diagonal" $ do
-      let squareOnAntiDiagonalIsPresent d = isOccupied (antiDiagonalMask d)
-      let squaresOnAntiDiagonal d = map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))]
-      let allSquaresOnAntiDiagonalArePresent = liftA2 all squareOnAntiDiagonalIsPresent squaresOnAntiDiagonal
-
-      forAll antiDiagonals allSquaresOnAntiDiagonalArePresent
+      forAll antiDiagonals $ antiDiagonalMask `generatesAllTheSquaresIn` (\d -> map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))])
 
   describe "ray attacks" $ do
     it "can calculate the north ray attack starting from an origin square" $ do
-      let squareOnNorthRayIsPresent origin = isOccupied (northRay origin)
-      let squaresOnNorthRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) + 8 * offset) [1..7-rank]
-      let allSquaresOnNorthRayArePresent = liftA2 all squareOnNorthRayIsPresent squaresOnNorthRay
-
-      forAll rankAndFileIndices allSquaresOnNorthRayArePresent
+      forAll rankAndFileIndices $ northRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + 8 * offset) [1..7-rank])
 
     it "can calculate the south ray attack starting from an origin square" $ do
-      let squareOnSouthRayIsPresent origin = isOccupied (southRay origin)
-      let squaresOnSouthRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) - 8 * offset) [1..rank]
-      let allSquaresOnSouthRayArePresent = liftA2 all squareOnSouthRayIsPresent squaresOnSouthRay
-
-      forAll rankAndFileIndices allSquaresOnSouthRayArePresent
+      forAll rankAndFileIndices $ southRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - 8 * offset) [1..rank])
 
     it "can calculate the east ray attack starting from an origin square" $ do
-      let squareOnEastRayIsPresent origin = isOccupied (eastRay origin)
-      let squaresOnEastRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) + offset) [1..7-file]
-      let allSquaresOnEastRayArePresent = liftA2 all squareOnEastRayIsPresent squaresOnEastRay
-
-      forAll rankAndFileIndices allSquaresOnEastRayArePresent
+      forAll rankAndFileIndices $ eastRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + offset) [1..7-file])
 
     it "can calculate the west ray attack starting from an origin square" $ do
-      let squareOnWestRayIsPresent origin = isOccupied (westRay origin)
-      let squaresOnWestRay (rank, file) = map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file]
-      let allSquaresOnWestRayArePresent = liftA2 all squareOnWestRayIsPresent squaresOnWestRay
-
-      forAll rankAndFileIndices allSquaresOnWestRayArePresent
+      forAll rankAndFileIndices $ westRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file])
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
