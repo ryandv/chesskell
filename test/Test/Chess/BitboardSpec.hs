@@ -167,6 +167,14 @@ spec = describe "bitboard" $ do
                              else antidiagonal in
         map (\offset -> (indicesToSquareIndex (rank, file) - 7 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 7])
 
+    it "can calculate the southwest ray attack starting from an origin square" $ do
+      forAll rankAndFileIndices $ southWestRay `generatesAllTheSquaresIn` (\(rank, file) ->
+        let diagonal = (rank - file)
+            endingSquare = if diagonal >= 0
+                             then 8 * diagonal
+                             else (-1) * diagonal in
+        map (\offset -> (indicesToSquareIndex (rank, file) - 9 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 9])
+
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
       {--
