@@ -42,6 +42,8 @@ module Chess.Bitboard
   , eastRay
   , southRay
   , westRay
+
+  , northEastRay
   ) where
 
 import Chess.Base
@@ -225,6 +227,9 @@ southRay (rank, file) = negativeRayFromLine (fileMask file) (rank, file)
 
 westRay :: (Int, Int) -> Bitboard
 westRay (rank, file) = negativeRayFromLine (rankMask rank) (rank, file)
+
+northEastRay :: (Int, Int) -> Bitboard
+northEastRay (rank, file) = positiveRayFromLine (diagonalMask $ rank - file) (rank, file)
 
 positiveRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
 positiveRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))

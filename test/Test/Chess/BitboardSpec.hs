@@ -135,7 +135,7 @@ spec = describe "bitboard" $ do
         then 8 * diagonal + 9 * offset
         else (-1) * diagonal + 9 * offset) [0..(7 - abs diagonal)])
 
-    it "can calculate line attacks for any given diagonal" $ do
+    it "can calculate line attacks for any given antidiagonal" $ do
       forAll antiDiagonals $ antiDiagonalMask `generatesAllTheSquaresIn` (\d -> map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))])
 
   describe "ray attacks" $ do
@@ -150,6 +150,14 @@ spec = describe "bitboard" $ do
 
     it "can calculate the west ray attack starting from an origin square" $ do
       forAll rankAndFileIndices $ westRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file])
+
+    it "can calculate the northeast ray attack starting from an origin square" $ do
+      forAll rankAndFileIndices $ northEastRay `generatesAllTheSquaresIn` (\(rank, file) ->
+        let diagonal = (rank - file)
+            endingSquare = if diagonal >= 0
+                             then 63 - (7 - file)
+                             else 63 - 8 * (7 - rank) in
+        map (\offset -> (indicesToSquareIndex (rank, file) + 9 * offset)) [1..(endingSquare - indicesToSquareIndex (rank, file)) `div` 9])
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
