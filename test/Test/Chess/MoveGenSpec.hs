@@ -18,7 +18,7 @@ spec = context "potential move generation" $ do
     describe "alongRay" $ do
       context "verticals" $ do
         it "returns a list of coordinates along the north vertical ray, including the destination" $
-          alongRay (Coordinate 'a' 1, Coordinate 'a' 8) `shouldBe`
+          alongRay (Coordinate 'a' 1, Coordinate 'a' 8) `shouldMatchList`
             [ Coordinate 'a' 2
             , Coordinate 'a' 3
             , Coordinate 'a' 4
@@ -29,7 +29,7 @@ spec = context "potential move generation" $ do
             ]
 
         it "returns a list of coordinates along the south vertical ray, including the destination" $
-          alongRay (Coordinate 'a' 8, Coordinate 'a' 1) `shouldBe`
+          alongRay (Coordinate 'a' 8, Coordinate 'a' 1) `shouldMatchList`
             [ Coordinate 'a' 7
             , Coordinate 'a' 6
             , Coordinate 'a' 5
@@ -41,7 +41,7 @@ spec = context "potential move generation" $ do
 
       context "horizontals" $ do
         it "returns a list of coordinates along the east horizontal ray, including the destination" $
-          alongRay (Coordinate 'a' 1, Coordinate 'h' 1) `shouldBe`
+          alongRay (Coordinate 'a' 1, Coordinate 'h' 1) `shouldMatchList`
             [ Coordinate 'b' 1
             , Coordinate 'c' 1
             , Coordinate 'd' 1
@@ -52,7 +52,7 @@ spec = context "potential move generation" $ do
             ]
 
         it "returns a list of coordinates along the west horizontal ray, including the destination" $
-          alongRay (Coordinate 'h' 1, Coordinate 'a' 1) `shouldBe`
+          alongRay (Coordinate 'h' 1, Coordinate 'a' 1) `shouldMatchList`
             [ Coordinate 'g' 1
             , Coordinate 'f' 1
             , Coordinate 'e' 1

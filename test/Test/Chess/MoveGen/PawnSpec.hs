@@ -21,7 +21,7 @@ spec = describe "potentialPawnMoves" $ do
              property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialPawnMoves Nothing (placement (placePiece emptyTest (Piece Pawn White) c)) c
 
            it "allows double-jumping from the second rank for White" $
-             potentialPawnMoves Nothing (placement startingPos) (Coordinate 'e' 2) `shouldBe`
+             potentialPawnMoves Nothing (placement startingPos) (Coordinate 'e' 2) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 3, moveType = Standard, movePromoteTo = Nothing }
                ]
@@ -30,11 +30,11 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (placement (setupGame [ (Piece Pawn White, Coordinate 'e' 6) ]))
-               (Coordinate 'e' 6) `shouldBe`
+               (Coordinate 'e' 6) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'e' 6, moveTo = Coordinate 'e' 7, moveType = Standard, movePromoteTo = Nothing } ]
 
            it "allows double-jumping from the second rank for Black" $
-             potentialPawnMoves Nothing (placement startingPos) (Coordinate 'e' 7) `shouldBe`
+             potentialPawnMoves Nothing (placement startingPos) (Coordinate 'e' 7) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 6, moveType = Standard, movePromoteTo = Nothing }
                ]
@@ -43,7 +43,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'e' 3) ]))
-               (Coordinate 'e' 3) `shouldBe`
+               (Coordinate 'e' 3) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'e' 3, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing } ]
 
            it "does not allow White to advance onto an occupied square" $
@@ -52,7 +52,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                           , (Piece Pawn White, Coordinate 'd' 4)
                           ]))
-               (Coordinate 'd' 4) `shouldBe` []
+               (Coordinate 'd' 4) `shouldMatchList` []
 
            it "does not allow White to double-jump onto an occupied square" $
              potentialPawnMoves
@@ -60,7 +60,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 4)
                           , (Piece Pawn White, Coordinate 'd' 2)
                           ]))
-               (Coordinate 'd' 2) `shouldBe`
+               (Coordinate 'd' 2) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 2, moveTo = Coordinate 'd' 3, moveType = Standard, movePromoteTo = Nothing } ]
 
            it "does not allow Black to double-jump onto an occupied square" $
@@ -69,7 +69,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
                           , (Piece Pawn White, Coordinate 'd' 5)
                           ]))
-               (Coordinate 'd' 7) `shouldBe`
+               (Coordinate 'd' 7) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing } ]
 
            it "does not allow White to double-jump when the square in front is blocked" $
@@ -78,7 +78,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 3)
                           , (Piece Pawn White, Coordinate 'd' 2)
                           ]))
-               (Coordinate 'd' 2) `shouldBe` []
+               (Coordinate 'd' 2) `shouldMatchList` []
 
            it "does not allow Black to double-jump when the square in front is blocked" $
              potentialPawnMoves
@@ -86,7 +86,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 7)
                           , (Piece Pawn White, Coordinate 'd' 6)
                           ]))
-               (Coordinate 'd' 7) `shouldBe` []
+               (Coordinate 'd' 7) `shouldMatchList` []
 
 
            it "does not allow Black to advance onto an occupied square" $
@@ -95,11 +95,11 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'd' 5)
                           , (Piece Pawn White, Coordinate 'd' 4)
                           ]))
-               (Coordinate 'd' 5) `shouldBe` []
+               (Coordinate 'd' 5) `shouldMatchList` []
 
          context "promotion" $ do
            it "produces four separate promotion moves when a White pawn moves to the eighth rank" $
-             potentialPawnMoves Nothing (placement (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])) (Coordinate 'e' 7) `shouldBe`
+             potentialPawnMoves Nothing (placement (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ])) (Coordinate 'e' 7) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Rook White }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Knight White }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Bishop White }
@@ -107,7 +107,7 @@ spec = describe "potentialPawnMoves" $ do
                ]
 
            it "produces four separate promotion moves when a Black pawn moves to the first rank" $
-             potentialPawnMoves Nothing (placement (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])) (Coordinate 'e' 2) `shouldBe`
+             potentialPawnMoves Nothing (placement (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ])) (Coordinate 'e' 2) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Rook Black }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Knight Black }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Bishop Black }
@@ -119,7 +119,7 @@ spec = describe "potentialPawnMoves" $ do
                                 (placement (setupGame [ (Piece Pawn White, Coordinate 'e' 7)
                                                       , (Piece King Black, Coordinate 'e' 8)
                                                       ]))
-                                (Coordinate 'e' 7) `shouldBe` []
+                                (Coordinate 'e' 7) `shouldMatchList` []
 
          context "capturing" $ do
 
@@ -130,7 +130,7 @@ spec = describe "potentialPawnMoves" $ do
                           , (Piece Pawn Black, Coordinate 'e' 5)
                           , (Piece Pawn White, Coordinate 'd' 4)
                           ]))
-               (Coordinate 'd' 4) `shouldBe`
+               (Coordinate 'd' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 5, moveType = Capture, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 5, moveType = Capture, movePromoteTo = Nothing }
@@ -143,7 +143,7 @@ spec = describe "potentialPawnMoves" $ do
                           , (Piece Pawn White, Coordinate 'e' 4)
                           , (Piece Pawn Black, Coordinate 'd' 5)
                           ]))
-               (Coordinate 'd' 5) `shouldBe`
+               (Coordinate 'd' 5) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 4, moveType = Capture, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 4, moveType = Capture, movePromoteTo = Nothing }
@@ -156,7 +156,7 @@ spec = describe "potentialPawnMoves" $ do
                           , (Piece Pawn White, Coordinate 'e' 5)
                           , (Piece Pawn White, Coordinate 'd' 4)
                           ]))
-               (Coordinate 'd' 4) `shouldBe`
+               (Coordinate 'd' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
                  ]
 
@@ -167,7 +167,7 @@ spec = describe "potentialPawnMoves" $ do
                            , (Piece Pawn Black, Coordinate 'e' 4)
                            , (Piece Pawn Black, Coordinate 'd' 5)
                            ]))
-               (Coordinate 'd' 5) `shouldBe`
+               (Coordinate 'd' 5) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
                  ]
 
@@ -177,7 +177,7 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'b' 5)
                           , (Piece Pawn White, Coordinate 'a' 4)
                           ]))
-               (Coordinate 'a' 4) `shouldBe`
+               (Coordinate 'a' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'a' 4, moveTo = Coordinate 'a' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'a' 4, moveTo = Coordinate 'b' 5, moveType = Capture, movePromoteTo = Nothing }
                  ]
@@ -188,19 +188,19 @@ spec = describe "potentialPawnMoves" $ do
                (placement (setupGame [ (Piece Pawn Black, Coordinate 'g' 5)
                          , (Piece Pawn White, Coordinate 'h' 4)
                          ]))
-               (Coordinate 'h' 4) `shouldBe`
+               (Coordinate 'h' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'h' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'g' 5, moveType = Capture, movePromoteTo = Nothing }
                  ]
 
            it "allows White to en passant, if available" $
-             potentialPawnMoves (Just (Coordinate 'd' 6)) (placement whiteEnPassantTest) (Coordinate 'e' 5) `shouldBe`
+             potentialPawnMoves (Just (Coordinate 'd' 6)) (placement whiteEnPassantTest) (Coordinate 'e' 5) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'e' 6, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant, movePromoteTo = Nothing }
                ]
 
            it "allows Black to en passant, if available" $
-             potentialPawnMoves (Just (Coordinate 'e' 3)) (placement blackEnPassantTest) (Coordinate 'd' 4) `shouldBe`
+             potentialPawnMoves (Just (Coordinate 'e' 3)) (placement blackEnPassantTest) (Coordinate 'd' 4) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 3, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 3, moveType = EnPassant, movePromoteTo = Nothing }
                ]
@@ -212,7 +212,7 @@ spec = describe "potentialPawnMoves" $ do
                                      , (Piece Pawn White, Coordinate 'e' 5)
                                      , (Piece Pawn White, Coordinate 'b' 2)
                                      ]))
-               (Coordinate 'b' 2) `shouldBe`
+               (Coordinate 'b' 2) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'b' 4, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'b' 3, moveType = Standard, movePromoteTo = Nothing }
                  ]
