@@ -10,6 +10,7 @@ module Chess.Bitboard
   , indicesToSquareIndex
   , squareIndexToIndices
   , coordinateToIndices
+  , bitboardToCoordinates
   , emptyBitboard
   , isOccupied
   , turnWord64IntoWord8s
@@ -97,6 +98,12 @@ squareIndexToIndices i = (i `div` 8, i `mod` 8)
 
 coordinateToIndices :: Coordinate -> (Int, Int)
 coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
+
+bitboardToCoordinates :: Bitboard -> [Coordinate]
+bitboardToCoordinates (Bitboard bits) = map (indicesToCoordinate . squareIndexToIndices) $ foldr getIndicesOfSetBits [] [0..63]
+  where
+    getIndicesOfSetBits exponent acc | testBit bits exponent = exponent:acc
+                                     | otherwise             = acc
 
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
