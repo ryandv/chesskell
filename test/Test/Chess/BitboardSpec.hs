@@ -9,6 +9,7 @@ import Data.Int
 import Data.Word
 
 import Test.Hspec
+import Test.Hspec.Core.QuickCheck (modifyMaxSize)
 import Test.Placements
 import Test.QuickCheck
 import Test.QuickCheck.Arbitrary
@@ -251,3 +252,8 @@ spec = describe "bitboard" $ do
         , whiteKings   = Bitboard 16
         , blackKings   = Bitboard 1152921504606846976
         }
+
+    describe "bitscan" $ do
+      modifyMaxSize (const . fromEnum $ (maxBound :: Word64)) $ describe "bitscan forward" $ do
+        it "can find the least significant one bit in a Bitboard" $ do
+          forAll bitboards (\bitboard -> bitscanForward bitboard == minimum (filter (isOccupied bitboard) [0..63]))
