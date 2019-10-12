@@ -125,7 +125,8 @@ turnWord64IntoWord8s w = map (extractWord8 . (shiftR w)) [56, 48, 40, 32, 24, 16
 instance Show Bitboard where
   show (Bitboard b) = "\n" ++ (intercalate "\n" $
     map printWord8AsBinary $
-    turnWord64IntoWord8s b) ++ "\n"
+    turnWord64IntoWord8s b) ++ "\n" ++
+    (show b)
 
 printWord8AsBinary   :: Word8 -> String
 printWord8AsBinary w = intersperse ' ' $ map bitToSquare wordAsBitString where

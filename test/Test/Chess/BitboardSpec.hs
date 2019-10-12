@@ -64,7 +64,7 @@ spec = describe "bitboard" $ do
 
   describe "formatting" $ do
     it "is showable" $ do
-      show (Bitboard 9820426766351346249) `shouldBe` "\n. . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n"
+      show (Bitboard 9820426766351346249) `shouldBe` "\n. . . 1 . . . 1\n1 . . 1 . . 1 .\n. 1 . 1 . 1 . .\n. . 1 1 1 . . .\n1 1 1 . 1 1 1 1\n. . 1 1 1 . . .\n. 1 . 1 . 1 . .\n1 . . 1 . . 1 .\n9820426766351346249"
 
   describe "representation" $ do
     {--
