@@ -28,6 +28,9 @@ rayGeneratorFor SW = southWestRay
 rayGeneratorFor W = westRay
 rayGeneratorFor NW = northWestRay
 
+liftOp :: (a -> b -> c) -> b -> [a] -> [c]
+liftOp f c xs = (flip f) c <$> xs
+
 potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
 potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveTo = x
@@ -35,11 +38,11 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
-potentialRayMoves b c ray = fmap (\x -> Move { moveFrom = c
-                                             , moveTo = x
-                                             , moveType = determineMoveType b c x
-                                             , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
-  where offsets = rayToOffsets <$> ray
+potentialRayMoves b c rays = fmap destinationToMove . filter isOnBoard . concatMap bitboardToCoordinates $ (liftOp rayGeneratorFor (coordinateToIndices c) rays)
+  where destinationToMove dest = Move { moveFrom = c
+                                      , moveTo = dest
+                                      , moveType = determineMoveType b c dest
+                                      , movePromoteTo = Nothing }
 
 determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
 determineMoveType b from to       | isNothing $ pieceAt b to                          = Standard
