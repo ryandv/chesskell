@@ -48,8 +48,12 @@ potentialPositiveRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> 
 potentialPositiveRayMoves b c r = filter (not . (isBlocked b))
   $ fmap destinationToMove
   . bitboardToCoordinates
-  $ rayGeneratorFor r (coordinateToIndices c)
-    where destinationToMove dest = Move { moveFrom = c
+  $ unobstructedRay
+    where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
+          occupancy = totalOccupancyFor b
+          blocker = bitscanForward $ unobstructedRay `bitboardIntersect` occupancy
+          rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
+          destinationToMove dest = Move { moveFrom = c
                                         , moveTo = dest
                                         , moveType = determineMoveType b c dest
                                         , movePromoteTo = Nothing }
@@ -58,8 +62,12 @@ potentialNegativeRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> 
 potentialNegativeRayMoves b c r = filter (not . (isBlocked b))
   $ fmap destinationToMove
   . bitboardToCoordinates
-  $ rayGeneratorFor r (coordinateToIndices c)
-    where destinationToMove dest = Move { moveFrom = c
+  $ unobstructedRay
+    where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
+          occupancy = totalOccupancyFor b
+          blocker = bitscanReverse $ unobstructedRay `bitboardIntersect` occupancy
+          rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
+          destinationToMove dest = Move { moveFrom = c
                                         , moveTo = dest
                                         , moveType = determineMoveType b c dest
                                         , movePromoteTo = Nothing }

@@ -6,6 +6,7 @@ module Chess.Bitboard
   , bitboardIntersect
   , bitboardUnion
   , bitboardComplement
+  , bitboardXOR
   , BoardIndex
   , indicesToCoordinate
   , indicesToSquareIndex
@@ -113,14 +114,17 @@ bitboardToCoordinates (Bitboard bits) = map (indicesToCoordinate . squareIndexTo
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
 
+bitboardComplement :: Bitboard -> Bitboard
+bitboardComplement (Bitboard bits) = Bitboard $ complement bits
+
 bitboardIntersect                             :: Bitboard -> Bitboard -> Bitboard
 bitboardIntersect (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..&. b2
 
 bitboardUnion                             :: Bitboard -> Bitboard -> Bitboard
 bitboardUnion (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..|. b2
 
-bitboardComplement :: Bitboard -> Bitboard
-bitboardComplement (Bitboard bits) = Bitboard $ complement bits
+bitboardXOR :: Bitboard -> Bitboard -> Bitboard
+bitboardXOR (Bitboard b1) (Bitboard b2) = Bitboard $ b1 `Data.Bits.xor` b2
 
 extractWord8   :: Word64 -> Word8
 extractWord8 w = fromIntegral $ w Data.Bits..&. mask where
