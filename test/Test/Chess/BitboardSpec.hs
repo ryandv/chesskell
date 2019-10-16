@@ -248,7 +248,10 @@ spec = describe "bitboard" $ do
     it "can produce an occupancy bitboard for black kings" $ do
       blackKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 1152921504606846976
 
-    it "can produce the total occupancy of the board, for all pieces" $ do
+    it "can produce the total occupancy of the board, for white pieces" $ do
+      whiteOccupancyFor (placement startingPos) `shouldBe` Bitboard 65535
+
+    it "can produce the total occupancy of the board, for both colours" $ do
       totalOccupancyFor (placement startingPos) `shouldBe` Bitboard 18446462598732906495
 
     it "can convert a RegularBoardRepresentation into a BitboardRepresentation" $ do
