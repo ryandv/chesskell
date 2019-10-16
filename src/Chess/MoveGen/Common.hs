@@ -5,17 +5,30 @@ import Chess.Board
 
 import Data.Maybe
 
+data Ray = N | NE | E | SE | S | SW | W | NW
+
+rayToOffsets :: Ray -> (Int, Int)
+rayToOffsets N = (0, 1)
+rayToOffsets NE = (1, 1)
+rayToOffsets E = (1, 0)
+rayToOffsets SE = (1, -1)
+rayToOffsets S = (0, -1)
+rayToOffsets SW = (-1, -1)
+rayToOffsets W = (-1, 0)
+rayToOffsets NW = (-1, 1)
+
 potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
 potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveTo = x
                                                     , moveType = determineMoveType b c x 
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
-potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialRayMoves b c offsets = fmap (\x -> Move { moveFrom = c
+potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
+potentialRayMoves b c ray = fmap (\x -> Move { moveFrom = c
                                                  , moveTo = x
                                                  , moveType = determineMoveType b c x
-                                                 , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets where
+                                                 , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
+  where offsets = rayToOffsets <$> ray
 
 determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
 determineMoveType b from to       | isNothing $ pieceAt b to                          = Standard

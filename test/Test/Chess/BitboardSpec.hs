@@ -140,49 +140,50 @@ spec = describe "bitboard" $ do
       forAll antiDiagonals $ antiDiagonalMask `generatesAllTheSquaresIn` (\d -> map (\offset -> if d <= 7 then (8 * d) - (7 * offset) else ((56 + (d - 7)) - (7 * offset))) [0.. 7 - (abs (d - 7))])
 
   describe "ray attacks" $ do
-    it "can calculate the north ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ northRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + 8 * offset) [1..7-rank])
+    describe "unobstructed rays" $ do
+      it "can calculate the north ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ northRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + 8 * offset) [1..7-rank])
 
-    it "can calculate the south ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ southRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - 8 * offset) [1..rank])
+      it "can calculate the south ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ southRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - 8 * offset) [1..rank])
 
-    it "can calculate the east ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ eastRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + offset) [1..7-file])
+      it "can calculate the east ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ eastRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) + offset) [1..7-file])
 
-    it "can calculate the west ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ westRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file])
+      it "can calculate the west ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ westRay `generatesAllTheSquaresIn` (\(rank, file) -> map (\offset -> (indicesToSquareIndex (rank, file)) - offset) [1..file])
 
-    it "can calculate the northeast ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ northEastRay `generatesAllTheSquaresIn` (\(rank, file) ->
-        let diagonal = (rank - file)
-            endingSquare = if diagonal >= 0
-                             then 63 - (7 - file)
-                             else 63 - 8 * (7 - rank) in
-        map (\offset -> (indicesToSquareIndex (rank, file) + 9 * offset)) [1..(endingSquare - indicesToSquareIndex (rank, file)) `div` 9])
+      it "can calculate the northeast ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ northEastRay `generatesAllTheSquaresIn` (\(rank, file) ->
+          let diagonal = (rank - file)
+              endingSquare = if diagonal >= 0
+                               then 63 - (7 - file)
+                               else 63 - 8 * (7 - rank) in
+          map (\offset -> (indicesToSquareIndex (rank, file) + 9 * offset)) [1..(endingSquare - indicesToSquareIndex (rank, file)) `div` 9])
 
-    it "can calculate the southeast ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ southEastRay `generatesAllTheSquaresIn` (\(rank, file) ->
-        let antidiagonal = (rank + file)
-            endingSquare = if antidiagonal >= 7
-                             then 7 + 8 * (antidiagonal - 7)
-                             else antidiagonal in
-        map (\offset -> (indicesToSquareIndex (rank, file) - 7 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 7])
+      it "can calculate the southeast ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ southEastRay `generatesAllTheSquaresIn` (\(rank, file) ->
+          let antidiagonal = (rank + file)
+              endingSquare = if antidiagonal >= 7
+                               then 7 + 8 * (antidiagonal - 7)
+                               else antidiagonal in
+          map (\offset -> (indicesToSquareIndex (rank, file) - 7 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 7])
 
-    it "can calculate the southwest ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ southWestRay `generatesAllTheSquaresIn` (\(rank, file) ->
-        let diagonal = (rank - file)
-            endingSquare = if diagonal >= 0
-                             then 8 * diagonal
-                             else (-1) * diagonal in
-        map (\offset -> (indicesToSquareIndex (rank, file) - 9 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 9])
+      it "can calculate the southwest ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ southWestRay `generatesAllTheSquaresIn` (\(rank, file) ->
+          let diagonal = (rank - file)
+              endingSquare = if diagonal >= 0
+                               then 8 * diagonal
+                               else (-1) * diagonal in
+          map (\offset -> (indicesToSquareIndex (rank, file) - 9 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 9])
 
-    it "can calculate the northwest ray attack starting from an origin square" $ do
-      forAll rankAndFileIndices $ northWestRay `generatesAllTheSquaresIn` (\(rank, file) ->
-        let antidiagonal = (rank + file)
-            endingSquare = if antidiagonal >= 7
-                             then 56 + (antidiagonal - 7)
-                             else 56 - 8 * (7 - antidiagonal) in
-        map (\offset -> (indicesToSquareIndex (rank, file) - 9 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 9])
+      it "can calculate the northwest ray attack starting from an origin square" $ do
+        forAll rankAndFileIndices $ northWestRay `generatesAllTheSquaresIn` (\(rank, file) ->
+          let antidiagonal = (rank + file)
+              endingSquare = if antidiagonal >= 7
+                               then 56 + (antidiagonal - 7)
+                               else 56 - 8 * (7 - antidiagonal) in
+          map (\offset -> (indicesToSquareIndex (rank, file) - 9 * offset)) [1..(indicesToSquareIndex (rank, file) - endingSquare) `div` 9])
 
   describe "translations" $ do
     it "can translate bitboards in the north direction" $ do
@@ -254,9 +255,11 @@ spec = describe "bitboard" $ do
         }
 
     modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do
+
       describe "bitscan forward" $ do
         it "can find the least significant one bit in a Bitboard" $ do
           forAll bitboards (\bitboard -> bitscanForward bitboard == minimum (filter (isOccupied bitboard) [0..63]))
+
       describe "bitscan reverse" $ do
         it "can find the most significant one bit in a Bitboard" $ do
           forAll bitboards (\bitboard -> bitscanReverse bitboard == maximum (filter (isOccupied bitboard) [0..63]))
