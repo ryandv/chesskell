@@ -257,3 +257,6 @@ spec = describe "bitboard" $ do
       describe "bitscan forward" $ do
         it "can find the least significant one bit in a Bitboard" $ do
           forAll bitboards (\bitboard -> bitscanForward bitboard == minimum (filter (isOccupied bitboard) [0..63]))
+      describe "bitscan reverse" $ do
+        it "can find the most significant one bit in a Bitboard" $ do
+          forAll bitboards (\bitboard -> bitscanReverse bitboard == maximum (filter (isOccupied bitboard) [0..63]))

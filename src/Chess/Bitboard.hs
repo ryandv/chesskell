@@ -50,6 +50,7 @@ module Chess.Bitboard
   , northWestRay
 
   , bitscanForward
+  , bitscanReverse
   ) where
 
 import Chess.Base
@@ -259,8 +260,8 @@ positiveRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. (shiftL (
 negativeRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
 negativeRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
 
-bitIndexTable :: [Int]
-bitIndexTable =
+bitscanForwardTable :: [Int]
+bitscanForwardTable =
   [ 64,  0,  1, 39,  2, 15, 40, 23
   ,  3, 12, 16, 59, 41, 19, 24, 54
   ,  4, -1, 13, 10, 17, 62, 60, 28
@@ -272,5 +273,27 @@ bitIndexTable =
   ,  6, 34, 33, -1 ]
 
 bitscanForward :: Bitboard -> Int
-bitscanForward (Bitboard bits) = bitIndexTable !! (fromEnum lookupIndex)
+bitscanForward (Bitboard bits) = bitscanForwardTable !! (fromEnum lookupIndex)
   where lookupIndex = bits .&. ((-1) * bits) `mod` 67
+
+bitscanReverseTable :: [Int]
+bitscanReverseTable =
+ [ 0
+ , 0
+ , 1, 1
+ , 2, 2, 2, 2
+ , 3, 3, 3, 3, 3, 3, 3, 3
+ , 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+ , 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5
+ , 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6
+ , 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7
+ ]
+
+bitscanReverse :: Bitboard -> Int
+bitscanReverse bitboard = bitscanReverse' 0 bitboard
+
+bitscanReverse' :: Int -> Bitboard -> Int
+bitscanReverse' acc (Bitboard bits) | bits > 0xFFFFFFFF = bitscanReverse' (acc + 32) . Bitboard $ bits `shiftR` 32
+                                    | bits > 0xFFFF = bitscanReverse' (acc + 16) . Bitboard $ bits `shiftR` 16
+                                    | bits > 0xFF = bitscanReverse' (acc + 8) . Bitboard $ bits `shiftR` 8
+                                    | otherwise = acc + bitscanReverseTable !! (fromEnum bits)
