@@ -19,7 +19,7 @@ import Data.Maybe
 import Control.Applicative
 
 pseudoLegalMoves               :: RegularGame -> [Move]
-pseudoLegalMoves game@Game { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b where
+pseudoLegalMoves game@Game { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b
 
 pseudoLegalMovesFrom :: RegularGame -> Square -> [Move]
 pseudoLegalMovesFrom _ (Square Nothing _)            = []
@@ -27,9 +27,9 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                , castlingRights = castlingRights
                                , enPassantSquare = enPassantSquare
                                }
-                               (Square (Just (Piece p _)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
-                                                             | p == Knight = potentialKnightMoves placement l
-                                                             | p == Bishop = potentialBishopMoves placement l
-                                                             | p == Rook   = potentialRookMoves placement l
-                                                             | p == Queen  = potentialQueenMoves placement l
-                                                             | p == King   = potentialKingMoves castlingRights placement l
+                               (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
+                                                               | p == Knight = potentialKnightMoves placement l
+                                                               | p == Bishop = potentialBishopMoves placement ply l
+                                                               | p == Rook   = potentialRookMoves placement ply l
+                                                               | p == Queen  = potentialQueenMoves placement ply l
+                                                               | p == King   = potentialKingMoves castlingRights placement l

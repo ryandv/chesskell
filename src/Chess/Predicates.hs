@@ -59,7 +59,7 @@ isStalemate          :: RegularGame -> Player -> Bool
 isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
 moveIsLegal :: Move -> RegularGame -> Bool
-moveIsLegal move@Move{ moveFrom = from} game = moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
+moveIsLegal move@Move{ moveFrom = from } game = moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
 
   moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
   moveIsByRightPlayer = (pieceOwner <$> (pieceAt position from)) == (Just (activeColor game))

@@ -4,6 +4,6 @@ import Chess.Base
 
 import Chess.MoveGen.Common
 
-potentialRookMoves             :: RegularBoardRepresentation -> Coordinate -> [Move]
-potentialRookMoves placement c = potentialRayMoves placement c straights where
+potentialRookMoves             :: RegularBoardRepresentation -> Player -> Coordinate -> [Move]
+potentialRookMoves placement ply c = potentialRayMoves placement ply c straights where
   straights = [N, E, S, W]

@@ -37,18 +37,18 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveType = determineMoveType b c x
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
-potentialRayMoves          :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
-potentialRayMoves b c rays = concat $ potentialRayMoves' b c <$> rays
+potentialRayMoves              :: RegularBoardRepresentation -> Player -> Coordinate -> [Ray] -> [Move]
+potentialRayMoves b ply c rays = concat $ potentialRayMoves' b ply c <$> rays
 
-potentialRayMoves' :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
-potentialRayMoves' b c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves b c r
-                         | otherwise = potentialNegativeRayMoves b c r
+potentialRayMoves' :: RegularBoardRepresentation -> Player -> Coordinate -> Ray -> [Move]
+potentialRayMoves' b ply c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves b ply c r
+                             | otherwise = potentialNegativeRayMoves b ply c r
 
-potentialPositiveRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
-potentialPositiveRayMoves b c r = filter (not . (isBlocked b))
-  $ fmap destinationToMove
+potentialPositiveRayMoves :: RegularBoardRepresentation -> Player -> Coordinate -> Ray -> [Move]
+potentialPositiveRayMoves b ply c r = filter (\move -> moveType move /= Capture || (moveType move == Capture && (pieceOwner <$> (pieceAt b (moveTo move))) /= Just ply))
+  . fmap destinationToMove
   . bitboardToCoordinates
-  $ unobstructedRay
+  $ unobstructedRay `bitboardXOR` rayFromBlocker
     where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
           occupancy = totalOccupancyFor b
           blocker = bitscanForward $ unobstructedRay `bitboardIntersect` occupancy
@@ -58,11 +58,11 @@ potentialPositiveRayMoves b c r = filter (not . (isBlocked b))
                                         , moveType = determineMoveType b c dest
                                         , movePromoteTo = Nothing }
 
-potentialNegativeRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
-potentialNegativeRayMoves b c r = filter (not . (isBlocked b))
-  $ fmap destinationToMove
+potentialNegativeRayMoves :: RegularBoardRepresentation -> Player -> Coordinate -> Ray -> [Move]
+potentialNegativeRayMoves b ply c r = filter (\move -> moveType move /= Capture || (moveType move == Capture && (pieceOwner <$> (pieceAt b (moveTo move))) /= Just ply))
+  . fmap destinationToMove
   . bitboardToCoordinates
-  $ unobstructedRay
+  $ unobstructedRay `bitboardXOR` rayFromBlocker
     where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
           occupancy = totalOccupancyFor b
           blocker = bitscanReverse $ unobstructedRay `bitboardIntersect` occupancy
@@ -72,9 +72,12 @@ potentialNegativeRayMoves b c r = filter (not . (isBlocked b))
                                         , moveType = determineMoveType b c dest
                                         , movePromoteTo = Nothing }
 
-determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b from to       | isNothing $ pieceAt b to                          = Standard
-                                  | (fmap pieceOwner $ pieceAt b to) /= (fmap pieceOwner $ pieceAt b from) = Capture
+determineMoveType              :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
+determineMoveType b _ to       | isNothing $ pieceAt b to = Standard
+                               | otherwise = Capture
+
+determinePieceOwner :: RegularBoardRepresentation -> Coordinate -> Maybe Player
+determinePieceOwner b c = fmap pieceOwner $ pieceAt b c
 
 isBlocked                       :: RegularBoardRepresentation -> Move -> Bool
 isBlocked b Move { moveFrom = from
