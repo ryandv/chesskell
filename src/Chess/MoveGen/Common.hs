@@ -38,7 +38,7 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
-potentialRayMoves b c rays = fmap destinationToMove . filter isOnBoard . concatMap bitboardToCoordinates $ (liftOp rayGeneratorFor (coordinateToIndices c) rays)
+potentialRayMoves b c rays = fmap destinationToMove . concatMap bitboardToCoordinates $ (liftOp rayGeneratorFor (coordinateToIndices c) rays)
   where destinationToMove dest = Move { moveFrom = c
                                       , moveTo = dest
                                       , moveType = determineMoveType b c dest
