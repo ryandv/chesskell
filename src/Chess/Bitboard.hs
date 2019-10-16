@@ -5,6 +5,7 @@ module Chess.Bitboard
   , BitboardRepresentation(..)
   , bitboardIntersect
   , bitboardUnion
+  , bitboardInvert
   , BoardIndex
   , indicesToCoordinate
   , indicesToSquareIndex
@@ -116,6 +117,9 @@ bitboardIntersect (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..&. b2
 
 bitboardUnion                             :: Bitboard -> Bitboard -> Bitboard
 bitboardUnion (Bitboard b1) (Bitboard b2) = Bitboard $ b1 Data.Bits..|. b2
+
+bitboardInvert :: Bitboard -> Bitboard
+bitboardInvert (Bitboard bits) = Bitboard $ complement bits
 
 extractWord8   :: Word64 -> Word8
 extractWord8 w = fromIntegral $ w Data.Bits..&. mask where

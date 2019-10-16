@@ -200,6 +200,12 @@ spec = describe "bitboard" $ do
 
       translateNorth (Bitboard 9820426766351346249) `shouldBe` Bitboard 5272058161445620104
 
+  describe "conversion to regular board representations" $ do
+    it "can return a list of coordinates represented by the bitboard" $ do
+      forAll bitboards (\bitboard ->
+        (all (\coordinate -> isOccupied bitboard coordinate) $ bitboardToCoordinates bitboard) &&
+        (all (\coordinate -> not $ isOccupied bitboard coordinate) $ bitboardToCoordinates $ bitboardInvert bitboard))
+
   describe "conversion from regular board representations" $ do
 
     it "can produce an occupancy bitboard for white pawns" $ do
