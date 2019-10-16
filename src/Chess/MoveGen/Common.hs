@@ -6,7 +6,7 @@ import Chess.Bitboard
 
 import Data.Maybe
 
-data Ray = N | NE | E | SE | S | SW | W | NW
+data Ray = N | NE | E | SE | S | SW | W | NW deriving(Eq, Show)
 
 rayToOffsets :: Ray -> (Int, Int)
 rayToOffsets N = (0, 1)
@@ -37,11 +37,28 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveType = determineMoveType b c x
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
-potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
-potentialRayMoves b c rays = filter (not . (isBlocked b))
+potentialRayMoves          :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
+potentialRayMoves b c rays = concat $ potentialRayMoves' b c <$> rays
+
+potentialRayMoves' :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
+potentialRayMoves' b c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves b c r
+                         | otherwise = potentialNegativeRayMoves b c r
+
+potentialPositiveRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
+potentialPositiveRayMoves b c r = filter (not . (isBlocked b))
   $ fmap destinationToMove
-  . concatMap bitboardToCoordinates
-  $ (liftOp rayGeneratorFor (coordinateToIndices c) rays)
+  . bitboardToCoordinates
+  $ rayGeneratorFor r (coordinateToIndices c)
+    where destinationToMove dest = Move { moveFrom = c
+                                        , moveTo = dest
+                                        , moveType = determineMoveType b c dest
+                                        , movePromoteTo = Nothing }
+
+potentialNegativeRayMoves :: RegularBoardRepresentation -> Coordinate -> Ray -> [Move]
+potentialNegativeRayMoves b c r = filter (not . (isBlocked b))
+  $ fmap destinationToMove
+  . bitboardToCoordinates
+  $ rayGeneratorFor r (coordinateToIndices c)
     where destinationToMove dest = Move { moveFrom = c
                                         , moveTo = dest
                                         , moveType = determineMoveType b c dest
