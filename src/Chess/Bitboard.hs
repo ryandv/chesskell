@@ -30,6 +30,7 @@ module Chess.Bitboard
   , blackQueenOccupancyFor
   , whiteKingOccupancyFor
   , blackKingOccupancyFor
+  , totalOccupancyFor
 
   , regularToBitboard
 
@@ -196,6 +197,26 @@ whiteKingOccupancyFor = occupancyFor (Piece King White)
 
 blackKingOccupancyFor :: RegularBoardRepresentation -> Bitboard
 blackKingOccupancyFor = occupancyFor (Piece King Black)
+
+totalOccupancyFor :: RegularBoardRepresentation -> Bitboard
+totalOccupancyFor b = whitePawns bitboard
+  `bitboardUnion` blackPawns bitboard
+
+  `bitboardUnion` whiteBishops bitboard
+  `bitboardUnion` blackBishops bitboard
+
+  `bitboardUnion` whiteKnights bitboard
+  `bitboardUnion` blackKnights bitboard
+
+  `bitboardUnion` whiteRooks bitboard
+  `bitboardUnion` blackRooks bitboard
+
+  `bitboardUnion` whiteQueens bitboard
+  `bitboardUnion` blackQueens bitboard
+
+  `bitboardUnion` whiteKings bitboard
+  `bitboardUnion` blackKings bitboard
+    where bitboard = regularToBitboard b
 
 regularToBitboard   :: RegularBoardRepresentation -> BitboardRepresentation
 regularToBitboard b = BitboardRepresentation
