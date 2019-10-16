@@ -124,6 +124,10 @@ spec = describe "bitboard" $ do
       let queenMoves  = Bitboard 9820426766351346249
       (rookMoves `bitboardUnion` bishopMoves) `shouldBe` queenMoves
 
+    it "include inversion or complement" $ do
+      let startingPosTotalOccupancy = Bitboard 18446462598732906495
+      bitboardComplement startingPosTotalOccupancy `shouldBe` Bitboard 281474976645120
+
   describe "line attacks" $ do
     it "can calculate line attacks for any given rank" $ do
       forAll ranks $ rankMask `generatesAllTheSquaresIn` (\rank -> map (\i -> 8 * rank + i) [0..7])
@@ -204,7 +208,7 @@ spec = describe "bitboard" $ do
     it "can return a list of coordinates represented by the bitboard" $ do
       forAll bitboards (\bitboard ->
         (all (\coordinate -> isOccupied bitboard coordinate) $ bitboardToCoordinates bitboard) &&
-        (all (\coordinate -> not $ isOccupied bitboard coordinate) $ bitboardToCoordinates $ bitboardInvert bitboard))
+        (all (\coordinate -> not $ isOccupied bitboard coordinate) $ bitboardToCoordinates $ bitboardComplement bitboard))
 
   describe "conversion from regular board representations" $ do
 
