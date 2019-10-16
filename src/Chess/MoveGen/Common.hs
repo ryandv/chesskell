@@ -2,6 +2,7 @@ module Chess.MoveGen.Common where
 
 import Chess.Base
 import Chess.Board
+import Chess.Bitboard
 
 import Data.Maybe
 
@@ -17,6 +18,16 @@ rayToOffsets SW = (-1, -1)
 rayToOffsets W = (-1, 0)
 rayToOffsets NW = (-1, 1)
 
+rayGeneratorFor :: Ray -> (Int, Int) -> Bitboard
+rayGeneratorFor N = northRay
+rayGeneratorFor NE = northEastRay
+rayGeneratorFor E = eastRay
+rayGeneratorFor SE = southEastRay
+rayGeneratorFor S = southRay
+rayGeneratorFor SW = southWestRay
+rayGeneratorFor W = westRay
+rayGeneratorFor NW = northWestRay
+
 potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
 potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveTo = x
@@ -25,9 +36,9 @@ potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
 
 potentialRayMoves             :: RegularBoardRepresentation -> Coordinate -> [Ray] -> [Move]
 potentialRayMoves b c ray = fmap (\x -> Move { moveFrom = c
-                                                 , moveTo = x
-                                                 , moveType = determineMoveType b c x
-                                                 , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
+                                             , moveTo = x
+                                             , moveType = determineMoveType b c x
+                                             , movePromoteTo = Nothing }) $ filter isOnBoard $ fmap (c `offsetBy`) $ scaleBy <$> [1..7] <*> offsets
   where offsets = rayToOffsets <$> ray
 
 determineMoveType                 :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
