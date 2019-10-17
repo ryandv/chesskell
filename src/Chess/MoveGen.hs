@@ -5,6 +5,7 @@ module Chess.MoveGen
   ) where
 
 import Chess.Base
+import Chess.Bitboard
 
 import Chess.MoveGen.Common
 import Chess.MoveGen.Bishop
@@ -29,7 +30,7 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                }
                                (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
                                                                | p == Knight = potentialKnightMoves placement l
-                                                               | p == Bishop = potentialBishopMoves placement ply l
-                                                               | p == Rook   = potentialRookMoves placement ply l
-                                                               | p == Queen  = potentialQueenMoves placement ply l
+                                                               | p == Bishop = potentialBishopMoves placement (totalOccupancyFor placement) ply l
+                                                               | p == Rook   = potentialRookMoves placement (totalOccupancyFor placement) ply l
+                                                               | p == Queen  = potentialQueenMoves placement (totalOccupancyFor placement) ply l
                                                                | p == King   = potentialKingMoves castlingRights placement l

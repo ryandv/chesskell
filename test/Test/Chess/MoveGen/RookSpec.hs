@@ -1,6 +1,7 @@
 module Test.Chess.MoveGen.RookSpec where
 
 import Chess.Base
+import Chess.Bitboard
 
 import Chess.MoveGen
 import Chess.MoveGen.Rook
@@ -14,11 +15,12 @@ import Test.Util
 
 spec :: Spec
 spec = describe "potentialRookMoves" $ do
-         it "never produces moves off the board" $
-           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialRookMoves (placement (placePiece emptyTest (Piece Rook White) c)) White c
+         it "never produces moves off the board" $ do
+           let position = (\c -> (placePiece emptyTest (Piece Rook White) c))
+           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialRookMoves (placement $ position c) (totalOccupancyFor . placement $ position c) White c
 
          it "produces the correct set of moves without being blocked by pieces" $
-           potentialRookMoves (placement onlyRookTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (placement onlyRookTest) (totalOccupancyFor $ placement onlyRookTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -36,7 +38,7 @@ spec = describe "potentialRookMoves" $ do
              ]
 
          it "produces the correct set of moves when blocked by some pieces" $
-           potentialRookMoves (placement rookTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (placement rookTest) (totalOccupancyFor $ placement rookTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -48,7 +50,7 @@ spec = describe "potentialRookMoves" $ do
              ]
 
          it "produces the correct set of moves, including captures" $
-           potentialRookMoves (placement rookAllCapturesTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (placement rookAllCapturesTest) (totalOccupancyFor $ placement rookAllCapturesTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -59,10 +61,11 @@ spec = describe "potentialRookMoves" $ do
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 3, moveType = Capture, movePromoteTo = Nothing }
              ]
 
-         it "does not allow a rook to capture pieces of its own color" $
-           potentialRookMoves (placement (setupGame [ (Piece King White, Coordinate 'e' 1)
+         it "does not allow a rook to capture pieces of its own color" $ do
+           let position = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                          , (Piece Rook White, Coordinate 'h' 1)
-                                         ])) White (Coordinate 'h' 1) `shouldMatchList`
+                                         ])
+           potentialRookMoves (placement position) (totalOccupancyFor $ placement position) White (Coordinate 'h' 1) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'g' 1, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 2, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'f' 1, moveType = Standard, movePromoteTo = Nothing }
