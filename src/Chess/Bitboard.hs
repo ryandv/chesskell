@@ -108,10 +108,7 @@ coordinateToIndices :: Coordinate -> (Int, Int)
 coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
 
 bitboardToCoordinates :: Bitboard -> [Coordinate]
-bitboardToCoordinates (Bitboard bits) = map (indicesToCoordinate . squareIndexToIndices) $ foldr getIndicesOfSetBits [] [0..63]
-  where
-    getIndicesOfSetBits exponent acc | testBit bits exponent = exponent:acc
-                                     | otherwise             = acc
+bitboardToCoordinates (Bitboard bits) = map (indicesToCoordinate . squareIndexToIndices) . filter (\i -> testBit bits i) $ [0..63]
 
 emptyBitboard :: Bitboard
 emptyBitboard = Bitboard 0
