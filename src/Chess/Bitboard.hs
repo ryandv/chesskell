@@ -63,6 +63,7 @@ import Chess.Base
 import Data.Bits
 import Data.Functor
 import Data.List
+import Data.Maybe
 import Data.Word
 import Text.Show
 
@@ -220,7 +221,8 @@ blackOccupancyFor b = blackPawns bitboard
     where bitboard = regularToBitboard b
 
 totalOccupancyFor :: RegularBoardRepresentation -> Bitboard
-totalOccupancyFor b = whiteOccupancyFor b `bitboardUnion` blackOccupancyFor b
+totalOccupancyFor = foldr occupiedSquareToBitboard emptyBitboard . filter (isJust . pieceOn) . concat
+  where occupiedSquareToBitboard occupiedSquare acc = Bitboard (shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location occupiedSquare)) `bitboardUnion` acc
 
 regularToBitboard   :: RegularBoardRepresentation -> BitboardRepresentation
 regularToBitboard b = BitboardRepresentation
