@@ -6,5 +6,5 @@ import Chess.Bitboard
 import Chess.MoveGen.Bishop
 import Chess.MoveGen.Rook
 
-potentialQueenMoves                 :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
-potentialQueenMoves placement occupancy ply c = potentialRookMoves placement occupancy ply c ++ potentialBishopMoves placement occupancy ply c
+potentialQueenMoves                          :: BitboardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
+potentialQueenMoves bitboard occupancy ply c = potentialRookMoves bitboard occupancy ply c ++ potentialBishopMoves bitboard occupancy ply c

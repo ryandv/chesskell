@@ -2,13 +2,14 @@ module Chess.MoveGen.King where
 
 import Chess.Base
 import Chess.Board
+import Chess.Bitboard
 
 import Chess.MoveGen.Common
 
-potentialKingMoves                                           :: CastleRights -> RegularBoardRepresentation -> Coordinate -> [Move]
-potentialKingMoves castlerights placement c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves placement c possibleMoves ++ whiteCastles castlerights
-                                                             | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves placement c possibleMoves ++ blackCastles castlerights
-                                                             | otherwise = potentialOffsetMoves placement c possibleMoves where
+potentialKingMoves                                           :: CastleRights -> RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
+potentialKingMoves castlerights placement bitboard c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves placement bitboard c possibleMoves ++ whiteCastles castlerights
+                                                             | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves placement bitboard c possibleMoves ++ blackCastles castlerights
+                                                             | otherwise = potentialOffsetMoves placement bitboard c possibleMoves where
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 

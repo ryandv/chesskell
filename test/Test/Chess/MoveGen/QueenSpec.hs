@@ -19,10 +19,10 @@ spec = describe "potentialQueenMoves" $
 
            it "never produces moves off the board" $ do
              let position = (\c -> (placePiece emptyTest (Piece Queen White) c))
-             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialQueenMoves (placement $ position c) (totalOccupancyFor . placement $ position c) White c
+             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialQueenMoves (regularToBitboard . placement $ position c) (totalOccupancyFor . placement $ position c) White c
 
            it "produces the correct set of moves without being blocked by pieces" $
-             potentialQueenMoves (placement onlyQueenTest) (totalOccupancyFor $ placement onlyQueenTest) White (Coordinate 'd' 4) `shouldMatchList`
+             potentialQueenMoves (regularToBitboard . placement $ onlyQueenTest) (totalOccupancyFor $ placement onlyQueenTest) White (Coordinate 'd' 4) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
@@ -53,7 +53,7 @@ spec = describe "potentialQueenMoves" $
                ]
 
            it "produces the correct set of moves when blocked by some pieces" $
-             potentialQueenMoves (placement queenTest) (totalOccupancyFor $ placement queenTest) White (Coordinate 'd' 4) `shouldMatchList`
+             potentialQueenMoves (regularToBitboard . placement $ queenTest) (totalOccupancyFor $ placement queenTest) White (Coordinate 'd' 4) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
@@ -80,7 +80,7 @@ spec = describe "potentialQueenMoves" $
                ]
 
            it "produces the correct set of moves, including captures" $
-             potentialQueenMoves (placement queenCaptureTest) (totalOccupancyFor $ placement queenCaptureTest) White (Coordinate 'd' 4) `shouldMatchList`
+             potentialQueenMoves (regularToBitboard . placement $ queenCaptureTest) (totalOccupancyFor $ placement queenCaptureTest) White (Coordinate 'd' 4) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }

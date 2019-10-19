@@ -5,6 +5,6 @@ import Chess.Bitboard
 
 import Chess.MoveGen.Common
 
-potentialBishopMoves                 :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
-potentialBishopMoves placement occupancy ply c = potentialRayMoves placement occupancy ply c diagonals where
+potentialBishopMoves                 :: BitboardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
+potentialBishopMoves bitboard occupancy ply c = potentialRayMoves bitboard occupancy ply c diagonals where
   diagonals = [NW, NE, SW, SE]

@@ -29,8 +29,9 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                , enPassantSquare = enPassantSquare
                                }
                                (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
-                                                               | p == Knight = potentialKnightMoves placement l
-                                                               | p == Bishop = potentialBishopMoves placement (totalOccupancyFor placement) ply l
-                                                               | p == Rook   = potentialRookMoves placement (totalOccupancyFor placement) ply l
-                                                               | p == Queen  = potentialQueenMoves placement (totalOccupancyFor placement) ply l
-                                                               | p == King   = potentialKingMoves castlingRights placement l
+                                                               | p == Knight = potentialKnightMoves placement bitboard l
+                                                               | p == Bishop = potentialBishopMoves bitboard (totalOccupancyFor placement) ply l
+                                                               | p == Rook   = potentialRookMoves bitboard (totalOccupancyFor placement) ply l
+                                                               | p == Queen  = potentialQueenMoves bitboard (totalOccupancyFor placement) ply l
+                                                               | p == King   = potentialKingMoves castlingRights placement bitboard l
+  where bitboard = regularToBitboard placement

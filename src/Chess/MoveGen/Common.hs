@@ -31,46 +31,42 @@ rayGeneratorFor NW = northWestRay
 liftOp :: (a -> b -> c) -> b -> [a] -> [c]
 liftOp f c xs = (flip f) c <$> xs
 
-potentialOffsetMoves             :: RegularBoardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialOffsetMoves b c offsets = fmap (\x -> Move { moveFrom = c
+potentialOffsetMoves             :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
+potentialOffsetMoves b bb c offsets = fmap (\x -> Move { moveFrom = c
                                                     , moveTo = x
-                                                    , moveType = determineMoveType b c x
+                                                    , moveType = determineMoveType bb c x
                                                     , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
 
-potentialRayMoves              :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> [Ray] -> [Move]
-potentialRayMoves b occupancy ply c rays = toLegalMoves $ foldr bitboardUnion emptyBitboard $ potentialRayMoves' b occupancy ply c <$> rays
+potentialRayMoves              :: BitboardRepresentation -> Bitboard -> Player -> Coordinate -> [Ray] -> [Move]
+potentialRayMoves b occupancy ply c rays = toLegalMoves $ foldr bitboardUnion emptyBitboard $ potentialRayMoves' occupancy ply c <$> rays
   where
     toLegalMoves = filter selfCaptures
       . fmap destinationToMove
       . bitboardToCoordinates
-    selfCaptures move = moveType move /= Capture || (moveType move == Capture && (pieceOwner <$> (pieceAt b (moveTo move))) /= Just ply)
+    selfCaptures move = moveType move /= Capture || (moveType move == Capture && (pieceOwner <$> (bitboardPieceAt b (moveTo move))) /= Just ply)
     destinationToMove dest = Move { moveFrom = c
                                   , moveTo = dest
                                   , moveType = determineMoveType b c dest
                                   , movePromoteTo = Nothing }
 
-potentialRayMoves' :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> Ray -> Bitboard
-potentialRayMoves' b occupancy ply c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves b occupancy ply c r
-                             | otherwise = potentialNegativeRayMoves b occupancy ply c r
+potentialRayMoves' :: Bitboard -> Player -> Coordinate -> Ray -> Bitboard
+potentialRayMoves' occupancy ply c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves occupancy ply c r
+                             | otherwise = potentialNegativeRayMoves occupancy ply c r
 
-potentialPositiveRayMoves :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> Ray -> Bitboard
-potentialPositiveRayMoves b occupancy ply c r = unobstructedRay `bitboardXOR` rayFromBlocker
+potentialPositiveRayMoves :: Bitboard -> Player -> Coordinate -> Ray -> Bitboard
+potentialPositiveRayMoves occupancy ply c r = unobstructedRay `bitboardXOR` rayFromBlocker
     where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
           blocker = bitscanForward $ unobstructedRay `bitboardIntersect` occupancy
           rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
 
-potentialNegativeRayMoves :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> Ray -> Bitboard
-potentialNegativeRayMoves b occupancy ply c r = unobstructedRay `bitboardXOR` rayFromBlocker
+potentialNegativeRayMoves :: Bitboard -> Player -> Coordinate -> Ray -> Bitboard
+potentialNegativeRayMoves occupancy ply c r = unobstructedRay `bitboardXOR` rayFromBlocker
     where unobstructedRay = rayGeneratorFor r (coordinateToIndices c)
           blocker = bitscanReverse $ unobstructedRay `bitboardIntersect` occupancy
           rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
-          destinationToMove dest = Move { moveFrom = c
-                                        , moveTo = dest
-                                        , moveType = determineMoveType b c dest
-                                        , movePromoteTo = Nothing }
 
-determineMoveType              :: RegularBoardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b _ to       | isNothing $ pieceAt b to = Standard
+determineMoveType              :: BitboardRepresentation -> Coordinate -> Coordinate -> MoveType
+determineMoveType b _ to       | isNothing $ bitboardPieceAt b to = Standard
                                | otherwise = Capture
 
 determinePieceOwner :: RegularBoardRepresentation -> Coordinate -> Maybe Player

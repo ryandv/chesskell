@@ -5,6 +5,6 @@ import Chess.Bitboard
 
 import Chess.MoveGen.Common
 
-potentialRookMoves             :: RegularBoardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
-potentialRookMoves placement occupancy ply c = potentialRayMoves placement occupancy ply c straights where
+potentialRookMoves                                    :: BitboardRepresentation -> Bitboard -> Player -> Coordinate -> [Move]
+potentialRookMoves bitboard occupancy ply c = potentialRayMoves bitboard occupancy ply c straights where
   straights = [N, E, S, W]
