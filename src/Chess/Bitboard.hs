@@ -7,6 +7,7 @@ module Chess.Bitboard
   , bitboardUnion
   , bitboardComplement
   , bitboardXOR
+  , bitboardPieceAt
   , BoardIndex
   , indicesToCoordinate
   , indicesToSquareIndex
@@ -239,6 +240,21 @@ regularToBitboard b = BitboardRepresentation
   , whiteKings   = whiteKingOccupancyFor b
   , blackKings   = blackKingOccupancyFor b
   }
+
+bitboardPieceAt :: BitboardRepresentation -> Coordinate -> Maybe Piece
+bitboardPieceAt b c | isOccupied (whitePawns b) c = Just $ Piece Pawn White
+                    | isOccupied (blackPawns b) c = Just $ Piece Pawn Black
+                    | isOccupied (whiteBishops b) c = Just $ Piece Bishop White
+                    | isOccupied (blackBishops b) c = Just $ Piece Bishop Black
+                    | isOccupied (whiteKnights b) c = Just $ Piece Knight White
+                    | isOccupied (blackKnights b) c = Just $ Piece Knight Black
+                    | isOccupied (whiteRooks b) c = Just $ Piece Rook White
+                    | isOccupied (blackRooks b) c = Just $ Piece Rook Black
+                    | isOccupied (whiteQueens b) c = Just $ Piece Queen White
+                    | isOccupied (blackQueens b) c = Just $ Piece Queen Black
+                    | isOccupied (whiteKings b) c = Just $ Piece King White
+                    | isOccupied (blackKings b) c = Just $ Piece King Black
+                    | otherwise = Nothing
 
 translateNorth :: Bitboard -> Bitboard
 translateNorth (Bitboard b) = Bitboard $ rotateL b 8

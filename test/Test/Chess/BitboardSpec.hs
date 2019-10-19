@@ -273,8 +273,23 @@ spec = describe "bitboard" $ do
         , blackKings   = Bitboard 1152921504606846976
         }
 
-    modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do
+    describe "operations on BitboardRepresentations" $ do
+      it "can determine what piece occupies a square on the board" $ do
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'a' 1) `shouldBe` (Just $ Piece Rook White)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'b' 1) `shouldBe` (Just $ Piece Knight White)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'c' 1) `shouldBe` (Just $ Piece Bishop White)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'd' 1) `shouldBe` (Just $ Piece Queen White)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 1) `shouldBe` (Just $ Piece King White)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 2) `shouldBe` (Just $ Piece Pawn White)
 
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'a' 8) `shouldBe` (Just $ Piece Rook Black)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'b' 8) `shouldBe` (Just $ Piece Knight Black)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'c' 8) `shouldBe` (Just $ Piece Bishop Black)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'd' 8) `shouldBe` (Just $ Piece Queen Black)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 8) `shouldBe` (Just $ Piece King Black)
+        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 7) `shouldBe` (Just $ Piece Pawn Black)
+
+    modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do
       describe "bitscan forward" $ do
         it "can find the least significant one bit in a Bitboard" $ do
           forAll bitboards (\bitboard -> bitscanForward bitboard == minimum (filter (isOccupied bitboard) [0..63]))
