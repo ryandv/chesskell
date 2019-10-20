@@ -66,8 +66,8 @@ potentialNegativeRayMoves occupancy ply c r = unobstructedRay `bitboardXOR` rayF
           rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
 
 determineMoveType              :: BitboardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b _ to       | isNothing $ bitboardPieceAt b to = Standard
-                               | otherwise = Capture
+determineMoveType b _ to       | bitboardIsOccupied b to = Capture
+                               | otherwise = Standard
 
 determinePieceOwner :: RegularBoardRepresentation -> Coordinate -> Maybe Player
 determinePieceOwner b c = fmap pieceOwner $ pieceAt b c

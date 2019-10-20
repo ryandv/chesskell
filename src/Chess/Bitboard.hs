@@ -8,6 +8,7 @@ module Chess.Bitboard
   , bitboardComplement
   , bitboardXOR
   , bitboardPieceAt
+  , bitboardIsOccupied
   , BoardIndex
   , indicesToCoordinate
   , indicesToSquareIndex
@@ -237,6 +238,10 @@ bitboardPieceAt b c | isOccupied (whitePawns b) c = Just $ Piece Pawn White
                     | isOccupied (whiteKings b) c = Just $ Piece King White
                     | isOccupied (blackKings b) c = Just $ Piece King Black
                     | otherwise = Nothing
+
+bitboardIsOccupied :: BitboardRepresentation -> Coordinate -> Bool
+bitboardIsOccupied bitboard c | isOccupied (totalOccupancy bitboard) c = True
+                              | otherwise = False
 
 translateNorth :: Bitboard -> Bitboard
 translateNorth (Bitboard b) = Bitboard $ rotateL b 8
