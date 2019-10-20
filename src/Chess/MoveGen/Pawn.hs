@@ -10,9 +10,9 @@ import Chess.MoveGen.Common
 
 import Data.Maybe
 
-potentialPawnMoves                                                        :: Maybe Coordinate -> RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
-potentialPawnMoves Nothing placement bitboard c                           = standardPawnMoves placement bitboard c
-potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = standardPawnMoves placement bitboard c ++ enPassantMoves enPassant where
+potentialPawnMoves                                              :: Maybe Coordinate -> BitboardRepresentation -> Coordinate -> [Move]
+potentialPawnMoves Nothing bitboard c                           = standardPawnMoves bitboard c
+potentialPawnMoves (Just enPassant) bitboard c@(Coordinate r f) = standardPawnMoves bitboard c ++ enPassantMoves enPassant where
   rankOffset :: Int
   rankOffset = case (fmap pieceOwner $ bitboardPieceAt bitboard c) of
                  Just White -> 1
@@ -26,13 +26,13 @@ potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = stan
                                                                                             , movePromoteTo = Nothing }]
                                       | otherwise                                   = []
 
-standardPawnMoves                               :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
-standardPawnMoves b bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures bitboard c
-                                                | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures bitboard c
-                                                | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures bitboard c
-                                                | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures bitboard c where
+standardPawnMoves                             :: BitboardRepresentation -> Coordinate -> [Move]
+standardPawnMoves bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                              | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures bitboard c
+                                              | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                              | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures bitboard c where
   pawnOwner :: Maybe Player
-  pawnOwner = (fmap pieceOwner $ pieceAt b c)
+  pawnOwner = (fmap pieceOwner $ bitboardPieceAt bitboard c)
 
 whiteAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
 whiteAdvance b c                   = advance b c 1
