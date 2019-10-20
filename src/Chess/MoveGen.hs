@@ -20,23 +20,19 @@ import Data.Maybe
 import Control.Applicative
 
 pseudoLegalMoves               :: RegularGame -> [Move]
-pseudoLegalMoves game@Game { placement = b } = (concatMap . concatMap) (pseudoLegalMovesFrom game) b
+pseudoLegalMoves game = (concatMap . concatMap) (pseudoLegalMovesFrom bitboard (castlingRights game) (enPassantSquare game)) $ placement game
+  where bitboard = regularToBitboard $ placement game
 
-pseudoLegalMovesFrom :: RegularGame -> Square -> [Move]
-pseudoLegalMovesFrom _ (Square Nothing _)            = []
-pseudoLegalMovesFrom game@Game { placement = placement
-                               , castlingRights = castlingRights
-                               , enPassantSquare = enPassantSquare
-                               }
-                               (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare bitboard l
-                                                               | p == Knight = potentialKnightMoves bitboard l
-                                                               | p == Bishop = bishopMoves
-                                                               | p == Rook   = rookMoves
-                                                               | p == Queen  = bishopMoves ++ rookMoves
-                                                               | p == King   = potentialKingMoves castlingRights bitboard l
-  where bitboard = regularToBitboard placement
-        bishopMoves = potentialBishopMoves bitboard occupancy ply l
+pseudoLegalMovesFrom                                                                         :: BitboardRepresentation -> CastleRights -> Maybe Coordinate -> Square -> [Move]
+pseudoLegalMovesFrom _ _ _ (Square Nothing _)                                                = []
+pseudoLegalMovesFrom bitboard castlingRights enPassantSquare (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare bitboard l
+                                                                                             | p == Knight = potentialKnightMoves bitboard l
+                                                                                             | p == Bishop = bishopMoves
+                                                                                             | p == Rook   = rookMoves
+                                                                                             | p == Queen  = bishopMoves ++ rookMoves
+                                                                                             | p == King   = potentialKingMoves castlingRights bitboard l
+  where bishopMoves = potentialBishopMoves bitboard occupancy ply l
         rookMoves   = potentialRookMoves bitboard occupancy ply l
-        occupancy = totalOccupancyFor placement
+        occupancy = totalOccupancy bitboard
         diagonals = [NW, NE, SW, SE]
         straights = [N, E, S, W]

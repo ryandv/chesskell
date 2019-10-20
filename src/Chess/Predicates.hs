@@ -76,7 +76,7 @@ noLegalMovesRemaining game ply = null
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceAt (placement game) from)) == (Just ply)
 
-isChecking            :: RegularGame -> Coordinate -> PieceType -> Bool
+isChecking                             :: RegularGame -> Coordinate -> PieceType -> Bool
 isChecking gameWithGhostPiece coord pt = not
                                        $ null
                                        $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
