@@ -26,11 +26,11 @@ potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = stan
                                                                                             , movePromoteTo = Nothing }]
                                       | otherwise                                   = []
 
-standardPawnMoves                      :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
-standardPawnMoves b bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures b c
-                                       | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures b c
-                                       | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures b c
-                                       | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures b c where
+standardPawnMoves                               :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
+standardPawnMoves b bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                                | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures bitboard c
+                                                | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                                | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures bitboard c where
   pawnOwner :: Maybe Player
   pawnOwner = (fmap pieceOwner $ pieceAt b c)
 
@@ -77,34 +77,34 @@ advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1
         destinationUnoccupied = (not . bitboardIsOccupied b $ Coordinate f (r+offset))
         movingPiece = bitboardPieceAt b c
 
-whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
-whiteCaptures b c@(Coordinate f _)      | f == 'a' = whiteNECapture b c
-                                        | f == 'h' = whiteNWCapture b c
-                                        | otherwise = whiteNWCapture b c ++ whiteNECapture b c
+whiteCaptures                             :: BitboardRepresentation -> Coordinate -> [Move]
+whiteCaptures bitboard c@(Coordinate f _) | f == 'a' = whiteNECapture bitboard c
+                                          | f == 'h' = whiteNWCapture bitboard c
+                                          | otherwise = whiteNWCapture bitboard c ++ whiteNECapture bitboard c
 
-blackCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
-blackCaptures b c@(Coordinate f _)      | f == 'a' = blackNECapture b c
-                                        | f == 'h' = blackNWCapture b c
-                                        | otherwise = blackNWCapture b c ++ blackNECapture b c
+blackCaptures                             :: BitboardRepresentation -> Coordinate -> [Move]
+blackCaptures bitboard c@(Coordinate f _) | f == 'a' = blackNECapture bitboard c
+                                          | f == 'h' = blackNWCapture bitboard c
+                                          | otherwise = blackNWCapture bitboard c ++ blackNECapture bitboard c
 
-capture                                :: RegularBoardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
-capture b (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
-                                       | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r)
+capture                                       :: BitboardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
+capture bitboard (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
+                                              | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r)
                                                                                                            , moveTo = targetCoord
                                                                                                            , moveType = Capture
                                                                                                            , movePromoteTo = Nothing }]
-                                       | otherwise = [] where
-  target = pieceAt b (Coordinate tf (r+dr))
+                                              | otherwise = [] where
+  target = bitboardPieceAt bitboard (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)
 
-whiteNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
+whiteNWCapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 whiteNWCapture b c@(Coordinate f _) = capture b c (pred f) 1 Black
 
-blackNWCapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
+blackNWCapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 blackNWCapture b c@(Coordinate f _) = capture b c (pred f) (-1) White
 
-whiteNECapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
+whiteNECapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 whiteNECapture b c@(Coordinate f _) = capture b c (succ f) 1 Black
 
-blackNECapture                      :: RegularBoardRepresentation -> Coordinate -> [Move]
+blackNECapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 blackNECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White
