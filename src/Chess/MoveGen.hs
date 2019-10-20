@@ -28,7 +28,7 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                , castlingRights = castlingRights
                                , enPassantSquare = enPassantSquare
                                }
-                               (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
+                               (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement bitboard l
                                                                | p == Knight = potentialKnightMoves placement bitboard l
                                                                | p == Bishop = bishopMoves
                                                                | p == Rook   = rookMoves

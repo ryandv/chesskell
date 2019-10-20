@@ -4,14 +4,15 @@ module Chess.MoveGen.Pawn
 
 import Chess.Base
 import Chess.Board
+import Chess.Bitboard
 
 import Chess.MoveGen.Common
 
 import Data.Maybe
 
-potentialPawnMoves                                               :: Maybe Coordinate -> RegularBoardRepresentation -> Coordinate -> [Move]
-potentialPawnMoves Nothing placement c                           = standardPawnMoves placement c
-potentialPawnMoves (Just enPassant) placement c@(Coordinate r f) = standardPawnMoves placement c ++ enPassantMoves enPassant where
+potentialPawnMoves                                                        :: Maybe Coordinate -> RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
+potentialPawnMoves Nothing placement bitboard c                           = standardPawnMoves placement c
+potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = standardPawnMoves placement c ++ enPassantMoves enPassant where
   rankOffset :: Int
   rankOffset = case (fmap pieceOwner $ pieceAt placement c) of
                  Just White -> 1
