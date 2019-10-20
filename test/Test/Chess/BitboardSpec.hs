@@ -213,40 +213,40 @@ spec = describe "bitboard" $ do
   describe "conversion from regular board representations" $ do
 
     it "can produce an occupancy bitboard for white pawns" $ do
-      whitePawnOccupancyFor (placement startingPos) `shouldBe` Bitboard 65280
+      whitePawns (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 65280
 
     it "can produce an occupancy bitboard for black pawns" $ do
-      blackPawnOccupancyFor (placement startingPos) `shouldBe` Bitboard 71776119061217280
+      blackPawns (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 71776119061217280
 
     it "can produce an occupancy bitboard for white knights" $ do
-      whiteKnightOccupancyFor (placement startingPos) `shouldBe` Bitboard 66
+      whiteKnights (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 66
 
     it "can produce an occupancy bitboard for black knights" $ do
-      blackKnightOccupancyFor (placement startingPos) `shouldBe` Bitboard 4755801206503243776
+      blackKnights (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 4755801206503243776
 
     it "can produce an occupancy bitboard for white bishops" $ do
-      whiteBishopOccupancyFor (placement startingPos) `shouldBe` Bitboard 36
+      whiteBishops (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 36
 
     it "can produce an occupancy bitboard for black bishops" $ do
-      blackBishopOccupancyFor (placement startingPos) `shouldBe` Bitboard 2594073385365405696
+      blackBishops (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 2594073385365405696
 
     it "can produce an occupancy bitboard for white rooks" $ do
-      whiteRookOccupancyFor (placement startingPos) `shouldBe` Bitboard 129
+      whiteRooks (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 129
 
     it "can produce an occupancy bitboard for black rooks" $ do
-      blackRookOccupancyFor (placement startingPos) `shouldBe` Bitboard 9295429630892703744
+      blackRooks (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 9295429630892703744
 
     it "can produce an occupancy bitboard for white queens" $ do
-      whiteQueenOccupancyFor (placement startingPos) `shouldBe` Bitboard 8
+      whiteQueens (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 8
 
     it "can produce an occupancy bitboard for black queens" $ do
-      blackQueenOccupancyFor (placement startingPos) `shouldBe` Bitboard 576460752303423488
+      blackQueens (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 576460752303423488
 
     it "can produce an occupancy bitboard for white kings" $ do
-      whiteKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 16
+      whiteKings (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 16
 
     it "can produce an occupancy bitboard for black kings" $ do
-      blackKingOccupancyFor (placement startingPos) `shouldBe` Bitboard 1152921504606846976
+      blackKings (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 1152921504606846976
 
     it "can produce the total occupancy of the board, for white pieces" $ do
       whiteOccupancyFor (placement startingPos) `shouldBe` Bitboard 65535

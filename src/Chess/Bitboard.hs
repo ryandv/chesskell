@@ -20,18 +20,6 @@ module Chess.Bitboard
   , extractWord8
   , printWord8AsBinary
 
-  , whitePawnOccupancyFor
-  , blackPawnOccupancyFor
-  , whiteKnightOccupancyFor
-  , blackKnightOccupancyFor
-  , whiteBishopOccupancyFor
-  , blackBishopOccupancyFor
-  , whiteRookOccupancyFor
-  , blackRookOccupancyFor
-  , whiteQueenOccupancyFor
-  , blackQueenOccupancyFor
-  , whiteKingOccupancyFor
-  , blackKingOccupancyFor
   , whiteOccupancyFor
   , blackOccupancyFor
   , totalOccupancyFor
@@ -167,42 +155,6 @@ occupancyFor p = snd . foldr (addPieceToBitboard p) (0, Bitboard 0) . concat whe
   isRelevantPiece     :: Piece -> Square -> Bool
   isRelevantPiece p s = pieceOn s == Just p
 
-whitePawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whitePawnOccupancyFor = occupancyFor (Piece Pawn White)
-
-blackPawnOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackPawnOccupancyFor = occupancyFor (Piece Pawn Black)
-
-whiteKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteKnightOccupancyFor = occupancyFor (Piece Knight White)
-
-blackKnightOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackKnightOccupancyFor = occupancyFor (Piece Knight Black)
-
-whiteBishopOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteBishopOccupancyFor = occupancyFor (Piece Bishop White)
-
-blackBishopOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackBishopOccupancyFor = occupancyFor (Piece Bishop Black)
-
-whiteRookOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteRookOccupancyFor = occupancyFor (Piece Rook White)
-
-blackRookOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackRookOccupancyFor = occupancyFor (Piece Rook Black)
-
-whiteQueenOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteQueenOccupancyFor = occupancyFor (Piece Queen White)
-
-blackQueenOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackQueenOccupancyFor = occupancyFor (Piece Queen Black)
-
-whiteKingOccupancyFor :: RegularBoardRepresentation -> Bitboard
-whiteKingOccupancyFor = occupancyFor (Piece King White)
-
-blackKingOccupancyFor :: RegularBoardRepresentation -> Bitboard
-blackKingOccupancyFor = occupancyFor (Piece King Black)
-
 whiteOccupancyFor :: RegularBoardRepresentation -> Bitboard
 whiteOccupancyFor b = whitePawns bitboard
   `bitboardUnion` whiteBishops bitboard
@@ -226,20 +178,35 @@ totalOccupancyFor = foldr occupiedSquareToBitboard emptyBitboard . filter (isJus
   where occupiedSquareToBitboard occupiedSquare acc = Bitboard (shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location occupiedSquare)) `bitboardUnion` acc
 
 regularToBitboard   :: RegularBoardRepresentation -> BitboardRepresentation
-regularToBitboard b = BitboardRepresentation
-  { whitePawns   = whitePawnOccupancyFor b
-  , blackPawns   = blackPawnOccupancyFor b
-  , whiteBishops = whiteBishopOccupancyFor b
-  , blackBishops = blackBishopOccupancyFor b
-  , whiteKnights = whiteKnightOccupancyFor b
-  , blackKnights = blackKnightOccupancyFor b
-  , whiteRooks   = whiteRookOccupancyFor b
-  , blackRooks   = blackRookOccupancyFor b
-  , whiteQueens  = whiteQueenOccupancyFor b
-  , blackQueens  = blackQueenOccupancyFor b
-  , whiteKings   = whiteKingOccupancyFor b
-  , blackKings   = blackKingOccupancyFor b
-  }
+regularToBitboard = foldr addPieceToBitboard empty . concat
+  where addPieceToBitboard square bitboards | pieceOn square == Just (Piece Pawn White) = bitboards { whitePawns = (whitePawns bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Pawn Black) = bitboards { blackPawns = (blackPawns bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Knight White) = bitboards { whiteKnights = (whiteKnights bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Knight Black) = bitboards { blackKnights = (blackKnights bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Bishop White) = bitboards { whiteBishops = (whiteBishops bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Bishop Black) = bitboards { blackBishops = (blackBishops bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Rook White) = bitboards { whiteRooks = (whiteRooks bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Rook Black) = bitboards { blackRooks = (blackRooks bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Queen White) = bitboards { whiteQueens = (whiteQueens bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece Queen Black) = bitboards { blackQueens = (blackQueens bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece King White) = bitboards { whiteKings = (whiteKings bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | pieceOn square == Just (Piece King Black) = bitboards { blackKings = (blackKings bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
+                                            | otherwise = bitboards
+        empty = (BitboardRepresentation
+                  { whitePawns   = emptyBitboard
+                  , blackPawns   = emptyBitboard
+                  , whiteBishops = emptyBitboard
+                  , blackBishops = emptyBitboard
+                  , whiteKnights = emptyBitboard
+                  , blackKnights = emptyBitboard
+                  , whiteRooks   = emptyBitboard
+                  , blackRooks   = emptyBitboard
+                  , whiteQueens  = emptyBitboard
+                  , blackQueens  = emptyBitboard
+                  , whiteKings   = emptyBitboard
+                  , blackKings   = emptyBitboard
+                  })
+        squareToBitboard square = shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location square)
 
 bitboardPieceAt :: BitboardRepresentation -> Coordinate -> Maybe Piece
 bitboardPieceAt b c | isOccupied (whitePawns b) c = Just $ Piece Pawn White
