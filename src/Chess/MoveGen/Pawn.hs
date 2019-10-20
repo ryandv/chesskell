@@ -14,7 +14,7 @@ potentialPawnMoves                                                        :: May
 potentialPawnMoves Nothing placement bitboard c                           = standardPawnMoves placement c
 potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = standardPawnMoves placement c ++ enPassantMoves enPassant where
   rankOffset :: Int
-  rankOffset = case (fmap pieceOwner $ pieceAt placement c) of
+  rankOffset = case (fmap pieceOwner $ bitboardPieceAt bitboard c) of
                  Just White -> 1
                  Just Black -> -1
 
