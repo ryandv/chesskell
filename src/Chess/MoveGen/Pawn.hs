@@ -49,22 +49,33 @@ blackDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r-1)) =
                                      | otherwise = advance b c (-2)
 
 advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
-advance b c@(Coordinate f r) offset | (r+offset) > 8 || (r+offset) < 1 = []
-                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 8 && ((pieceAt b c) == (Just $ Piece Pawn White)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1 = []
+                                    | whiteCanPromote && movingPieceIsWhite = map (Move (Coordinate f r) destinationCoordinate Promotion)
                                       [ Just $ Piece Rook White
                                       , Just $ Piece Knight White
                                       , Just $ Piece Bishop White
-                                      , Just $ Piece Queen White ]
-                                    | (unoccupied b $ Coordinate f (r+offset)) && (r+offset) == 1 && ((pieceAt b c) == (Just $ Piece Pawn Black)) = map (Move (Coordinate f r) (Coordinate f (r+offset)) Promotion)
+                                      , Just $ Piece Queen White
+                                      ]
+                                    | blackCanPromote && movingPieceIsBlack = map (Move (Coordinate f r) destinationCoordinate Promotion)
                                       [ Just $ Piece Rook Black
                                       , Just $ Piece Knight Black
                                       , Just $ Piece Bishop Black
-                                      , Just $ Piece Queen Black ]
-                                    | (unoccupied b $ Coordinate f (r+offset)) = [Move { moveFrom = (Coordinate f r)
-                                                                                     , moveTo = (Coordinate f (r+offset))
-                                                                                     , moveType = Standard
-                                                                                     , movePromoteTo = Nothing}]
-                                  | otherwise                                = []
+                                      , Just $ Piece Queen Black
+                                      ]
+                                    | destinationUnoccupied = [Move { moveFrom      = (Coordinate f r)
+                                                                    , moveTo        = destinationCoordinate
+                                                                    , moveType      = Standard
+                                                                    , movePromoteTo = Nothing}]
+                                    | otherwise             = []
+
+  where destinationRank = r + offset
+        destinationCoordinate = Coordinate f (r + offset)
+        movingPieceIsWhite = movingPiece == (Just $ Piece Pawn White)
+        whiteCanPromote = unoccupied b destinationCoordinate && destinationRank == 8
+        movingPieceIsBlack = movingPiece == (Just $ Piece Pawn Black)
+        blackCanPromote = unoccupied b destinationCoordinate && destinationRank == 1
+        destinationUnoccupied = (unoccupied b $ Coordinate f (r+offset))
+        movingPiece = pieceAt b c
 
 whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteCaptures b c@(Coordinate f _)      | f == 'a' = whiteNECapture b c
