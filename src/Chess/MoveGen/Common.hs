@@ -31,8 +31,8 @@ rayGeneratorFor NW = northWestRay
 liftOp :: (a -> b -> c) -> b -> [a] -> [c]
 liftOp f c xs = (flip f) c <$> xs
 
-potentialOffsetMoves             :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialOffsetMoves b bb c offsets = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
+potentialOffsetMoves              :: BitboardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
+potentialOffsetMoves bb c offsets = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
   where canMoveToDestination = (flip (unoccupiedByAlly bb) (fmap pieceOwner $ bitboardPieceAt bb c))
         destinationToMove x = Move { moveFrom = c
                                    , moveTo = x
