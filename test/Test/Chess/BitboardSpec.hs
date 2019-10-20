@@ -271,6 +271,7 @@ spec = describe "bitboard" $ do
         , blackQueens  = Bitboard 576460752303423488
         , whiteKings   = Bitboard 16
         , blackKings   = Bitboard 1152921504606846976
+        , totalOccupancy        = Bitboard 18446462598732906495
         }
 
     describe "operations on BitboardRepresentations" $ do

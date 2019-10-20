@@ -83,6 +83,7 @@ data BitboardRepresentation = BitboardRepresentation
   , blackQueens  :: Bitboard
   , whiteKings   :: Bitboard
   , blackKings   :: Bitboard
+  , totalOccupancy        :: Bitboard
   } deriving (Eq, Show)
 
 indicesToCoordinate :: (Int, Int) -> Coordinate
@@ -178,7 +179,19 @@ totalOccupancyFor = foldr occupiedSquareToBitboard emptyBitboard . filter (isJus
   where occupiedSquareToBitboard occupiedSquare acc = Bitboard (shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location occupiedSquare)) `bitboardUnion` acc
 
 regularToBitboard   :: RegularBoardRepresentation -> BitboardRepresentation
-regularToBitboard = foldr addPieceToBitboard empty . concat
+regularToBitboard b = withoutTotalOccupancy { totalOccupancy = whitePawns withoutTotalOccupancy
+      `bitboardUnion` whiteBishops withoutTotalOccupancy
+      `bitboardUnion` whiteKnights withoutTotalOccupancy
+      `bitboardUnion` whiteRooks withoutTotalOccupancy
+      `bitboardUnion` whiteQueens withoutTotalOccupancy
+      `bitboardUnion` whiteKings withoutTotalOccupancy
+      `bitboardUnion` blackPawns withoutTotalOccupancy
+      `bitboardUnion` blackBishops withoutTotalOccupancy
+      `bitboardUnion` blackKnights withoutTotalOccupancy
+      `bitboardUnion` blackRooks withoutTotalOccupancy
+      `bitboardUnion` blackQueens withoutTotalOccupancy
+      `bitboardUnion` blackKings withoutTotalOccupancy }
+
   where addPieceToBitboard square bitboards | pieceOn square == Just (Piece Pawn White) = bitboards { whitePawns = (whitePawns bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
                                             | pieceOn square == Just (Piece Pawn Black) = bitboards { blackPawns = (blackPawns bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
                                             | pieceOn square == Just (Piece Knight White) = bitboards { whiteKnights = (whiteKnights bitboards) `bitboardUnion` (Bitboard $ squareToBitboard square) }
@@ -205,7 +218,9 @@ regularToBitboard = foldr addPieceToBitboard empty . concat
                   , blackQueens  = emptyBitboard
                   , whiteKings   = emptyBitboard
                   , blackKings   = emptyBitboard
+                  , totalOccupancy        = emptyBitboard
                   })
+        withoutTotalOccupancy = foldr addPieceToBitboard empty $ concat b
         squareToBitboard square = shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location square)
 
 bitboardPieceAt :: BitboardRepresentation -> Coordinate -> Maybe Piece
