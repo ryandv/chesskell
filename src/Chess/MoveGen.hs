@@ -30,8 +30,12 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                }
                                (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare placement l
                                                                | p == Knight = potentialKnightMoves placement bitboard l
-                                                               | p == Bishop = potentialBishopMoves bitboard (totalOccupancyFor placement) ply l
-                                                               | p == Rook   = potentialRookMoves bitboard (totalOccupancyFor placement) ply l
-                                                               | p == Queen  = potentialQueenMoves bitboard (totalOccupancyFor placement) ply l
+                                                               | p == Bishop = bishopMoves
+                                                               | p == Rook   = rookMoves
+                                                               | p == Queen  = bishopMoves ++ rookMoves
                                                                | p == King   = potentialKingMoves castlingRights placement bitboard l
   where bitboard = regularToBitboard placement
+        bishopMoves = potentialRayMoves bitboard (totalOccupancyFor placement) ply l diagonals
+        rookMoves   = potentialRayMoves bitboard (totalOccupancyFor placement) ply l straights
+        diagonals = [NW, NE, SW, SE]
+        straights = [N, E, S, W]
