@@ -11,8 +11,8 @@ import Chess.MoveGen.Common
 import Data.Maybe
 
 potentialPawnMoves                                                        :: Maybe Coordinate -> RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
-potentialPawnMoves Nothing placement bitboard c                           = standardPawnMoves placement c
-potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = standardPawnMoves placement c ++ enPassantMoves enPassant where
+potentialPawnMoves Nothing placement bitboard c                           = standardPawnMoves placement bitboard c
+potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = standardPawnMoves placement bitboard c ++ enPassantMoves enPassant where
   rankOffset :: Int
   rankOffset = case (fmap pieceOwner $ bitboardPieceAt bitboard c) of
                  Just White -> 1
@@ -26,29 +26,29 @@ potentialPawnMoves (Just enPassant) placement bitboard c@(Coordinate r f) = stan
                                                                                             , movePromoteTo = Nothing }]
                                       | otherwise                                   = []
 
-standardPawnMoves                      :: RegularBoardRepresentation -> Coordinate -> [Move]
-standardPawnMoves b c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump b c ++ whiteAdvance b c ++ whiteCaptures b c
-                                       | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump b c ++ blackAdvance b c ++ blackCaptures b c
-                                       | ((Just White) == pawnOwner) = whiteAdvance b c ++ whiteCaptures b c
-                                       | ((Just Black) == pawnOwner) = blackAdvance b c ++ blackCaptures b c where
+standardPawnMoves                      :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [Move]
+standardPawnMoves b bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures b c
+                                       | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures b c
+                                       | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures b c
+                                       | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures b c where
   pawnOwner :: Maybe Player
   pawnOwner = (fmap pieceOwner $ pieceAt b c)
 
-whiteAdvance                       :: RegularBoardRepresentation -> Coordinate -> [Move]
+whiteAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
 whiteAdvance b c                   = advance b c 1
 
-blackAdvance                       :: RegularBoardRepresentation -> Coordinate -> [Move]
+blackAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
 blackAdvance b c                   = advance b c (-1)
 
-whiteDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
-whiteDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r+1)) = []
+whiteDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
+whiteDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r+1)) = []
                                      | otherwise = advance b c 2
 
-blackDoubleJump                      :: RegularBoardRepresentation -> Coordinate -> [Move]
-blackDoubleJump b c@(Coordinate f r) | not $ unoccupied b (Coordinate f (r-1)) = []
+blackDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
+blackDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r-1)) = []
                                      | otherwise = advance b c (-2)
 
-advance                             :: RegularBoardRepresentation -> Coordinate -> Rank -> [Move]
+advance                             :: BitboardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1 = []
                                     | whiteCanPromote && movingPieceIsWhite = map (Move (Coordinate f r) destinationCoordinate Promotion)
                                       [ Just $ Piece Rook White
@@ -71,11 +71,11 @@ advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1
   where destinationRank = r + offset
         destinationCoordinate = Coordinate f (r + offset)
         movingPieceIsWhite = movingPiece == (Just $ Piece Pawn White)
-        whiteCanPromote = unoccupied b destinationCoordinate && destinationRank == 8
+        whiteCanPromote = (not $ bitboardIsOccupied b destinationCoordinate) && destinationRank == 8
         movingPieceIsBlack = movingPiece == (Just $ Piece Pawn Black)
-        blackCanPromote = unoccupied b destinationCoordinate && destinationRank == 1
-        destinationUnoccupied = (unoccupied b $ Coordinate f (r+offset))
-        movingPiece = pieceAt b c
+        blackCanPromote = (not $ bitboardIsOccupied b destinationCoordinate) && destinationRank == 1
+        destinationUnoccupied = (not . bitboardIsOccupied b $ Coordinate f (r+offset))
+        movingPiece = bitboardPieceAt b c
 
 whiteCaptures                           :: RegularBoardRepresentation -> Coordinate -> [Move]
 whiteCaptures b c@(Coordinate f _)      | f == 'a' = whiteNECapture b c
