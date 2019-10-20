@@ -32,10 +32,13 @@ liftOp :: (a -> b -> c) -> b -> [a] -> [c]
 liftOp f c xs = (flip f) c <$> xs
 
 potentialOffsetMoves             :: RegularBoardRepresentation -> BitboardRepresentation -> Coordinate -> [(Int, Int)] -> [Move]
-potentialOffsetMoves b bb c offsets = fmap (\x -> Move { moveFrom = c
-                                                    , moveTo = x
-                                                    , moveType = determineMoveType bb c x
-                                                    , movePromoteTo = Nothing }) $ filter (flip (unoccupiedByAlly b) (fmap pieceOwner $ pieceAt b c)) $ filter isOnBoard $ fmap (c `offsetBy`) offsets
+potentialOffsetMoves b bb c offsets = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
+  where canMoveToDestination = (flip (unoccupiedByAlly bb) (fmap pieceOwner $ bitboardPieceAt bb c))
+        destinationToMove x = Move { moveFrom = c
+                                   , moveTo = x
+                                   , moveType = determineMoveType bb c x
+                                   , movePromoteTo = Nothing
+                                   }
 
 potentialRayMoves              :: BitboardRepresentation -> Bitboard -> Player -> Coordinate -> [Ray] -> [Move]
 potentialRayMoves b occupancy ply c rays = toLegalMoves $ foldr bitboardUnion emptyBitboard $ potentialRayMoves' occupancy ply c <$> rays
@@ -118,9 +121,9 @@ scaleBy s (x,y)                   = (x*s, y*s)
 unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
 unoccupied b c = isNothing $ pieceAt b c
 
-unoccupiedByAlly         :: RegularBoardRepresentation -> Coordinate -> Maybe Player -> Bool
+unoccupiedByAlly         :: BitboardRepresentation -> Coordinate -> Maybe Player -> Bool
 unoccupiedByAlly b c ply | isNothing targetOwner = True
                          | ply /= targetOwner = True
                          | ply == targetOwner = False where
-  targetPiece = pieceAt b c
+  targetPiece = bitboardPieceAt b c
   targetOwner = pieceOwner <$> targetPiece
