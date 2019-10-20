@@ -35,7 +35,7 @@ pseudoLegalMovesFrom game@Game { placement = placement
                                                                | p == Queen  = bishopMoves ++ rookMoves
                                                                | p == King   = potentialKingMoves castlingRights placement bitboard l
   where bitboard = regularToBitboard placement
-        bishopMoves = potentialRayMoves bitboard (totalOccupancyFor placement) ply l diagonals
-        rookMoves   = potentialRayMoves bitboard (totalOccupancyFor placement) ply l straights
+        bishopMoves = potentialBishopMoves bitboard (totalOccupancyFor placement) ply l
+        rookMoves   = potentialRookMoves bitboard (totalOccupancyFor placement) ply l
         diagonals = [NW, NE, SW, SE]
         straights = [N, E, S, W]
