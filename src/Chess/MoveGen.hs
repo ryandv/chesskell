@@ -1,7 +1,5 @@
 module Chess.MoveGen
-  ( alongRay
-  , isBlocked
-  , pseudoLegalMoves
+  ( pseudoLegalMoves
   ) where
 
 import Chess.Base

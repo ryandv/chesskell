@@ -76,51 +76,8 @@ determineMoveType b _ to       | bitboardIsOccupied b to = Capture
 determinePieceOwner :: RegularBoardRepresentation -> Coordinate -> Maybe Player
 determinePieceOwner b c = fmap pieceOwner $ pieceAt b c
 
-isBlocked                       :: RegularBoardRepresentation -> Move -> Bool
-isBlocked b Move { moveFrom = from
-                 , moveTo = to }  = not $ to `elem` (validMoves $ alongRay (from, to)) where
-
-  validMoves    :: [Coordinate] -> [Coordinate]
-  validMoves cs = validMoves' cs False
-
-  validMoves'                :: [Coordinate] -> Bool -> [Coordinate]
-  validMoves' (c:cs) blocked | blocked == True = []
-                             | otherwise       = case (fmap pieceOwner $ pieceAt b c) of
-                                                   Nothing                -> c:validMoves' cs False
-                                                   (Just owner) -> if ((Just owner) == (fmap pieceOwner $ pieceAt b from))
-                                                                               then []
-                                                                               else c:validMoves' cs True
-
-alongRay            :: (Coordinate, Coordinate) -> [Coordinate]
-alongRay (from, to) = filter (\x -> coordinateEuclideanDistance from x <= coordinateEuclideanDistance from to)
-                    $ filter isOnBoard
-                    $ fmap (from `offsetBy`)
-                    $ scaleBy <$> [1..7] <*> [rayFromMove (from, to)]
-
-rayFromMove                                    :: (Coordinate, Coordinate) -> (Int, Int)
-rayFromMove (Coordinate f r, Coordinate f' r') | fromEnum f' > fromEnum f && r' > r = (1,1)
-                                               | fromEnum f' > fromEnum f && r' < r = (1,-1)
-                                               | fromEnum f' > fromEnum f && r' == r = (1,0)
-                                               | fromEnum f' < fromEnum f && r' > r = (-1,1)
-                                               | fromEnum f' < fromEnum f && r' < r = (-1,-1)
-                                               | fromEnum f' < fromEnum f && r' == r = (-1,0)
-                                               | fromEnum f' == fromEnum f && r' > r = (0,1)
-                                               | fromEnum f' == fromEnum f && r' < r = (0,-1)
-                                               | fromEnum f' == fromEnum f && r' == r = (0,0)
-
-coordinateEuclideanDistance                                       :: Coordinate -> Coordinate -> Int
-coordinateEuclideanDistance (Coordinate cx y) (Coordinate cx' y') = ((x' - x) ^ 2) + ((y' - y) ^ 2) where
-  x' = fromEnum cx' - fromEnum 'a'
-  x  = fromEnum cx - fromEnum 'a'
-
 offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
 offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
-
-scaleBy                           :: Int -> (Int, Int) -> (Int, Int)
-scaleBy s (x,y)                   = (x*s, y*s)
-
-unoccupied     :: RegularBoardRepresentation -> Coordinate -> Bool
-unoccupied b c = isNothing $ pieceAt b c
 
 unoccupiedByAlly         :: BitboardRepresentation -> Coordinate -> Maybe Player -> Bool
 unoccupiedByAlly b c ply | isNothing targetOwner = True
