@@ -12,7 +12,6 @@ import Chess.MoveGen.Bishop
 import Chess.MoveGen.King
 import Chess.MoveGen.Knight
 import Chess.MoveGen.Pawn
-import Chess.MoveGen.Queen
 import Chess.MoveGen.Rook
 
 import Data.Maybe
@@ -31,8 +30,6 @@ pseudoLegalMovesFrom bitboard castlingRights enPassantSquare (Square (Just (Piec
                                                                                              | p == Rook   = rookMoves
                                                                                              | p == Queen  = bishopMoves ++ rookMoves
                                                                                              | p == King   = potentialKingMoves castlingRights bitboard l
-  where bishopMoves = potentialBishopMoves bitboard occupancy ply l
-        rookMoves   = potentialRookMoves bitboard occupancy ply l
-        occupancy = totalOccupancy bitboard
-        diagonals = [NW, NE, SW, SE]
-        straights = [N, E, S, W]
+  where bishopMoves = potentialBishopMoves bitboard ply l
+        rookMoves   = potentialRookMoves bitboard ply l
+        occupancy   = totalOccupancy bitboard

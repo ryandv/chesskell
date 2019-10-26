@@ -7,9 +7,9 @@ import Chess.Bitboard
 import Chess.MoveGen.Common
 
 potentialKingMoves                                          :: CastleRights -> BitboardRepresentation -> Coordinate -> [Move]
-potentialKingMoves castlerights bitboard c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves bitboard c possibleMoves ++ whiteCastles castlerights
-                                                            | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves bitboard c possibleMoves ++ blackCastles castlerights
-                                                            | otherwise = potentialOffsetMoves bitboard c possibleMoves where
+potentialKingMoves castlerights bitboard c@(Coordinate f r) | f == 'e' && r == 1 && (Just White) == kingOwner = potentialOffsetMoves possibleMoves bitboard c ++ whiteCastles castlerights
+                                                            | f == 'e' && r == 8 && (Just Black) == kingOwner = potentialOffsetMoves possibleMoves bitboard c ++ blackCastles castlerights
+                                                            | otherwise = potentialOffsetMoves possibleMoves bitboard c where
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 

@@ -17,10 +17,10 @@ spec :: Spec
 spec = describe "potentialRookMoves" $ do
          it "never produces moves off the board" $ do
            let position = (\c -> (placePiece emptyTest (Piece Rook White) c))
-           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialRookMoves (regularToBitboard . placement $ position c) (totalOccupancyFor . placement $ position c) White c
+           property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialRookMoves (regularToBitboard . placement $ position c) White c
 
          it "produces the correct set of moves without being blocked by pieces" $
-           potentialRookMoves (regularToBitboard . placement $ onlyRookTest) (totalOccupancyFor $ placement onlyRookTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (regularToBitboard . placement $ onlyRookTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -38,7 +38,7 @@ spec = describe "potentialRookMoves" $ do
              ]
 
          it "produces the correct set of moves when blocked by some pieces" $
-           potentialRookMoves (regularToBitboard . placement $ rookTest) (totalOccupancyFor $ placement rookTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (regularToBitboard . placement $ rookTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -50,7 +50,7 @@ spec = describe "potentialRookMoves" $ do
              ]
 
          it "produces the correct set of moves, including captures" $
-           potentialRookMoves (regularToBitboard . placement $ rookAllCapturesTest) (totalOccupancyFor $ placement rookAllCapturesTest) White (Coordinate 'd' 5) `shouldMatchList`
+           potentialRookMoves (regularToBitboard . placement $ rookAllCapturesTest) White (Coordinate 'd' 5) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
@@ -65,7 +65,7 @@ spec = describe "potentialRookMoves" $ do
            let position = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                          , (Piece Rook White, Coordinate 'h' 1)
                                          ])
-           potentialRookMoves (regularToBitboard . placement $ position) (totalOccupancyFor $ placement position) White (Coordinate 'h' 1) `shouldMatchList`
+           potentialRookMoves (regularToBitboard . placement $ position) White (Coordinate 'h' 1) `shouldMatchList`
              [ Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'g' 1, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 2, moveType = Standard, movePromoteTo = Nothing }
              , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'f' 1, moveType = Standard, movePromoteTo = Nothing }

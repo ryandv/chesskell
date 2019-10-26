@@ -22,7 +22,6 @@ library
                      , Chess.MoveGen.King
                      , Chess.MoveGen.Knight
                      , Chess.MoveGen.Pawn
-                     , Chess.MoveGen.Queen
                      , Chess.MoveGen.Rook
                      , Chess.MoveGen.Common
                      , Chess.Predicates
