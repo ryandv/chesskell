@@ -31,9 +31,9 @@ rayGeneratorFor NW = northWestRay
 liftOp :: (a -> b -> c) -> b -> [a] -> [c]
 liftOp f c xs = (flip f) c <$> xs
 
-potentialOffsetMoves              :: [(Int, Int)] -> BitboardRepresentation -> Coordinate -> [Move]
-potentialOffsetMoves offsets bb c = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
-  where canMoveToDestination = (flip (unoccupiedByAlly bb) (fmap pieceOwner $ bitboardPieceAt bb c))
+potentialOffsetMoves                  :: [(Int, Int)] -> BitboardRepresentation -> Player -> Coordinate -> [Move]
+potentialOffsetMoves offsets bb ply c = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
+  where canMoveToDestination = (flip (unoccupiedByAlly bb) ply)
         destinationToMove x = Move { moveFrom = c
                                    , moveTo = x
                                    , moveType = determineMoveType bb c x
@@ -79,9 +79,9 @@ determinePieceOwner b c = fmap pieceOwner $ pieceAt b c
 offsetBy                          :: Coordinate -> (Int, Int) -> Coordinate
 offsetBy (Coordinate f r) (df,dr) = Coordinate (toEnum $ fromEnum f + df) (r + dr)
 
-unoccupiedByAlly         :: BitboardRepresentation -> Coordinate -> Maybe Player -> Bool
+unoccupiedByAlly         :: BitboardRepresentation -> Coordinate -> Player -> Bool
 unoccupiedByAlly b c ply | isNothing targetOwner = True
-                         | ply /= targetOwner = True
-                         | ply == targetOwner = False where
+                         | Just ply /= targetOwner = True
+                         | Just ply == targetOwner = False where
   targetPiece = bitboardPieceAt b c
   targetOwner = pieceOwner <$> targetPiece

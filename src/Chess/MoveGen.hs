@@ -23,11 +23,11 @@ pseudoLegalMoves game = (concatMap . concatMap) (pseudoLegalMovesFrom bitboard (
 pseudoLegalMovesFrom                                                                         :: BitboardRepresentation -> CastleRights -> Maybe Coordinate -> Square -> [Move]
 pseudoLegalMovesFrom _ _ _ (Square Nothing _)                                                = []
 pseudoLegalMovesFrom bitboard castlingRights enPassantSquare (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare bitboard ply l
-                                                                                             | p == Knight = potentialKnightMoves bitboard l
+                                                                                             | p == Knight = potentialKnightMoves bitboard ply l
                                                                                              | p == Bishop = bishopMoves
                                                                                              | p == Rook   = rookMoves
                                                                                              | p == Queen  = bishopMoves ++ rookMoves
-                                                                                             | p == King   = potentialKingMoves castlingRights bitboard l
+                                                                                             | p == King   = potentialKingMoves castlingRights bitboard ply l
   where bishopMoves = potentialBishopMoves bitboard ply l
         rookMoves   = potentialRookMoves bitboard ply l
         occupancy   = totalOccupancy bitboard
