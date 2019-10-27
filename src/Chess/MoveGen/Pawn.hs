@@ -10,43 +10,42 @@ import Chess.MoveGen.Common
 
 import Data.Maybe
 
-potentialPawnMoves                                              :: Maybe Coordinate -> BitboardRepresentation -> Coordinate -> [Move]
-potentialPawnMoves Nothing bitboard c                           = standardPawnMoves bitboard c
-potentialPawnMoves (Just enPassant) bitboard c@(Coordinate r f) = standardPawnMoves bitboard c ++ enPassantMoves enPassant where
-  rankOffset :: Int
-  rankOffset = case (fmap pieceOwner $ bitboardPieceAt bitboard c) of
-                 Just White -> 1
-                 Just Black -> -1
+potentialPawnMoves                                                  :: Maybe Coordinate -> BitboardRepresentation -> Player -> Coordinate -> [Move]
+potentialPawnMoves Nothing bitboard ply c                           = standardPawnMoves bitboard ply c
+potentialPawnMoves (Just enPassant) bitboard ply c@(Coordinate r f) = standardPawnMoves bitboard ply c ++ enPassantMoves enPassant
+  where rankOffset :: Player -> Int
+        rankOffset White = 1
+        rankOffset Black = -1
 
-  enPassantMoves                      :: Coordinate -> [Move]
-  enPassantMoves (Coordinate r' f')   | (toEnum $ fromEnum r' + fromEnum rankOffset) == r
-                                        && (f == (f' - 1) || f == (f' + 1))         = [Move { moveFrom = (Coordinate r f)
-                                                                                            , moveTo = (Coordinate r' f')
-                                                                                            , moveType = EnPassant
-                                                                                            , movePromoteTo = Nothing }]
-                                      | otherwise                                   = []
+        enPassantMoves                      :: Coordinate -> [Move]
+        enPassantMoves (Coordinate r' f')   | canEnPassantFromThisRank r' && canEnPassantFromThisFile f' = [Move { moveFrom = (Coordinate r f)
+                                                                                                           , moveTo = (Coordinate r' f')
+                                                                                                           , moveType = EnPassant
+                                                                                                           , movePromoteTo = Nothing }]
+                                            | otherwise                                   = []
 
-standardPawnMoves                             :: BitboardRepresentation -> Coordinate -> [Move]
-standardPawnMoves bitboard c@(Coordinate _ r) | r == 2 && ((Just White) == pawnOwner)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures bitboard c
-                                              | r == 7 && ((Just Black) == pawnOwner)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures bitboard c
-                                              | ((Just White) == pawnOwner) = whiteAdvance bitboard c ++ whiteCaptures bitboard c
-                                              | ((Just Black) == pawnOwner) = blackAdvance bitboard c ++ blackCaptures bitboard c where
-  pawnOwner :: Maybe Player
-  pawnOwner = (fmap pieceOwner $ bitboardPieceAt bitboard c)
+        canEnPassantFromThisRank r' = (toEnum $ fromEnum r' + (fromEnum $ rankOffset ply)) == r
+        canEnPassantFromThisFile f' = (f == (f' - 1) || f == (f' + 1))
 
-whiteAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
-whiteAdvance b c                   = advance b c 1
+standardPawnMoves                                 :: BitboardRepresentation -> Player -> Coordinate -> [Move]
+standardPawnMoves bitboard ply c@(Coordinate _ r) | r == 2 && (ply == White)  = whiteDoubleJump bitboard c ++ whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                                  | r == 7 && (ply == Black)  = blackDoubleJump bitboard c ++ blackAdvance bitboard c ++ blackCaptures bitboard c
+                                                  | (ply == White) = whiteAdvance bitboard c ++ whiteCaptures bitboard c
+                                                  | (ply == Black) = blackAdvance bitboard c ++ blackCaptures bitboard c
 
-blackAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
-blackAdvance b c                   = advance b c (-1)
+  where whiteAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
+        whiteAdvance b c                   = advance b c 1
 
-whiteDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
-whiteDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r+1)) = []
-                                     | otherwise = advance b c 2
+        blackAdvance                       :: BitboardRepresentation -> Coordinate -> [Move]
+        blackAdvance b c                   = advance b c (-1)
 
-blackDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
-blackDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r-1)) = []
-                                     | otherwise = advance b c (-2)
+        whiteDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
+        whiteDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r+1)) = []
+                                             | otherwise = advance b c 2
+
+        blackDoubleJump                      :: BitboardRepresentation -> Coordinate -> [Move]
+        blackDoubleJump b c@(Coordinate f r) | bitboardIsOccupied b (Coordinate f (r-1)) = []
+                                             | otherwise = advance b c (-2)
 
 advance                             :: BitboardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1 = []
@@ -83,9 +82,9 @@ whiteCaptures bitboard c@(Coordinate f _) | f == 'a' = whiteNECapture bitboard c
                                           | otherwise = whiteNWCapture bitboard c ++ whiteNECapture bitboard c
 
 blackCaptures                             :: BitboardRepresentation -> Coordinate -> [Move]
-blackCaptures bitboard c@(Coordinate f _) | f == 'a' = blackNECapture bitboard c
-                                          | f == 'h' = blackNWCapture bitboard c
-                                          | otherwise = blackNWCapture bitboard c ++ blackNECapture bitboard c
+blackCaptures bitboard c@(Coordinate f _) | f == 'a' = blackSECapture bitboard c
+                                          | f == 'h' = blackSWCapture bitboard c
+                                          | otherwise = blackSWCapture bitboard c ++ blackSECapture bitboard c
 
 capture                                       :: BitboardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
 capture bitboard (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
@@ -100,11 +99,11 @@ capture bitboard (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
 whiteNWCapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 whiteNWCapture b c@(Coordinate f _) = capture b c (pred f) 1 Black
 
-blackNWCapture                      :: BitboardRepresentation -> Coordinate -> [Move]
-blackNWCapture b c@(Coordinate f _) = capture b c (pred f) (-1) White
+blackSWCapture                      :: BitboardRepresentation -> Coordinate -> [Move]
+blackSWCapture b c@(Coordinate f _) = capture b c (pred f) (-1) White
 
 whiteNECapture                      :: BitboardRepresentation -> Coordinate -> [Move]
 whiteNECapture b c@(Coordinate f _) = capture b c (succ f) 1 Black
 
-blackNECapture                      :: BitboardRepresentation -> Coordinate -> [Move]
-blackNECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White
+blackSECapture                      :: BitboardRepresentation -> Coordinate -> [Move]
+blackSECapture b c@(Coordinate f _) = capture b c (succ f) (-1) White

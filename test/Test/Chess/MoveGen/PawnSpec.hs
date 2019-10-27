@@ -20,10 +20,10 @@ spec = describe "potentialPawnMoves" $ do
            -- TODO: add quickcheck spec when enPassant isJust.
            it "never produces moves off the board" $ do
              let position c = placement (placePiece emptyTest (Piece Pawn White) c)
-             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialPawnMoves Nothing (regularToBitboard $ position c) c
+             property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialPawnMoves Nothing (regularToBitboard $ position c) White c
 
            it "allows double-jumping from the second rank for White" $ do
-             potentialPawnMoves Nothing (regularToBitboard $ placement startingPos) (Coordinate 'e' 2) `shouldMatchList`
+             potentialPawnMoves Nothing (regularToBitboard $ placement startingPos) White (Coordinate 'e' 2) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 4, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 3, moveType = Standard, movePromoteTo = Nothing }
                ]
@@ -33,11 +33,12 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'e' 6) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'e' 6, moveTo = Coordinate 'e' 7, moveType = Standard, movePromoteTo = Nothing } ]
 
            it "allows double-jumping from the second rank for Black" $
-             potentialPawnMoves Nothing  (regularToBitboard $ placement startingPos) (Coordinate 'e' 7) `shouldMatchList`
+             potentialPawnMoves Nothing  (regularToBitboard $ placement startingPos) Black (Coordinate 'e' 7) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 6, moveType = Standard, movePromoteTo = Nothing }
                ]
@@ -47,6 +48,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'e' 3) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'e' 3, moveTo = Coordinate 'e' 2, moveType = Standard, movePromoteTo = Nothing } ]
 
@@ -57,6 +59,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'd' 4) `shouldMatchList` []
 
            it "does not allow White to double-jump onto an occupied square" $ do
@@ -66,6 +69,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'd' 2) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 2, moveTo = Coordinate 'd' 3, moveType = Standard, movePromoteTo = Nothing } ]
 
@@ -76,6 +80,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'd' 7) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing } ]
 
@@ -86,6 +91,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'd' 2) `shouldMatchList` []
 
            it "does not allow Black to double-jump when the square in front is blocked" $ do
@@ -95,6 +101,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'd' 7) `shouldMatchList` []
 
 
@@ -105,12 +112,13 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'd' 5) `shouldMatchList` []
 
          context "promotion" $ do
            it "produces four separate promotion moves when a White pawn moves to the eighth rank" $ do
              let position = (placement (setupGame [ (Piece Pawn White, Coordinate 'e' 7) ]))
-             potentialPawnMoves Nothing (regularToBitboard position) (Coordinate 'e' 7) `shouldMatchList`
+             potentialPawnMoves Nothing (regularToBitboard position) White (Coordinate 'e' 7) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Rook White }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Knight White }
                , Move { moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion, movePromoteTo = Just $ Piece Bishop White }
@@ -119,7 +127,7 @@ spec = describe "potentialPawnMoves" $ do
 
            it "produces four separate promotion moves when a Black pawn moves to the first rank" $ do
              let position = (placement (setupGame [ (Piece Pawn Black, Coordinate 'e' 2) ]))
-             potentialPawnMoves Nothing (regularToBitboard position) (Coordinate 'e' 2) `shouldMatchList`
+             potentialPawnMoves Nothing (regularToBitboard position) Black (Coordinate 'e' 2) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Rook Black }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Knight Black }
                , Move { moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion, movePromoteTo = Just $ Piece Bishop Black }
@@ -132,6 +140,7 @@ spec = describe "potentialPawnMoves" $ do
                                                       ]))
              potentialPawnMoves Nothing
                                 (regularToBitboard position)
+                                White
                                 (Coordinate 'e' 7) `shouldMatchList` []
 
          context "capturing" $ do
@@ -144,13 +153,14 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'd' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'c' 5, moveType = Capture, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 5, moveType = Capture, movePromoteTo = Nothing }
                  ]
 
-           it "allows Black to capture pieces on the neighbouring NW and NE squares" $ do
+           it "allows Black to capture pieces on the neighbouring SW and SE squares" $ do
              let position = (placement (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
                           , (Piece Pawn White, Coordinate 'e' 4)
                           , (Piece Pawn Black, Coordinate 'd' 5)
@@ -158,6 +168,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'd' 5) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 4, moveType = Capture, movePromoteTo = Nothing }
@@ -172,6 +183,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'd' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 5, moveType = Standard, movePromoteTo = Nothing }
                  ]
@@ -184,6 +196,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               Black
                (Coordinate 'd' 5) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
                  ]
@@ -195,6 +208,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'a' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'a' 4, moveTo = Coordinate 'a' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'a' 4, moveTo = Coordinate 'b' 5, moveType = Capture, movePromoteTo = Nothing }
@@ -207,6 +221,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                Nothing
                (regularToBitboard position)
+               White
                (Coordinate 'h' 4) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'h' 5, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'g' 5, moveType = Capture, movePromoteTo = Nothing }
@@ -214,14 +229,14 @@ spec = describe "potentialPawnMoves" $ do
 
            it "allows White to en passant, if available" $ do
              let position = (placement whiteEnPassantTest)
-             potentialPawnMoves (Just (Coordinate 'd' 6)) (regularToBitboard position) (Coordinate 'e' 5) `shouldMatchList`
+             potentialPawnMoves (Just (Coordinate 'd' 6)) (regularToBitboard position) White (Coordinate 'e' 5) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'e' 6, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant, movePromoteTo = Nothing }
                ]
 
            it "allows Black to en passant, if available" $ do
              let position = (placement blackEnPassantTest)
-             potentialPawnMoves (Just (Coordinate 'e' 3)) (regularToBitboard position) (Coordinate 'd' 4) `shouldMatchList`
+             potentialPawnMoves (Just (Coordinate 'e' 3)) (regularToBitboard position) Black (Coordinate 'd' 4) `shouldMatchList`
                [ Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'd' 3, moveType = Standard, movePromoteTo = Nothing }
                , Move { moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 3, moveType = EnPassant, movePromoteTo = Nothing }
                ]
@@ -234,6 +249,7 @@ spec = describe "potentialPawnMoves" $ do
              potentialPawnMoves
                (Just (Coordinate 'd' 6))
                (regularToBitboard position)
+               White
                (Coordinate 'b' 2) `shouldMatchList`
                  [ Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'b' 4, moveType = Standard, movePromoteTo = Nothing }
                  , Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'b' 3, moveType = Standard, movePromoteTo = Nothing }
