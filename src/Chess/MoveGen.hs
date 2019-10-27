@@ -1,5 +1,10 @@
 module Chess.MoveGen
   ( pseudoLegalMoves
+  , potentialBishopMoves
+  , potentialKingMoves
+  , potentialKnightMoves
+  , potentialPawnMoves
+  , potentialRookMoves
   ) where
 
 import Chess.Base

@@ -8,6 +8,7 @@ module Chess.Predicates
 
 import Chess.Base
 import Chess.Board
+import Chess.Bitboard
 import Chess.MoveGen
 
 import Control.Applicative
@@ -20,6 +21,7 @@ isAttacked :: RegularGame -> Coordinate -> Bool
 isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
 
   nextState = (placement game)
+  bitboard = regularToBitboard $ placement game
 
   activePly = (activeColor game)
 
@@ -30,21 +32,30 @@ isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking ||
   isQueenChecking = isChecking (placeGhostPiece Queen) coord Queen
 
   isRookChecking :: Bool
-  isRookChecking = isChecking (placeGhostPiece Rook) coord Rook
+  isRookChecking = fastIsChecking potentialRookMoves bitboard activePly coord Rook
+
+  moveIsCapture :: Move -> Bool
+  moveIsCapture = (== Capture) . moveType
+
+  moveMatchesPieceType    :: PieceType -> Move -> Bool
+  moveMatchesPieceType pt = (== (Just pt)) . (fmap pieceType) . bitboardPieceAt bitboard . moveTo
+
+  moveIsFromTargetCoordinate :: Move -> Bool
+  moveIsFromTargetCoordinate = (== coord) . moveFrom
 
   isBishopChecking :: Bool
-  isBishopChecking = isChecking (placeGhostPiece Bishop) coord Bishop
+  isBishopChecking = fastIsChecking potentialBishopMoves bitboard activePly coord Bishop
 
   isKnightChecking :: Bool
-  isKnightChecking = isChecking (placeGhostPiece Knight) coord Knight
+  isKnightChecking = fastIsChecking potentialKnightMoves bitboard activePly coord Knight
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = isChecking (placeGhostPiece Pawn) coord Pawn
+  isPawnChecking = fastIsChecking (potentialPawnMoves (enPassantSquare game)) bitboard activePly coord Pawn
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = isChecking (placeGhostPiece King) coord King
+  isKingChecking = fastIsChecking (potentialKingMoves (castlingRights game)) bitboard activePly coord King
 
 isChecked      :: RegularGame -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
@@ -75,6 +86,22 @@ noLegalMovesRemaining game ply = null
 
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceAt (placement game) from)) == (Just ply)
+
+fastIsChecking :: (BitboardRepresentation -> Player -> Coordinate -> [Move]) -> BitboardRepresentation -> Player -> Coordinate -> PieceType -> Bool
+fastIsChecking moveGenerator bitboard activePly coord pt = not
+                                                         $ null
+                                                         $ filter (liftA2 (&&) moveIsCapture (moveMatchesPieceType pt))
+                                                         $ filter moveIsFromTargetCoordinate
+                                                         $ moveGenerator bitboard activePly coord
+
+  where moveIsCapture :: Move -> Bool
+        moveIsCapture = (== Capture) . moveType
+
+        moveMatchesPieceType    :: PieceType -> Move -> Bool
+        moveMatchesPieceType pt = (== (Just pt)) . (fmap pieceType) . bitboardPieceAt bitboard . moveTo
+
+        moveIsFromTargetCoordinate :: Move -> Bool
+        moveIsFromTargetCoordinate = (== coord) . moveFrom
 
 isChecking                             :: RegularGame -> Coordinate -> PieceType -> Bool
 isChecking gameWithGhostPiece coord pt = not
