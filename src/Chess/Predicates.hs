@@ -17,60 +17,63 @@ import Data.Maybe
 
 -- Given an opponent's PieceType, this function works by placing down a ghost piece of the same PieceType but the active player's color,
 -- and checks to see if the ghost piece can capture any of the opponent's pieces.
-isAttacked :: RegularGame -> Coordinate -> Bool
+isAttacked :: Game BitboardRepresentation -> Coordinate -> Bool
 isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking || isKnightChecking || isPawnChecking || isKingChecking where
+  bitboards = (placement game)
 
-  nextState = (placement game)
-  bitboard = regularToBitboard $ placement game
-
-  rookAttacks = (potentialRookMoves bitboard activePly coord)
-  bishopAttacks = (potentialBishopMoves bitboard activePly coord)
+  rookAttacks = (potentialRookMoves bitboards activePly coord)
+  bishopAttacks = (potentialBishopMoves bitboards activePly coord)
 
   activePly = (activeColor game)
 
-  placeGhostPiece :: PieceType -> RegularGame
-  placeGhostPiece pt = game { placement = addPiece nextState (Just (Piece pt activePly)) coord }
-
   isQueenChecking :: Bool
-  isQueenChecking = fastIsChecking (rookAttacks ++ bishopAttacks) bitboard coord Queen
+  isQueenChecking = fastIsChecking (rookAttacks ++ bishopAttacks) bitboards coord Queen
 
   isRookChecking :: Bool
-  isRookChecking = fastIsChecking rookAttacks bitboard coord Rook
-
-  moveIsCapture :: Move -> Bool
-  moveIsCapture = (== Capture) . moveType
-
-  moveMatchesPieceType    :: PieceType -> Move -> Bool
-  moveMatchesPieceType pt = (== (Just pt)) . (fmap pieceType) . bitboardPieceAt bitboard . moveTo
-
-  moveIsFromTargetCoordinate :: Move -> Bool
-  moveIsFromTargetCoordinate = (== coord) . moveFrom
+  isRookChecking = fastIsChecking rookAttacks bitboards coord Rook
 
   isBishopChecking :: Bool
-  isBishopChecking = fastIsChecking bishopAttacks bitboard coord Bishop
+  isBishopChecking = fastIsChecking bishopAttacks bitboards coord Bishop
 
   isKnightChecking :: Bool
-  isKnightChecking = fastIsChecking (potentialKnightMoves bitboard activePly coord) bitboard coord Knight
+  isKnightChecking = fastIsChecking (potentialKnightMoves bitboards activePly coord) bitboards coord Knight
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = fastIsChecking (potentialPawnMoves (enPassantSquare game) bitboard activePly coord) bitboard coord Pawn
+  isPawnChecking = fastIsChecking (potentialPawnMoves (enPassantSquare game) bitboards activePly coord) bitboards coord Pawn
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = fastIsChecking (potentialKingMoves (castlingRights game) bitboard activePly coord) bitboard coord King
+  isKingChecking = fastIsChecking (potentialKingMoves (castlingRights game) bitboards activePly coord) bitboards coord King
 
-isChecked      :: RegularGame -> Bool
+isChecked      :: Game BitboardRepresentation -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
 
   kingSquare     :: Player -> Coordinate
-  kingSquare ply = location $ head $ filter ((== Just (Piece King ply)) . pieceOn) $ foldr (++) [] (placement game)
+  kingSquare White = indicesToCoordinate . squareIndexToIndices $ bitscanForward (whiteKings $ placement game)
+  kingSquare Black = indicesToCoordinate . squareIndexToIndices $ bitscanForward (blackKings $ placement game)
 
 isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
+isCheckmate game ply = (isChecked bitboardGame) && noLegalMovesRemaining game ply
+  where bitboardGame = Game {
+      placement = regularToBitboard $ placement game
+    , activeColor = activeColor game
+    , castlingRights = castlingRights game
+    , enPassantSquare = enPassantSquare game
+    , halfMoveClock = halfMoveClock game
+    , fullMoveNumber = fullMoveNumber game
+    }
 
 isStalemate          :: RegularGame -> Player -> Bool
-isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
+isStalemate game ply = (not $ isChecked bitboardGame) && noLegalMovesRemaining game ply
+  where bitboardGame = Game {
+      placement = regularToBitboard $ placement game
+    , activeColor = activeColor game
+    , castlingRights = castlingRights game
+    , enPassantSquare = enPassantSquare game
+    , halfMoveClock = halfMoveClock game
+    , fullMoveNumber = fullMoveNumber game
+    }
 
 moveIsLegal :: Move -> RegularGame -> Bool
 moveIsLegal move@Move{ moveFrom = from } game = moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
@@ -80,7 +83,15 @@ moveIsLegal move@Move{ moveFrom = from } game = moveIsPseudoLegal && moveIsByRig
   position = placement game
 
 notCheckedAfterMove :: RegularGame -> Move -> Bool
-notCheckedAfterMove game move = (not $ isChecked game { placement = positionAfterMove (placement game) move})
+notCheckedAfterMove game move = (not $ isChecked bitboardGame { placement = regularToBitboard $ positionAfterMove (placement game) move})
+  where bitboardGame = Game {
+      placement = regularToBitboard $ placement game
+    , activeColor = activeColor game
+    , castlingRights = castlingRights game
+    , enPassantSquare = enPassantSquare game
+    , halfMoveClock = halfMoveClock game
+    , fullMoveNumber = fullMoveNumber game
+    }
 
 noLegalMovesRemaining :: RegularGame -> Player -> Bool
 noLegalMovesRemaining game ply = null

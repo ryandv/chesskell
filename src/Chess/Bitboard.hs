@@ -20,6 +20,7 @@ module Chess.Bitboard
   , turnWord64IntoWord8s
   , extractWord8
   , printWord8AsBinary
+  , regularGameToBitboardGame
 
   , whiteOccupancyFor
   , blackOccupancyFor
@@ -72,18 +73,18 @@ instance BoardIndex Coordinate where
 data Bitboard = Bitboard Word64 deriving (Eq)
 
 data BitboardRepresentation = BitboardRepresentation
-  { whitePawns   :: Bitboard
-  , blackPawns   :: Bitboard
-  , whiteBishops :: Bitboard
-  , blackBishops :: Bitboard
-  , whiteKnights :: Bitboard
-  , blackKnights :: Bitboard
-  , whiteRooks   :: Bitboard
-  , blackRooks   :: Bitboard
-  , whiteQueens  :: Bitboard
-  , blackQueens  :: Bitboard
-  , whiteKings   :: Bitboard
-  , blackKings   :: Bitboard
+  { whitePawns            :: Bitboard
+  , blackPawns            :: Bitboard
+  , whiteBishops          :: Bitboard
+  , blackBishops          :: Bitboard
+  , whiteKnights          :: Bitboard
+  , blackKnights          :: Bitboard
+  , whiteRooks            :: Bitboard
+  , blackRooks            :: Bitboard
+  , whiteQueens           :: Bitboard
+  , blackQueens           :: Bitboard
+  , whiteKings            :: Bitboard
+  , blackKings            :: Bitboard
   , totalOccupancy        :: Bitboard
   } deriving (Eq, Show)
 
@@ -223,6 +224,16 @@ regularToBitboard b = withoutTotalOccupancy { totalOccupancy = whitePawns withou
                   })
         withoutTotalOccupancy = foldr addPieceToBitboard empty $ concat b
         squareToBitboard square = shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location square)
+
+regularGameToBitboardGame :: RegularGame -> Game BitboardRepresentation
+regularGameToBitboardGame regularGame = Game {
+      placement = regularToBitboard $ placement regularGame
+    , activeColor = activeColor regularGame
+    , castlingRights = castlingRights regularGame
+    , enPassantSquare = enPassantSquare regularGame
+    , halfMoveClock = halfMoveClock regularGame
+    , fullMoveNumber = fullMoveNumber regularGame
+  }
 
 bitboardPieceAt :: BitboardRepresentation -> Coordinate -> Maybe Piece
 bitboardPieceAt b c | isOccupied (whitePawns b) c = Just $ Piece Pawn White

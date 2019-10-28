@@ -103,12 +103,13 @@ makeCastle move@Move { moveFrom = from
   doCastle castlingSquares fupdaterights rookMove@Move { moveFrom = rookfrom } = do
     game <- get
     let gamestate = gameState game
+    let bitboardGameState = regularGameToBitboardGame gamestate
     let position = placement $ gameState game
 
     let originalPiece = pieceAt position from
     let rook = pieceAt position rookfrom
 
-    if (not $ isChecked gamestate { placement = positionAfterMove (positionAfterMove position move) rookMove }) && (all (not . isAttacked gamestate) castlingSquares)
+    if (not $ isChecked (regularGameToBitboardGame $ gamestate { placement = positionAfterMove (positionAfterMove position move) rookMove })) && (all (not . isAttacked bitboardGameState) castlingSquares)
       then do
         put $ game { gameState = gamestate { activeColor = opponent (activeColor gamestate)
                                            , castlingRights = fupdaterights (castlingRights gamestate)
