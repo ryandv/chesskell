@@ -14,9 +14,15 @@ import Control.Monad.State.Lazy
 import Data.Maybe
 
 makeMoveFrom :: RegularGame -> Move -> Maybe RegularGame
-makeMoveFrom game move = case (evalState (makeMove move) game) of
-                           True -> Just $ execState (makeMove move) game
+makeMoveFrom game move = case moveAccepted game move of
+                           True -> Just $ doMakeMove game move
                            False -> Nothing
+
+moveAccepted :: RegularGame -> Move -> Bool
+moveAccepted game move = evalState (makeMove move) game
+
+doMakeMove :: RegularGame -> Move -> RegularGame
+doMakeMove game move = execState (makeMove move) game
 
 makeMove                                   :: Move -> State RegularGame Bool
 makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
