@@ -23,16 +23,19 @@ isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking ||
   nextState = (placement game)
   bitboard = regularToBitboard $ placement game
 
+  rookAttacks = (potentialRookMoves bitboard activePly coord)
+  bishopAttacks = (potentialBishopMoves bitboard activePly coord)
+
   activePly = (activeColor game)
 
   placeGhostPiece :: PieceType -> RegularGame
   placeGhostPiece pt = game { placement = addPiece nextState (Just (Piece pt activePly)) coord }
 
   isQueenChecking :: Bool
-  isQueenChecking = isChecking (placeGhostPiece Queen) coord Queen
+  isQueenChecking = fastIsChecking (rookAttacks ++ bishopAttacks) bitboard coord Queen
 
   isRookChecking :: Bool
-  isRookChecking = fastIsChecking potentialRookMoves bitboard activePly coord Rook
+  isRookChecking = fastIsChecking rookAttacks bitboard coord Rook
 
   moveIsCapture :: Move -> Bool
   moveIsCapture = (== Capture) . moveType
@@ -44,18 +47,18 @@ isAttacked game coord = isQueenChecking || isRookChecking || isBishopChecking ||
   moveIsFromTargetCoordinate = (== coord) . moveFrom
 
   isBishopChecking :: Bool
-  isBishopChecking = fastIsChecking potentialBishopMoves bitboard activePly coord Bishop
+  isBishopChecking = fastIsChecking bishopAttacks bitboard coord Bishop
 
   isKnightChecking :: Bool
-  isKnightChecking = fastIsChecking potentialKnightMoves bitboard activePly coord Knight
+  isKnightChecking = fastIsChecking (potentialKnightMoves bitboard activePly coord) bitboard coord Knight
 
   -- TODO: do we need to consider en passant? I think not.
   isPawnChecking :: Bool
-  isPawnChecking = fastIsChecking (potentialPawnMoves (enPassantSquare game)) bitboard activePly coord Pawn
+  isPawnChecking = fastIsChecking (potentialPawnMoves (enPassantSquare game) bitboard activePly coord) bitboard coord Pawn
 
   -- TODO: do we need to consider castling? I think not.
   isKingChecking :: Bool
-  isKingChecking = fastIsChecking (potentialKingMoves (castlingRights game)) bitboard activePly coord King
+  isKingChecking = fastIsChecking (potentialKingMoves (castlingRights game) bitboard activePly coord) bitboard coord King
 
 isChecked      :: RegularGame -> Bool
 isChecked game = isAttacked game (kingSquare (activeColor game)) where
@@ -87,12 +90,12 @@ noLegalMovesRemaining game ply = null
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceAt (placement game) from)) == (Just ply)
 
-fastIsChecking :: (BitboardRepresentation -> Player -> Coordinate -> [Move]) -> BitboardRepresentation -> Player -> Coordinate -> PieceType -> Bool
-fastIsChecking moveGenerator bitboard activePly coord pt = not
-                                                         $ null
-                                                         $ filter (liftA2 (&&) moveIsCapture (moveMatchesPieceType pt))
-                                                         $ filter moveIsFromTargetCoordinate
-                                                         $ moveGenerator bitboard activePly coord
+fastIsChecking :: [Move] -> BitboardRepresentation -> Coordinate -> PieceType -> Bool
+fastIsChecking moves bitboard coord pt = not
+                                       . null
+                                       . filter (liftA2 (&&) moveIsCapture (moveMatchesPieceType pt))
+                                       . filter moveIsFromTargetCoordinate
+                                       $ moves
 
   where moveIsCapture :: Move -> Bool
         moveIsCapture = (== Capture) . moveType
