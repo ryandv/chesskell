@@ -45,7 +45,7 @@ makeStandardMove move@Move { moveFrom = from } = do
   let gamestate = gameState game
   let position = placement gamestate
 
-  if moveIsLegal move gamestate
+  if moveIsLegal move (regularGameToBitboardGame gamestate)
     then do let originalPiece = pieceAt position from
 
             put $ game { gameState = gamestate { activeColor = opponent (activeColor gamestate) } }
@@ -126,7 +126,7 @@ makePromotion move@Move { movePromoteTo = p } = do
   game <- get
   let position = gameState game
 
-  if moveIsLegal move position
+  if moveIsLegal move (regularGameToBitboardGame position)
     then do
       put $ game { gameState = position { activeColor = opponent (activeColor position) } }
 
@@ -140,7 +140,7 @@ makeEnPassant m@Move { moveTo = Coordinate f r
   game <- get
   let position = gameState game
 
-  if moveIsLegal m position
+  if moveIsLegal m (regularGameToBitboardGame position)
     then do let posn = placement position
             let originalPiece = pieceAt posn from
             let rankOffset = if fmap pieceOwner originalPiece == Just White then (-1) else 1

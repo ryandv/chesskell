@@ -4,6 +4,7 @@
 module Chess.AI where
 
 import Chess.Base
+import Chess.Bitboard
 import Chess.Game
 import Chess.MoveGen
 import Chess.Predicates
@@ -54,8 +55,8 @@ pieceSquareTableLookup :: [[Int]] -> Coordinate -> Int
 pieceSquareTableLookup t (Coordinate f r) = (t !! (r-1)) !! (fromEnum f - fromEnum 'a')
 
 evalGame      :: RegularGame -> Int
-evalGame game | isCheckmate game (activeColor game) = checkmateValue
-              | isStalemate game (activeColor game) = 0
+evalGame game | isCheckmate (regularGameToBitboardGame game) (activeColor game) = checkmateValue
+              | isStalemate (regularGameToBitboardGame game) (activeColor game) = 0
               | otherwise = evalPosition $ placement game
               where
 
@@ -87,7 +88,7 @@ evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
 -- Inspired by John Hughes' "Why Functional Programming Matters"
 
 gamesFrom      :: RegularGame -> [(Move, RegularGame)]
-gamesFrom game = mapMaybe (\move -> (move,) <$> makeMoveFrom game move) (pseudoLegalMoves game)
+gamesFrom game = mapMaybe (\move -> (move,) <$> makeMoveFrom game move) (pseudoLegalMoves (regularGameToBitboardGame game))
 
 gameTreeFrom          :: (RegularGame -> [RegularGame]) -> [Move] -> RegularGame -> GameTree RegularGame
 gameTreeFrom f moves game = GameTree game (map (\edge -> (gameTreeFrom f ((fst edge):moves) (snd edge))) (gamesFrom game)) moves
@@ -139,5 +140,5 @@ prune 0 (GameTree v _ moves) = GameTree v [] moves
 prune n (GameTree v children moves) = GameTree v (map (prune $ n - 1) children) moves
 
 decideOnMove :: Player -> RegularGame -> Move
-decideOnMove player game | player == White = head $ reverse $ gameTreeLastMove $ maximize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
-                         | otherwise = head $ reverse $ gameTreeLastMove $ minimize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves) [] game
+decideOnMove player game | player == White = head $ reverse $ gameTreeLastMove $ maximize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves . regularGameToBitboardGame) [] game
+                         | otherwise = head $ reverse $ gameTreeLastMove $ minimize $ prune 4 $ gameTreeFrom (mapMaybe (makeMoveFrom game) . pseudoLegalMoves . regularGameToBitboardGame) [] game

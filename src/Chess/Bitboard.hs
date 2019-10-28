@@ -26,6 +26,7 @@ module Chess.Bitboard
   , whiteOccupancyFor
   , blackOccupancyFor
   , totalOccupancyFor
+  , occupiedCoordinates
 
   , regularToBitboard
 
@@ -304,6 +305,9 @@ bitboardPieceAt b c | isOccupied (whitePawns b) c = Just $ Piece Pawn White
                     | isOccupied (whiteKings b) c = Just $ Piece King White
                     | isOccupied (blackKings b) c = Just $ Piece King Black
                     | otherwise = Nothing
+
+occupiedCoordinates :: BitboardRepresentation -> [Coordinate]
+occupiedCoordinates bitboards = filter (bitboardIsOccupied bitboards) $ map (indicesToCoordinate . squareIndexToIndices) [0..63]
 
 bitboardIsOccupied :: BitboardRepresentation -> Coordinate -> Bool
 bitboardIsOccupied bitboard c | isOccupied (totalOccupancy bitboard) c = True

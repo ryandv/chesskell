@@ -53,53 +53,29 @@ isChecked game = isAttacked game (kingSquare (activeColor game)) where
   kingSquare White = indicesToCoordinate . squareIndexToIndices $ bitscanForward (whiteKings $ placement game)
   kingSquare Black = indicesToCoordinate . squareIndexToIndices $ bitscanForward (blackKings $ placement game)
 
-isCheckmate          :: RegularGame -> Player -> Bool
-isCheckmate game ply = (isChecked bitboardGame) && noLegalMovesRemaining game ply
-  where bitboardGame = Game {
-      placement = regularToBitboard $ placement game
-    , activeColor = activeColor game
-    , castlingRights = castlingRights game
-    , enPassantSquare = enPassantSquare game
-    , halfMoveClock = halfMoveClock game
-    , fullMoveNumber = fullMoveNumber game
-    }
+isCheckmate          :: Game BitboardRepresentation -> Player -> Bool
+isCheckmate game ply = (isChecked game) && noLegalMovesRemaining game ply
 
-isStalemate          :: RegularGame -> Player -> Bool
-isStalemate game ply = (not $ isChecked bitboardGame) && noLegalMovesRemaining game ply
-  where bitboardGame = Game {
-      placement = regularToBitboard $ placement game
-    , activeColor = activeColor game
-    , castlingRights = castlingRights game
-    , enPassantSquare = enPassantSquare game
-    , halfMoveClock = halfMoveClock game
-    , fullMoveNumber = fullMoveNumber game
-    }
+isStalemate          :: Game BitboardRepresentation -> Player -> Bool
+isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
-moveIsLegal :: Move -> RegularGame -> Bool
+moveIsLegal :: Move -> Game BitboardRepresentation -> Bool
 moveIsLegal move@Move{ moveFrom = from } game = moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
 
   moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  moveIsByRightPlayer = (pieceOwner <$> (pieceAt position from)) == (Just (activeColor game))
+  moveIsByRightPlayer = (pieceOwner <$> (bitboardPieceAt position from)) == (Just (activeColor game))
   position = placement game
 
-notCheckedAfterMove :: RegularGame -> Move -> Bool
-notCheckedAfterMove game move = (not $ isChecked bitboardGame { placement = regularToBitboard $ positionAfterMove (placement game) move})
-  where bitboardGame = Game {
-      placement = regularToBitboard $ placement game
-    , activeColor = activeColor game
-    , castlingRights = castlingRights game
-    , enPassantSquare = enPassantSquare game
-    , halfMoveClock = halfMoveClock game
-    , fullMoveNumber = fullMoveNumber game
-    }
+notCheckedAfterMove :: Game BitboardRepresentation -> Move -> Bool
+notCheckedAfterMove game move = (not $ isChecked game { placement = bitboardMovePiece (placement game) move })
 
-noLegalMovesRemaining :: RegularGame -> Player -> Bool
+noLegalMovesRemaining :: Game BitboardRepresentation -> Player -> Bool
 noLegalMovesRemaining game ply = null
                                $ filter (liftA2 (&&) pieceIsOwnedByPly (notCheckedAfterMove game))
                                $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (pieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
 
 fastIsChecking :: [Move] -> BitboardRepresentation -> Coordinate -> PieceType -> Bool
 fastIsChecking moves bitboard coord pt = not
@@ -116,19 +92,3 @@ fastIsChecking moves bitboard coord pt = not
 
         moveIsFromTargetCoordinate :: Move -> Bool
         moveIsFromTargetCoordinate = (== coord) . moveFrom
-
-isChecking                             :: RegularGame -> Coordinate -> PieceType -> Bool
-isChecking gameWithGhostPiece coord pt = not
-                                       $ null
-                                       $ filter (liftA2 (&&) moveIsCapture moveMatchesPieceType)
-                                       $ filter moveIsFromTargetCoordinate
-                                       $ pseudoLegalMoves gameWithGhostPiece where
-
-  moveIsCapture :: Move -> Bool
-  moveIsCapture = (== Capture) . moveType
-
-  moveMatchesPieceType :: Move -> Bool
-  moveMatchesPieceType = (== pt) . fromJust . (fmap pieceType) . pieceAt (placement gameWithGhostPiece) . moveTo
-
-  moveIsFromTargetCoordinate :: Move -> Bool
-  moveIsFromTargetCoordinate = (== coord) . moveFrom

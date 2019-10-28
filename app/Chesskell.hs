@@ -7,6 +7,7 @@ import Data.Aeson.Types
 
 import Chess.AI
 import Chess.Base
+import Chess.Bitboard
 import Chess.FenParser
 import Chess.Game
 import Chess.MoveGen
@@ -45,13 +46,14 @@ instance ToJSON GameResult where
   toJSON Stalemate = "1/2-1/2"
 
 coordPairToMove :: RegularGame -> Coordinate -> Coordinate -> [Move]
-coordPairToMove game from to = filter (\move -> (moveFrom move == from) && (moveTo move == to)) $ pseudoLegalMoves game
+coordPairToMove game from to = filter (\move -> (moveFrom move == from) && (moveTo move == to)) . pseudoLegalMoves $ regularGameToBitboardGame game
 
-determineGameResult :: RegularGame -> GameResult
-determineGameResult g = case ((isCheckmate g (activeColor g)), (isStalemate g (activeColor g))) of
-                          (True, False) -> if (activeColor g == White) then BlackWin else WhiteWin
-                          (False, True) -> Stalemate
-                          (False, False) -> InProgress
+determineGameResult      :: RegularGame -> GameResult
+determineGameResult game = case ((isCheckmate g (activeColor g)), (isStalemate g (activeColor g))) of
+                             (True, False) -> if (activeColor g == White) then BlackWin else WhiteWin
+                             (False, True) -> Stalemate
+                             (False, False) -> InProgress
+  where g = regularGameToBitboardGame game
 
 requestMoveHandler :: ServerPart Response
 requestMoveHandler = do

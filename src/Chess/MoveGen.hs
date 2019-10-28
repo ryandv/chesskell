@@ -21,18 +21,21 @@ import Data.Maybe
 
 import Control.Applicative
 
-pseudoLegalMoves               :: RegularGame -> [Move]
-pseudoLegalMoves game = (concatMap . concatMap) (pseudoLegalMovesFrom bitboard (castlingRights game) (enPassantSquare game)) $ placement game
-  where bitboard = regularToBitboard $ placement game
+pseudoLegalMoves               :: Game BitboardRepresentation -> [Move]
+pseudoLegalMoves game = concatMap (pseudoLegalMovesFrom (placement game) (castlingRights game) (enPassantSquare game)) $ occupiedCoordinates (placement game)
 
-pseudoLegalMovesFrom                                                                         :: BitboardRepresentation -> CastleRights -> Maybe Coordinate -> Square -> [Move]
-pseudoLegalMovesFrom _ _ _ (Square Nothing _)                                                = []
-pseudoLegalMovesFrom bitboard castlingRights enPassantSquare (Square (Just (Piece p ply)) l) | p == Pawn   = potentialPawnMoves enPassantSquare bitboard ply l
-                                                                                             | p == Knight = potentialKnightMoves bitboard ply l
-                                                                                             | p == Bishop = bishopMoves
-                                                                                             | p == Rook   = rookMoves
-                                                                                             | p == Queen  = bishopMoves ++ rookMoves
-                                                                                             | p == King   = potentialKingMoves castlingRights bitboard ply l
-  where bishopMoves = potentialBishopMoves bitboard ply l
-        rookMoves   = potentialRookMoves bitboard ply l
-        occupancy   = totalOccupancy bitboard
+pseudoLegalMovesFrom                                                                         :: BitboardRepresentation -> CastleRights -> Maybe Coordinate -> Coordinate -> [Move]
+pseudoLegalMovesFrom bitboards castlingRights enPassantSquare coord = pseudoLegalMovesFrom' (occupyingPiece coord)
+
+  where pseudoLegalMovesFrom' Nothing = []
+        pseudoLegalMovesFrom' (Just (Piece Pawn ply)) = potentialPawnMoves enPassantSquare bitboards ply coord
+        pseudoLegalMovesFrom' (Just (Piece Knight ply)) = potentialKnightMoves bitboards ply coord
+        pseudoLegalMovesFrom' (Just (Piece Bishop ply)) = bishopMoves ply
+        pseudoLegalMovesFrom' (Just (Piece Rook ply)) = rookMoves ply
+        pseudoLegalMovesFrom' (Just (Piece Queen ply)) = bishopMoves ply ++ rookMoves ply
+        pseudoLegalMovesFrom' (Just (Piece King ply)) = potentialKingMoves castlingRights bitboards ply coord
+
+        bishopMoves ply = potentialBishopMoves bitboards ply coord
+        rookMoves ply   = potentialRookMoves bitboards ply coord
+        occupancy       = totalOccupancy bitboards
+        occupyingPiece  = bitboardPieceAt bitboards
