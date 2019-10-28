@@ -55,7 +55,7 @@ spec =
 
       it "can find mate in 2" $ do
         let position = (successful $ parseFen "" "r6k/pp1b2p1/3Np2p/8/3p1PRQ/2nB4/q1P4P/2K5 w - - 0 1")
-        evalStateT makeTwoMoves (ChessGame position (regularToBitboard $ placement position)) `shouldReturn`
+        evalStateT makeTwoMoves (ChessGame position (regularGameToBitboardGame position)) `shouldReturn`
           ( (Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'h' 6, moveType = Capture, movePromoteTo = Nothing })
           , (Move { moveFrom = Coordinate 'd' 6, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing })
           )
