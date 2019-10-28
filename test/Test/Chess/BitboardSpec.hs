@@ -290,6 +290,24 @@ spec = describe "bitboard" $ do
         bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 8) `shouldBe` (Just $ Piece King Black)
         bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 7) `shouldBe` (Just $ Piece Pawn Black)
 
+      describe "moving pieces" $ do
+        it "can move a single piece to a different square on a given Bitboard" $
+          bitboardMovePiece (regularToBitboard $ placement startingPos) (Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 4), moveType = Standard, movePromoteTo = Nothing }) `shouldBe` BitboardRepresentation
+            { whitePawns   = Bitboard 134280960
+            , blackPawns   = Bitboard 71776119061217280
+            , whiteKnights = Bitboard 66
+            , blackKnights = Bitboard 4755801206503243776
+            , whiteBishops = Bitboard 36
+            , blackBishops = Bitboard 2594073385365405696
+            , whiteRooks   = Bitboard 129
+            , blackRooks   = Bitboard 9295429630892703744
+            , whiteQueens  = Bitboard 8
+            , blackQueens  = Bitboard 576460752303423488
+            , whiteKings   = Bitboard 16
+            , blackKings   = Bitboard 1152921504606846976
+            , totalOccupancy        = Bitboard 18446462598867122175
+            }
+
     modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do
       describe "bitscan forward" $ do
         it "can find the least significant one bit in a Bitboard" $ do
