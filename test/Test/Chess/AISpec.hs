@@ -2,6 +2,7 @@ module Test.Chess.AISpec where
 
 import Chess.AI
 import Chess.Base
+import Chess.Bitboard
 import Chess.FenParser
 import Chess.Game
 import Chess.MoveGen
@@ -19,11 +20,12 @@ successful (Right x) = x
 liftState :: (Monad m) => Control.Monad.State.Lazy.State s a -> StateT s m a
 liftState action = StateT $ \s -> return (runState action s)
 
-makeTwoMoves :: StateT (Game RegularBoardRepresentation) IO (Move, Move)
+makeTwoMoves :: StateT ChessGame IO (Move, Move)
 makeTwoMoves = do
   curState <- get
+  let gamestate = gameState curState
 
-  let chosenMove = decideOnMove (activeColor curState) curState
+  let chosenMove = decideOnMove (activeColor gamestate) gamestate
 
   liftState (makeMove chosenMove)
 
@@ -36,8 +38,9 @@ makeTwoMoves = do
                              })
 
   stateAfterPlayerMove <- get
+  let gameStateAfterPlayerMove = gameState stateAfterPlayerMove
 
-  let chosenMove2 = decideOnMove (activeColor stateAfterPlayerMove) stateAfterPlayerMove
+  let chosenMove2 = decideOnMove (activeColor gameStateAfterPlayerMove) gameStateAfterPlayerMove
 
   liftState (makeMove chosenMove2)
 
@@ -51,7 +54,8 @@ spec =
     describe "Mate in 2" $ do
 
       it "can find mate in 2" $ do
-        evalStateT makeTwoMoves (successful $ parseFen "" "r6k/pp1b2p1/3Np2p/8/3p1PRQ/2nB4/q1P4P/2K5 w - - 0 1") `shouldReturn`
+        let position = (successful $ parseFen "" "r6k/pp1b2p1/3Np2p/8/3p1PRQ/2nB4/q1P4P/2K5 w - - 0 1")
+        evalStateT makeTwoMoves (ChessGame position (regularToBitboard $ placement position)) `shouldReturn`
           ( (Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'h' 6, moveType = Capture, movePromoteTo = Nothing })
           , (Move { moveFrom = Coordinate 'd' 6, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing })
           )
