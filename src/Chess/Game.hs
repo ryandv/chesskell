@@ -66,7 +66,7 @@ makeCastle move@Move { moveFrom = from
                                         | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = makeBlackQueensideCastle where
 
   makeWhiteKingsideCastle :: State ChessGame Bool
-  makeWhiteKingsideCastle = doCastle [Coordinate 'f' 1, Coordinate 'g' 1] disableWhiteCastles
+  makeWhiteKingsideCastle = doCastle Kingside disableWhiteCastles
     Move { moveFrom = Coordinate 'h' 1
          , moveTo   = Coordinate 'f' 1
          , moveType = Castle
@@ -74,7 +74,7 @@ makeCastle move@Move { moveFrom = from
          }
 
   makeWhiteQueensideCastle :: State ChessGame Bool
-  makeWhiteQueensideCastle = doCastle [Coordinate 'd' 1, Coordinate 'c' 1] disableWhiteCastles
+  makeWhiteQueensideCastle = doCastle Queenside disableWhiteCastles
     Move { moveFrom = Coordinate 'a' 1
          , moveTo   = Coordinate 'd' 1
          , moveType = Castle
@@ -82,7 +82,7 @@ makeCastle move@Move { moveFrom = from
          }
 
   makeBlackKingsideCastle :: State ChessGame Bool
-  makeBlackKingsideCastle = doCastle [Coordinate 'f' 8, Coordinate 'g' 8] disableBlackCastles
+  makeBlackKingsideCastle = doCastle Kingside disableBlackCastles
     Move { moveFrom = Coordinate 'h' 8
          , moveTo   = Coordinate 'f' 8
          , moveType = Castle
@@ -90,7 +90,7 @@ makeCastle move@Move { moveFrom = from
          }
 
   makeBlackQueensideCastle :: State ChessGame Bool
-  makeBlackQueensideCastle = doCastle [Coordinate 'd' 8, Coordinate 'c' 8] disableBlackCastles
+  makeBlackQueensideCastle = doCastle Queenside disableBlackCastles
     Move { moveFrom = Coordinate 'a' 8
          , moveTo   = Coordinate 'd' 8
          , moveType = Castle
@@ -103,8 +103,8 @@ makeCastle move@Move { moveFrom = from
   disableBlackCastles :: CastleRights -> CastleRights
   disableBlackCastles (CastleRights woo _ wooo _) = CastleRights woo False wooo False
 
-  doCastle :: [Coordinate] -> (CastleRights -> CastleRights) -> Move -> State ChessGame Bool
-  doCastle castlingSquares fupdaterights rookMove@Move { moveFrom = rookfrom } = do
+  doCastle :: CastleSide -> (CastleRights -> CastleRights) -> Move -> State ChessGame Bool
+  doCastle castleSide fupdaterights rookMove@Move { moveFrom = rookfrom } = do
     game <- get
     let gamestate = gameState game
     let bitboardGameState = bitboards game
@@ -113,7 +113,7 @@ makeCastle move@Move { moveFrom = from
     let originalPiece = bitboardPieceAt position from
     let rook = bitboardPieceAt position rookfrom
 
-    if (not $ isChecked bitboardGameState { placement = bitboardMovePiece (bitboardMovePiece position move) rookMove }) && (all (not . isAttacked bitboardGameState) castlingSquares)
+    if (not $ isChecked bitboardGameState { placement = bitboardMovePiece (bitboardMovePiece position move) rookMove }) && isCastleSafe castleSide bitboardGameState (activeColor gamestate)
       then do
         put $ game {
             gameState = gamestate { activeColor = opponent (activeColor gamestate)

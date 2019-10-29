@@ -63,13 +63,13 @@ blackKingsideCastleThroughCheckTest :: RegularGame
 blackKingsideCastleThroughCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
                                                  , (Piece Rook Black, Coordinate 'h' 8)
                                                  , (Piece Rook White, Coordinate 'f' 1)
-                                                 , (Piece King White, Coordinate 'e' 1)])
+                                                 , (Piece King White, Coordinate 'e' 1)]) { activeColor = Black }
 
 blackQueensideCastleThroughCheckTest :: RegularGame
 blackQueensideCastleThroughCheckTest = (setupGame [ (Piece King Black, Coordinate 'e' 8)
                                                   , (Piece Rook Black, Coordinate 'a' 8)
                                                   , (Piece Rook White, Coordinate 'd' 1)
-                                                  , (Piece King White, Coordinate 'e' 1)])
+                                                  , (Piece King White, Coordinate 'e' 1)]) { activeColor = Black }
 
 whitePromotionTest :: RegularGame
 whitePromotionTest = setupGame [ (Piece Pawn White, Coordinate 'e' 7)
