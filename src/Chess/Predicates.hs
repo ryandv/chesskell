@@ -72,11 +72,21 @@ notCheckedAfterMove game move = (not $ isChecked game { placement = bitboardMove
 
 noLegalMovesRemaining :: Game BitboardRepresentation -> Player -> Bool
 noLegalMovesRemaining game ply = null
+                               $ filter validCastles
                                $ filter (liftA2 (&&) pieceIsOwnedByPly (notCheckedAfterMove game))
                                $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
   pieceIsOwnedByPly Move { moveFrom = from } = (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+
+  validCastles :: Move -> Bool
+  validCastles (Move from to Castle _) | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = isCastleSafe Kingside game White
+                                      | from == Coordinate 'e' 8 && to == Coordinate 'g' 8 = isCastleSafe Kingside game Black
+                                      | from == Coordinate 'e' 1 && to == Coordinate 'c' 1 = isCastleSafe Queenside game White
+                                      | from == Coordinate 'e' 8 && to == Coordinate 'c' 8 = isCastleSafe Queenside game Black
+                                      | otherwise = True
+  validCastles _ = True
+
 
 fastIsChecking :: [Move] -> BitboardRepresentation -> Coordinate -> PieceType -> Bool
 fastIsChecking moves bitboard coord pt = not

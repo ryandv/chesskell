@@ -29,7 +29,6 @@ spec = do
                                                          , (Piece King Black, Coordinate 'h' 8)
                                                          ]) { activeColor = Black } Black `shouldBe` False
 
-    {--
     it "does not allow castling out of checkmate when the castling squares are attacked" $
       isCheckmate (regularGameToBitboardGame $ setupGame [ (Piece Bishop White, Coordinate 'a' 3)
                                                          , (Piece Queen White, Coordinate 'e' 7)
@@ -38,7 +37,6 @@ spec = do
                                                          , (Piece Rook Black, Coordinate 'a' 8)
                                                          , (Piece Rook Black, Coordinate 'h' 8)
                                                          ]) { activeColor = Black } Black `shouldBe` True
-    --}
 
   describe "castling legality" $ do
     describe "kingside castling" $ do
