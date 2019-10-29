@@ -3,6 +3,7 @@
 
 module Chess.Base
   ( CastleRights(..)
+  , CastleSide(..)
   , Coordinate(..)
   , File
   , Game(..)
@@ -69,6 +70,7 @@ type File   = Char
 
 -- KkQq
 data CastleRights = CastleRights Bool Bool Bool Bool deriving(Eq, Show)
+data CastleSide = Queenside | Kingside deriving(Eq, Show)
 
 type RegularBoardRepresentation   = [[Square]]
 

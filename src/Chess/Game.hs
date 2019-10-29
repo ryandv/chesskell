@@ -183,6 +183,6 @@ updateSquare c p = do
   game <- get
   let position = placement $ gameState game
   put $ game {
-      gameState = (gameState game) { placement = addPiece position p c }
+       gameState = (gameState game) { placement = addPiece position p c }
      , bitboards = regularGameToBitboardGame $ (gameState game) { placement = addPiece position p c }
-      }
+     }
