@@ -56,6 +56,7 @@ Test-Suite test
                      , Test.Chess.BitboardSpec
                      , Test.Chess.FenParserSpec
                      , Test.Chess.GameSpec
+                     , Test.Chess.PredicatesSpec
                      , Test.Placements
 
   build-depends:       chesskell,
