@@ -72,21 +72,73 @@ spec = do
                                  ]) { activeColor = Black }
         isKingsideCastleSafe (regularGameToBitboardGame position) Black `shouldBe` True
 
-      it "detects when the white kingside castle is under attack" $ do
+      it "detects when the black kingside castle is under attack" $ do
         let f8Attacked = (setupGame [ (Piece King Black, Coordinate 'e' 8)
                                  , (Piece Rook Black, Coordinate 'h' 8)
                                  , (Piece King White, Coordinate 'e' 1)
                                  , (Piece Rook White, Coordinate 'f' 1)
                                  ]) { activeColor = Black }
 
-        let g8Attacked = (setupGame [ (Piece King White, Coordinate 'e' 8)
-                                 , (Piece Rook White, Coordinate 'h' 8)
-                                 , (Piece King Black, Coordinate 'e' 1)
-                                 , (Piece Rook Black, Coordinate 'g' 1)
+        let g8Attacked = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece King White, Coordinate 'e' 1)
+                                 , (Piece Rook White, Coordinate 'g' 1)
                                  ]) { activeColor = Black }
 
         isKingsideCastleSafe (regularGameToBitboardGame f8Attacked) Black `shouldBe` False
         isKingsideCastleSafe (regularGameToBitboardGame g8Attacked) Black `shouldBe` False
+
+    describe "queenside castling" $ do
+      it "detects when the white queenside castle is safe" $ do
+        let position = setupGame [ (Piece King White, Coordinate 'e' 1)
+                                 , (Piece King Black, Coordinate 'e' 8)
+                                 ]
+        isQueensideCastleSafe (regularGameToBitboardGame position) White `shouldBe` True
+
+      it "detects when the white queenside castle is under attack" $ do
+        let b1Attacked = setupGame [ (Piece King White, Coordinate 'e' 1)
+                                 , (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece Rook Black, Coordinate 'b' 8)
+                                 ]
+
+        let c1Attacked = setupGame [ (Piece King White, Coordinate 'e' 1)
+                                 , (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece Rook Black, Coordinate 'c' 8)
+                                 ]
+
+        let d1Attacked = setupGame [ (Piece King White, Coordinate 'e' 1)
+                                 , (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece Rook Black, Coordinate 'd' 8)
+                                 ]
+
+        isQueensideCastleSafe (regularGameToBitboardGame b1Attacked) White `shouldBe` False
+        isQueensideCastleSafe (regularGameToBitboardGame c1Attacked) White `shouldBe` False
+        isQueensideCastleSafe (regularGameToBitboardGame d1Attacked) White `shouldBe` False
+
+      it "detects when the black queenside castle is safe" $ do
+        let position = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece King White, Coordinate 'e' 1)
+                                 ]) { activeColor = Black }
+        isQueensideCastleSafe (regularGameToBitboardGame position) Black `shouldBe` True
+
+      it "detects when the black queenside castle is under attack" $ do
+        let b8Attacked = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece King White, Coordinate 'e' 1)
+                                 , (Piece Rook White, Coordinate 'b' 1)
+                                 ]) { activeColor = Black }
+
+        let c8Attacked = (setupGame [ (Piece King White, Coordinate 'e' 8)
+                                 , (Piece King Black, Coordinate 'e' 1)
+                                 , (Piece Rook White, Coordinate 'c' 1)
+                                 ]) { activeColor = Black }
+
+        let d8Attacked = (setupGame [ (Piece King Black, Coordinate 'e' 8)
+                                 , (Piece King White, Coordinate 'e' 1)
+                                 , (Piece Rook White, Coordinate 'd' 1)
+                                 ]) { activeColor = Black }
+
+        isQueensideCastleSafe (regularGameToBitboardGame b8Attacked) Black `shouldBe` False
+        isQueensideCastleSafe (regularGameToBitboardGame c8Attacked) Black `shouldBe` False
+        isQueensideCastleSafe (regularGameToBitboardGame d8Attacked) Black `shouldBe` False
 
   describe "isStalemate" $ do
     it "accepts a game and a player, returning true if that player has been stalemated" $

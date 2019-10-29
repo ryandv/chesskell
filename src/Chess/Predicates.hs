@@ -3,6 +3,7 @@ module Chess.Predicates
   , isChecked
   , isCheckmate
   , isKingsideCastleSafe
+  , isQueensideCastleSafe
   , isStalemate
   , moveIsLegal
   ) where
@@ -97,3 +98,7 @@ fastIsChecking moves bitboard coord pt = not
 isKingsideCastleSafe :: Game BitboardRepresentation -> Player -> Bool
 isKingsideCastleSafe game White = all (not . isAttacked game) [Coordinate 'f' 1, Coordinate 'g' 1]
 isKingsideCastleSafe game Black = all (not . isAttacked game) [Coordinate 'f' 8, Coordinate 'g' 8]
+
+isQueensideCastleSafe :: Game BitboardRepresentation -> Player -> Bool
+isQueensideCastleSafe game White = all (not . isAttacked game) [Coordinate 'b' 1, Coordinate 'c' 1, Coordinate 'd' 1]
+isQueensideCastleSafe game Black = all (not . isAttacked game) [Coordinate 'b' 8, Coordinate 'c' 8, Coordinate 'd' 8]
