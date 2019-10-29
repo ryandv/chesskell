@@ -308,6 +308,29 @@ spec = describe "bitboard" $ do
             , totalOccupancy        = Bitboard 18446462598867122175
             }
 
+        it "removes captured pieces from the appropriate Bitboard" $ do
+          let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                        , (Piece Queen White, Coordinate 'd' 1)
+                                        , (Piece Knight Black, Coordinate 'c' 2)
+                                        , (Piece King Black, Coordinate 'e' 8)
+                                        ])
+
+          bitboardMovePiece (regularToBitboard $ placement fromPosition) (Move { moveFrom = (Coordinate 'd' 1), moveTo = (Coordinate 'c' 2), moveType = Capture, movePromoteTo = Nothing }) `shouldBe` BitboardRepresentation
+            { whitePawns   = emptyBitboard
+            , blackPawns   = emptyBitboard
+            , whiteKnights = emptyBitboard
+            , blackKnights = emptyBitboard
+            , whiteBishops = emptyBitboard
+            , blackBishops = emptyBitboard
+            , whiteRooks   = emptyBitboard
+            , blackRooks   = emptyBitboard
+            , whiteQueens  = Bitboard 1024
+            , blackQueens  = emptyBitboard
+            , whiteKings   = Bitboard 16
+            , blackKings   = Bitboard 1152921504606846976
+            , totalOccupancy        = Bitboard 1152921504606848016
+            }
+
     modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do
       describe "bitscan forward" $ do
         it "can find the least significant one bit in a Bitboard" $ do

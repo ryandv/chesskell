@@ -118,6 +118,14 @@ spec = do
         doMakeMove enPassantPinTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` enPassantPinTest
 
       context "checks" $ do
+        it "allows capturing a checking piece to get out of check" $ do
+          let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
+                                        , (Piece Queen White, Coordinate 'd' 1)
+                                        , (Piece Rook White, Coordinate 'a' 1)
+                                        , (Piece Knight Black, Coordinate 'c' 2)
+                                        , (Piece King Black, Coordinate 'e' 8)
+                                        ])
+          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 1, moveTo = Coordinate 'c' 2, moveType = Capture }) `shouldBe` True
 
         it "does not allow the king to move into check by a queen" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)

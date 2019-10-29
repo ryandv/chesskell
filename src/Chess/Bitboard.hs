@@ -238,7 +238,66 @@ regularGameToBitboardGame regularGame = Game {
   }
 
 bitboardMovePiece :: BitboardRepresentation -> Move -> BitboardRepresentation
-bitboardMovePiece bitboards Move { moveFrom = from, moveTo = to } = updatedBitboards { totalOccupancy = whitePawns updatedBitboards
+bitboardMovePiece bitboards move@(Move from to Capture _) = bitboardMovePieceCapture bitboards move
+bitboardMovePiece bitboards move@(Move from to _ _) = bitboardMovePieceStandard bitboards move
+
+bitboardMovePieceCapture :: BitboardRepresentation -> Move -> BitboardRepresentation
+bitboardMovePieceCapture bitboards (Move { moveFrom = from, moveTo = to }) = updatedBitboards { totalOccupancy = whitePawns updatedBitboards
+      `bitboardUnion` whiteBishops updatedBitboards
+      `bitboardUnion` whiteKnights updatedBitboards
+      `bitboardUnion` whiteRooks updatedBitboards
+      `bitboardUnion` whiteQueens updatedBitboards
+      `bitboardUnion` whiteKings updatedBitboards
+      `bitboardUnion` blackPawns updatedBitboards
+      `bitboardUnion` blackBishops updatedBitboards
+      `bitboardUnion` blackKnights updatedBitboards
+      `bitboardUnion` blackRooks updatedBitboards
+      `bitboardUnion` blackQueens updatedBitboards
+      `bitboardUnion` blackKings updatedBitboards }
+
+  where removePieceFrom :: BitboardRepresentation -> Maybe Piece -> Coordinate -> BitboardRepresentation
+        removePieceFrom bitboards piece coord | piece == Just (Piece Pawn White) = bitboards { whitePawns = (whitePawns bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Pawn Black) = bitboards { blackPawns = (blackPawns bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Knight White) = bitboards { whiteKnights = (whiteKnights bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Knight Black) = bitboards { blackKnights = (blackKnights bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Bishop White) = bitboards { whiteBishops = (whiteBishops bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Bishop Black) = bitboards { blackBishops = (blackBishops bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Rook White) = bitboards { whiteRooks = (whiteRooks bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Rook Black) = bitboards { blackRooks = (blackRooks bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Queen White) = bitboards { whiteQueens = (whiteQueens bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece Queen Black) = bitboards { blackQueens = (blackQueens bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece King White) = bitboards { whiteKings = (whiteKings bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | piece == Just (Piece King Black) = bitboards { blackKings = (blackKings bitboards) `bitboardIntersect` (singleVacancy coord) }
+                                              | otherwise = bitboards
+
+        addPieceTo :: BitboardRepresentation -> Coordinate -> BitboardRepresentation
+        addPieceTo bitboards coord | movedPiece == Just (Piece Pawn White) = bitboards { whitePawns = (whitePawns bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Pawn Black) = bitboards { blackPawns = (blackPawns bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Knight White) = bitboards { whiteKnights = (whiteKnights bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Knight Black) = bitboards { blackKnights = (blackKnights bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Bishop White) = bitboards { whiteBishops = (whiteBishops bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Bishop Black) = bitboards { blackBishops = (blackBishops bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Rook White) = bitboards { whiteRooks = (whiteRooks bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Rook Black) = bitboards { blackRooks = (blackRooks bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Queen White) = bitboards { whiteQueens = (whiteQueens bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece Queen Black) = bitboards { blackQueens = (blackQueens bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece King White) = bitboards { whiteKings = (whiteKings bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | movedPiece == Just (Piece King Black) = bitboards { blackKings = (blackKings bitboards) `bitboardUnion` (singleOccupant coord) }
+                                   | otherwise = bitboards
+
+        updatedBitboards = addPieceTo (removePieceFrom (removePieceFrom bitboards capturedPiece to) movedPiece from) to
+
+        singleOccupant coord = Bitboard $ shiftL 1 (squareIndex coord)
+        singleVacancy coord = bitboardComplement (singleOccupant coord)
+
+        capturedPiece = bitboardPieceAt bitboards to
+        movedPiece = bitboardPieceAt bitboards from
+
+        squareIndex :: Coordinate -> Int
+        squareIndex = indicesToSquareIndex . coordinateToIndices
+
+bitboardMovePieceStandard :: BitboardRepresentation -> Move -> BitboardRepresentation
+bitboardMovePieceStandard bitboards (Move { moveFrom = from, moveTo = to }) = updatedBitboards { totalOccupancy = whitePawns updatedBitboards
       `bitboardUnion` whiteBishops updatedBitboards
       `bitboardUnion` whiteKnights updatedBitboards
       `bitboardUnion` whiteRooks updatedBitboards
