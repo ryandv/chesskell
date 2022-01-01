@@ -118,6 +118,7 @@ makeMoveHandler = do
 main :: IO ()
 main = do
   envPort <- getEnv "PORT"
+  print $ "Listening on port " ++ envPort
   simpleHTTP (nullConf { port = read envPort, timeout = 300 })
     $ msum [ dir "makemove" $ do method POST
                                  makeMoveHandler
