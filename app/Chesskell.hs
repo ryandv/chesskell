@@ -23,6 +23,7 @@ import Happstack.Server
 import Happstack.Server.Types
 
 import System.Environment
+import System.IO
 
 import Text.Parsec
 
@@ -118,6 +119,7 @@ makeMoveHandler = do
 main :: IO ()
 main = do
   envPort <- getEnv "PORT"
+  hSetBuffering stdout NoBuffering
   print $ "Listening on port " ++ envPort
   simpleHTTP (nullConf { port = read envPort, timeout = 300 })
     $ msum [ dir "makemove" $ do method POST
