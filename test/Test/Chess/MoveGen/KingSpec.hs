@@ -2,9 +2,14 @@ module Test.Chess.MoveGen.KingSpec where
 
 import Chess.Base
 import Chess.Bitboard
+import Chess.FenParser
+import Chess.Game
 
 import Chess.MoveGen
 import Chess.MoveGen.King
+
+import Control.Monad
+import Control.Monad.State.Lazy
 
 import Test.Placements
 import Test.Placements.King
@@ -197,3 +202,9 @@ spec = describe "potentialKingMoves" $
            it "does not allow the king to castle if the intermediate squares are occupied" $
              potentialKingMoves (CastleRights True False False False) (regularToBitboard . placement $ startingPos) White (Coordinate 'e' 1) `shouldMatchList`
                []
+
+           it "does not generate castling moves for the opposing colour" $ do
+             let successful (Right x) = x
+             let position = successful $ parseFen "" "r2q1k1r/pp3ppp/4b3/2pN4/4P3/4N3/PP1Q1PPP/R3K2R w - - 0 1"
+             potentialKingMoves (CastleRights True True False False) (placement $ regularGameToBitboardGame position) Black (Coordinate 'e' 1) `shouldNotContain`
+               [ Move { moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle, movePromoteTo = Nothing } ]
