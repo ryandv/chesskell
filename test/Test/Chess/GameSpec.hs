@@ -1,10 +1,13 @@
 module Test.Chess.GameSpec where
 
 import Chess.Base
+import Chess.FenParser
 import Chess.Game
 import Chess.Predicates
 
 import Control.Monad.State.Lazy
+
+import Data.Maybe
 
 import Test.Hspec
 import Test.Placements
@@ -92,7 +95,6 @@ spec = do
         doMakeMove blackEnPassantTest { activeColor = Black } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 3, moveType = EnPassant }) `shouldBe` expectedPosition { activeColor = White }
 
     context "illegal moves" $ do
-
       it "returns a value of false for illegal moves" $
         moveAccepted startingPos (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 1, moveTo = Coordinate 'd' 8, moveType = Standard }) `shouldBe` False
 
@@ -104,6 +106,12 @@ spec = do
 
       it "does not allow white to make a move during black's turn" $
         doMakeMove kingOpening (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 2, moveTo = Coordinate 'd' 4, moveType = Standard }) `shouldBe` kingOpening
+
+      it "does not allow black to castle during white's turn" $ do
+        let successful (Right x) = x
+        let position = successful $ parseFen "" "rn2k1nr/p2p1ppp/8/2pp4/2b5/8/PB2NPPP/R3KB1R w KQkq - 0 1"
+        let position' = fromJust . makeMoveFrom position $ Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'g' 7, moveType = Capture, movePromoteTo = Nothing }
+        doMakeMove position' (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle }) `shouldBe` position'
 
       it "returns a value of false for en passant moves when none are allowed" $
         moveAccepted whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` False

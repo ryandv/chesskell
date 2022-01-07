@@ -33,11 +33,22 @@ moveAccepted game move = evalState (makeMove move) $ ChessGame game (regularGame
 doMakeMove :: RegularGame -> Move -> RegularGame
 doMakeMove game move = gameState $ execState (makeMove move) $ ChessGame game (regularGameToBitboardGame game )
 
-makeMove                                   :: Move -> State ChessGame Bool
-makeMove move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
-                                           | movetype == Promotion = makePromotion move
-                                           | movetype == EnPassant = makeEnPassant move
-                                           | otherwise             = makeStandardMove move
+makeMove :: Move -> State ChessGame Bool
+makeMove = validatedMakeMove where
+
+  validatedMakeMove :: Move -> State ChessGame Bool
+  validatedMakeMove move@Move { moveFrom = from } = do
+    game <- get
+    let toMove = activeColor . gameState $ game
+    let position = placement . gameState $ game
+    if (pieceOwner <$> pieceAt position from) == (Just toMove)
+      then makeMove' move
+      else return False
+
+  makeMove' move@Move { moveType = movetype } | movetype == Castle    = makeCastle move
+                                              | movetype == Promotion = makePromotion move
+                                              | movetype == EnPassant = makeEnPassant move
+                                              | otherwise             = makeStandardMove move
 
 makeStandardMove                              :: Move -> State ChessGame Bool
 makeStandardMove move@Move { moveFrom = from } = do
