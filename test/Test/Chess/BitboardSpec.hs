@@ -292,7 +292,7 @@ spec = describe "bitboard" $ do
 
       describe "moving pieces" $ do
         it "can move a single piece to a different square on a given Bitboard" $
-          bitboardMovePiece (regularToBitboard $ placement startingPos) (Move { moveFrom = (Coordinate 'd' 2), moveTo = (Coordinate 'd' 4), moveType = Standard, movePromoteTo = Nothing }) `shouldBe` BitboardRepresentation
+          bitboardMovePiece (regularToBitboard $ placement startingPos) (Move ((Coordinate 'd' 2)) ((Coordinate 'd' 4))) `shouldBe` BitboardRepresentation
             { whitePawns   = Bitboard 134280960
             , blackPawns   = Bitboard 71776119061217280
             , whiteKnights = Bitboard 66
@@ -315,7 +315,7 @@ spec = describe "bitboard" $ do
                                         , (Piece King Black, Coordinate 'e' 8)
                                         ])
 
-          bitboardMovePiece (regularToBitboard $ placement fromPosition) (Move { moveFrom = (Coordinate 'd' 1), moveTo = (Coordinate 'c' 2), moveType = Capture, movePromoteTo = Nothing }) `shouldBe` BitboardRepresentation
+          bitboardMovePiece (regularToBitboard $ placement fromPosition) (Capture ((Coordinate 'd' 1)) ((Coordinate 'c' 2))) `shouldBe` BitboardRepresentation
             { whitePawns   = emptyBitboard
             , blackPawns   = emptyBitboard
             , whiteKnights = emptyBitboard

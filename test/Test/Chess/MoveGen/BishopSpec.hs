@@ -21,41 +21,41 @@ spec = describe "potentialBishopMoves" $ do
 
          it "produces the correct set of moves without being blocked by pieces" $
            potentialBishopMoves (regularToBitboard . placement $ onlyBishopTest) White (Coordinate 'e' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'c' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'g' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'g' 3, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'c' 3, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'b' 8, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 8, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 2, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'b' 2, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'a' 1, moveType = Standard, movePromoteTo = Nothing }
+             [ Move (Coordinate 'e' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 4)
+             , Move (Coordinate 'e' 5) (Coordinate 'd' 4)
+             , Move (Coordinate 'e' 5) (Coordinate 'c' 7)
+             , Move (Coordinate 'e' 5) (Coordinate 'g' 7)
+             , Move (Coordinate 'e' 5) (Coordinate 'g' 3)
+             , Move (Coordinate 'e' 5) (Coordinate 'c' 3)
+             , Move (Coordinate 'e' 5) (Coordinate 'b' 8)
+             , Move (Coordinate 'e' 5) (Coordinate 'h' 8)
+             , Move (Coordinate 'e' 5) (Coordinate 'h' 2)
+             , Move (Coordinate 'e' 5) (Coordinate 'b' 2)
+             , Move (Coordinate 'e' 5) (Coordinate 'a' 1)
              ]
 
          it "produces the correct set of moves when blocked by some pieces" $
            potentialBishopMoves (regularToBitboard . placement $ bishopTest) White (Coordinate 'e' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'c' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'g' 3, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'b' 8, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 2, moveType = Standard, movePromoteTo = Nothing }
+             [ Move (Coordinate 'e' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 4)
+             , Move (Coordinate 'e' 5) (Coordinate 'd' 4)
+             , Move (Coordinate 'e' 5) (Coordinate 'c' 7)
+             , Move (Coordinate 'e' 5) (Coordinate 'g' 3)
+             , Move (Coordinate 'e' 5) (Coordinate 'b' 8)
+             , Move (Coordinate 'e' 5) (Coordinate 'h' 2)
              ]
 
          it "produces the correct set of moves, including captures" $
            potentialBishopMoves (regularToBitboard . placement $ bishopAllCapturesTest) White (Coordinate 'e' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'f' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'c' 7, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'g' 7, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'g' 3, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'c' 3, moveType = Capture, movePromoteTo = Nothing }
+             [ Move (Coordinate 'e' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 6)
+             , Move (Coordinate 'e' 5) (Coordinate 'f' 4)
+             , Move (Coordinate 'e' 5) (Coordinate 'd' 4)
+             , Capture (Coordinate 'e' 5) (Coordinate 'c' 7)
+             , Capture (Coordinate 'e' 5) (Coordinate 'g' 7)
+             , Capture (Coordinate 'e' 5) (Coordinate 'g' 3)
+             , Capture (Coordinate 'e' 5) (Coordinate 'c' 3)
              ]

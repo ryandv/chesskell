@@ -31,11 +31,7 @@ makeTwoMoves = do
 
   stateAfterAIMove <- get
 
-  liftState (makeMove $ Move { moveFrom = Coordinate 'g' 7
-                             , moveTo = Coordinate 'h' 6
-                             , moveType = Capture
-                             , movePromoteTo = Nothing
-                             })
+  liftState (makeMove $ (Capture (Coordinate 'g' 7) (Coordinate 'h' 6)))
 
   stateAfterPlayerMove <- get
   let gameStateAfterPlayerMove = gameState stateAfterPlayerMove
@@ -56,6 +52,6 @@ spec =
       it "can find mate in 2" $ do
         let position = (successful $ parseFen "" "r6k/pp1b2p1/3Np2p/8/3p1PRQ/2nB4/q1P4P/2K5 w - - 0 1")
         evalStateT makeTwoMoves (ChessGame position (regularGameToBitboardGame position)) `shouldReturn`
-          ( (Move { moveFrom = Coordinate 'h' 4, moveTo = Coordinate 'h' 6, moveType = Capture, movePromoteTo = Nothing })
-          , (Move { moveFrom = Coordinate 'd' 6, moveTo = Coordinate 'f' 7, moveType = Standard, movePromoteTo = Nothing })
+          ( (Capture (Coordinate 'h' 4) (Coordinate 'h' 6))
+          , (Move (Coordinate 'd' 6) (Coordinate 'f' 7))
           )

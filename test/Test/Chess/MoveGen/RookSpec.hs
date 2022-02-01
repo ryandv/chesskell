@@ -21,44 +21,44 @@ spec = describe "potentialRookMoves" $ do
 
          it "produces the correct set of moves without being blocked by pieces" $
            potentialRookMoves (regularToBitboard . placement $ onlyRookTest) White (Coordinate 'd' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'f' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'b' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 3, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'g' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'a' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 2, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'h' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 1, moveType = Standard, movePromoteTo = Nothing }
+             [ Move (Coordinate 'd' 5) (Coordinate 'e' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'c' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 4)
+             , Move (Coordinate 'd' 5) (Coordinate 'f' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'b' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 7)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 3)
+             , Move (Coordinate 'd' 5) (Coordinate 'g' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'a' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 8)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 2)
+             , Move (Coordinate 'd' 5) (Coordinate 'h' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 1)
              ]
 
          it "produces the correct set of moves when blocked by some pieces" $
            potentialRookMoves (regularToBitboard . placement $ rookTest) White (Coordinate 'd' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'b' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'a' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 8, moveType = Standard, movePromoteTo = Nothing }
+             [ Move (Coordinate 'd' 5) (Coordinate 'e' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'c' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 4)
+             , Move (Coordinate 'd' 5) (Coordinate 'b' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 7)
+             , Move (Coordinate 'd' 5) (Coordinate 'a' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 8)
              ]
 
          it "produces the correct set of moves, including captures" $
            potentialRookMoves (regularToBitboard . placement $ rookAllCapturesTest) White (Coordinate 'd' 5) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'e' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'f' 5, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'b' 5, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 7, moveType = Capture, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'd' 3, moveType = Capture, movePromoteTo = Nothing }
+             [ Move (Coordinate 'd' 5) (Coordinate 'e' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'c' 5)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 6)
+             , Move (Coordinate 'd' 5) (Coordinate 'd' 4)
+             , Capture (Coordinate 'd' 5) (Coordinate 'f' 5)
+             , Capture (Coordinate 'd' 5) (Coordinate 'b' 5)
+             , Capture (Coordinate 'd' 5) (Coordinate 'd' 7)
+             , Capture (Coordinate 'd' 5) (Coordinate 'd' 3)
              ]
 
          it "does not allow a rook to capture pieces of its own color" $ do
@@ -66,13 +66,13 @@ spec = describe "potentialRookMoves" $ do
                                          , (Piece Rook White, Coordinate 'h' 1)
                                          ])
            potentialRookMoves (regularToBitboard . placement $ position) White (Coordinate 'h' 1) `shouldMatchList`
-             [ Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'g' 1, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 2, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'f' 1, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 3, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 4, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 5, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 6, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 7, moveType = Standard, movePromoteTo = Nothing }
-             , Move { moveFrom = Coordinate 'h' 1, moveTo = Coordinate 'h' 8, moveType = Standard, movePromoteTo = Nothing }
+             [ Move (Coordinate 'h' 1) (Coordinate 'g' 1)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 2)
+             , Move (Coordinate 'h' 1) (Coordinate 'f' 1)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 3)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 4)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 5)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 6)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 7)
+             , Move (Coordinate 'h' 1) (Coordinate 'h' 8)
              ]

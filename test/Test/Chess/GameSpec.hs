@@ -19,7 +19,7 @@ spec = do
   describe "makeMove" $ do
     context "legal moves" $ do
       it "accepts standard moves and updates the game's positional state" $
-        doMakeMove startingPos (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 4, moveType = Standard }) `shouldBe` kingOpening
+        doMakeMove startingPos (Move (Coordinate 'e' 2) (Coordinate 'e' 4)) `shouldBe` kingOpening
 
       it "accepts captures and removes the captured piece from the board" $ do
         let fromPosition = (setupGame [ (Piece Pawn White, Coordinate 'c' 4)
@@ -30,14 +30,14 @@ spec = do
         let expectedPosition = (setupGame [ (Piece Pawn Black, Coordinate 'c' 4)
                      , (Piece King White, Coordinate 'e' 1)
                      , (Piece King Black, Coordinate 'e' 8)])
-        doMakeMove fromPosition { activeColor = Black } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 5, moveTo = Coordinate 'c' 4, moveType = Capture }) `shouldBe`
+        doMakeMove fromPosition { activeColor = Black } (Capture (Coordinate 'd' 5) (Coordinate 'c' 4)) `shouldBe`
            expectedPosition { activeColor = White }
 
       it "accepts white kingside castles, updating castling rights and moving the rook" $ do
         let expectedPosition = (setupGame [ (Piece King White, Coordinate 'g' 1)
                               , (Piece Rook White, Coordinate 'f' 1)
                               ])
-        doMakeMove whiteKingOOTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle }) `shouldBe`
+        doMakeMove whiteKingOOTest (Castle (Coordinate 'e' 1) (Coordinate 'g' 1)) `shouldBe`
            expectedPosition { activeColor = Black
                             , castlingRights = CastleRights False True False True
                             }
@@ -46,7 +46,7 @@ spec = do
         let expectedPosition = (setupGame [ (Piece King White, Coordinate 'c' 1)
                                           , (Piece Rook White, Coordinate 'd' 1)
                                           ])
-        doMakeMove whiteKingOOOTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle }) `shouldBe`
+        doMakeMove whiteKingOOOTest (Castle (Coordinate 'e' 1) (Coordinate 'c' 1)) `shouldBe`
            expectedPosition { activeColor = Black
                             , castlingRights = CastleRights False True False True
                             }
@@ -55,7 +55,7 @@ spec = do
         let expectedPosition = (setupGame [ (Piece King Black, Coordinate 'g' 8)
                      , (Piece Rook Black, Coordinate 'f' 8)
                      ])
-        doMakeMove blackKingOOTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'g' 8, moveType = Castle }) `shouldBe`
+        doMakeMove blackKingOOTest (Castle (Coordinate 'e' 8) (Coordinate 'g' 8)) `shouldBe`
            expectedPosition { activeColor = White
                         , castlingRights = CastleRights True False True False
                         }
@@ -64,7 +64,7 @@ spec = do
         let expectedPosition = (setupGame [ (Piece King Black, Coordinate 'c' 8)
                      , (Piece Rook Black, Coordinate 'd' 8)
                      ])
-        doMakeMove blackKingOOOTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'c' 8, moveType = Castle }) `shouldBe`
+        doMakeMove blackKingOOOTest (Castle (Coordinate 'e' 8) (Coordinate 'c' 8)) `shouldBe`
            expectedPosition { activeColor = White
                         , castlingRights = CastleRights True False True False
                         }
@@ -73,57 +73,57 @@ spec = do
         let expectedPosition = (setupGame [ (Piece Queen White, Coordinate 'e' 8)
                        , (Piece King White, Coordinate 'a' 1)
                        , (Piece King Black, Coordinate 'h' 1)])
-        doMakeMove whitePromotionTest (Move { movePromoteTo = Just (Piece Queen White), moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion }) `shouldBe` expectedPosition { activeColor = Black }
+        doMakeMove whitePromotionTest (Promote (Coordinate 'e' 7) (Coordinate 'e' 8) (Piece Queen White)) `shouldBe` expectedPosition { activeColor = Black }
 
       it "allows black to promote pawns" $ do
         let expectedPosition = (setupGame [ (Piece Queen Black, Coordinate 'e' 1)
                        , (Piece King White, Coordinate 'a' 8)
                        , (Piece King Black, Coordinate 'h' 8)])
-        doMakeMove blackPromotionTest (Move { movePromoteTo = Just (Piece Queen Black), moveFrom = Coordinate 'e' 2, moveTo = Coordinate 'e' 1, moveType = Promotion })
+        doMakeMove blackPromotionTest (Promote (Coordinate 'e' 2) (Coordinate 'e' 1) (Piece Queen Black))
           `shouldBe` expectedPosition { activeColor = White }
 
       it "allows white to en passant" $ do
         let expectedPosition = (setupGame [ (Piece Pawn White, Coordinate 'd' 6)
                        , (Piece King White, Coordinate 'a' 1)
                        , (Piece King Black, Coordinate 'h' 1)])
-        doMakeMove whiteEnPassantTest { activeColor = White } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` expectedPosition { activeColor = Black }
+        doMakeMove whiteEnPassantTest { activeColor = White } (EnPassant (Coordinate 'e' 5) (Coordinate 'd' 6)) `shouldBe` expectedPosition { activeColor = Black }
 
       it "allows black to en passant" $ do
         let expectedPosition = (setupGame [ (Piece Pawn Black, Coordinate 'e' 3)
                        , (Piece King White, Coordinate 'a' 1)
                        , (Piece King Black, Coordinate 'h' 1)])
-        doMakeMove blackEnPassantTest { activeColor = Black } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 4, moveTo = Coordinate 'e' 3, moveType = EnPassant }) `shouldBe` expectedPosition { activeColor = White }
+        doMakeMove blackEnPassantTest { activeColor = Black } (EnPassant (Coordinate 'd' 4) (Coordinate 'e' 3)) `shouldBe` expectedPosition { activeColor = White }
 
     context "illegal moves" $ do
       it "returns a value of false for illegal moves" $
-        moveAccepted startingPos (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 1, moveTo = Coordinate 'd' 8, moveType = Standard }) `shouldBe` False
+        moveAccepted startingPos (Move (Coordinate 'd' 1) (Coordinate 'd' 8)) `shouldBe` False
 
       it "does not modify the game state for illegal moves" $
-        doMakeMove startingPos (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 1, moveTo = Coordinate 'd' 8, moveType = Standard }) `shouldBe` startingPos
+        doMakeMove startingPos (Move (Coordinate 'd' 1) (Coordinate 'd' 8)) `shouldBe` startingPos
 
       it "does not allow black to make a move during white's turn" $
-        doMakeMove startingPos (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 7, moveTo = Coordinate 'd' 5, moveType = Standard }) `shouldBe` startingPos
+        doMakeMove startingPos (Move (Coordinate 'd' 7) (Coordinate 'd' 5)) `shouldBe` startingPos
 
       it "does not allow white to make a move during black's turn" $
-        doMakeMove kingOpening (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 2, moveTo = Coordinate 'd' 4, moveType = Standard }) `shouldBe` kingOpening
+        doMakeMove kingOpening (Move (Coordinate 'd' 2) (Coordinate 'd' 4)) `shouldBe` kingOpening
 
       it "does not allow black to castle during white's turn" $ do
         let successful (Right x) = x
         let position = successful $ parseFen "" "rn2k1nr/p2p1ppp/8/2pp4/2b5/8/PB2NPPP/R3KB1R w KQkq - 0 1"
-        let position' = fromJust . makeMoveFrom position $ Move { moveFrom = Coordinate 'b' 2, moveTo = Coordinate 'g' 7, moveType = Capture, movePromoteTo = Nothing }
-        doMakeMove position' (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle }) `shouldBe` position'
+        let position' = fromJust . makeMoveFrom position $ Capture (Coordinate 'b' 2) (Coordinate 'g' 7)
+        doMakeMove position' (Castle (Coordinate 'e' 1) (Coordinate 'c' 1)) `shouldBe` position'
 
       it "returns a value of false for en passant moves when none are allowed" $
-        moveAccepted whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` False
+        moveAccepted whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } (EnPassant (Coordinate 'e' 5) (Coordinate 'd' 6)) `shouldBe` False
 
       it "does not modify the game state for en passant moves when none are allowed" $
-        doMakeMove whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing }
+        doMakeMove whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing } (EnPassant (Coordinate 'e' 5) (Coordinate 'd' 6)) `shouldBe` whiteEnPassantTest { activeColor = White, enPassantSquare = Nothing }
 
       it "does not allow pawn promotion if the pawn is pinned to its king" $
-        doMakeMove promotionPinTest (Move { movePromoteTo = Just (Piece Queen White), moveFrom = Coordinate 'e' 7, moveTo = Coordinate 'e' 8, moveType = Promotion }) `shouldBe` promotionPinTest
+        doMakeMove promotionPinTest (Promote (Coordinate 'e' 7) (Coordinate 'e' 8) (Piece Queen White)) `shouldBe` promotionPinTest
 
       it "does not allow en passant if the capturing pawn is pinned to its king" $
-        doMakeMove enPassantPinTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'd' 6, moveType = EnPassant }) `shouldBe` enPassantPinTest
+        doMakeMove enPassantPinTest (EnPassant (Coordinate 'e' 5) (Coordinate 'd' 6)) `shouldBe` enPassantPinTest
 
       context "checks" $ do
         it "allows capturing a checking piece to get out of check" $ do
@@ -133,13 +133,13 @@ spec = do
                                         , (Piece Knight Black, Coordinate 'c' 2)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         ])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'd' 1, moveTo = Coordinate 'c' 2, moveType = Capture }) `shouldBe` True
+          moveAccepted fromPosition (Capture (Coordinate 'd' 1) (Coordinate 'c' 2)) `shouldBe` True
 
         it "does not allow the king to move into check by a queen" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                        , (Piece King Black, Coordinate 'e' 8)
                        , (Piece Queen Black, Coordinate 'd' 8)])
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1))
              `shouldBe` setupGame [ (Piece King White, Coordinate 'e' 1)
                                   , (Piece King Black, Coordinate 'e' 8)
                                   , (Piece Queen Black, Coordinate 'd' 8)
@@ -149,7 +149,7 @@ spec = do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         , (Piece Queen Black, Coordinate 'd' 8)])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` False
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` False
 
         it "does not allow the king to move into check by a rook" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
@@ -159,13 +159,13 @@ spec = do
                                            , (Piece King Black, Coordinate 'e' 8)
                                            , (Piece Rook Black, Coordinate 'd' 8)
                                            ]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` expectedPosition
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` expectedPosition
 
         it "returns false when the king moves into check by a rook" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         , (Piece Rook Black, Coordinate 'd' 8)])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` False
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` False
 
         it "does not allow the king to move into check by a bishop" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
@@ -175,14 +175,14 @@ spec = do
                                            , (Piece King Black, Coordinate 'e' 8)
                                            , (Piece Bishop Black, Coordinate 'h' 5)
                                            ]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` expectedPosition
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` expectedPosition
 
         it "returns false when the king moves into check by a bishop" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         , (Piece Bishop Black, Coordinate 'h' 5)
                                         ])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` False
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` False
 
         it "does not allow the king to move into check by a knight" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
@@ -192,7 +192,7 @@ spec = do
                                            , (Piece King Black, Coordinate 'e' 8)
                                            , (Piece Knight Black, Coordinate 'e' 3)
                                            ]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1))
              `shouldBe` expectedPosition
 
         it "returns false when the king moves into check by a knight" $ do
@@ -200,7 +200,7 @@ spec = do
                                         , (Piece King Black, Coordinate 'e' 8)
                                         , (Piece Knight Black, Coordinate 'e' 3)
                                         ])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1))
              `shouldBe` False
 
         it "does not allow the king to move into check by a pawn" $ do
@@ -211,14 +211,14 @@ spec = do
                                            , (Piece King Black, Coordinate 'e' 8)
                                            , (Piece Pawn Black, Coordinate 'e' 2)
                                            ]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` expectedPosition
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` expectedPosition
 
         it "returns false when the king moves into check by a pawn" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         , (Piece Pawn Black, Coordinate 'e' 2)
                                         ])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard })
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1))
              `shouldBe` False
 
         it "does not allow the king to move into check by a king" $ do
@@ -228,14 +228,14 @@ spec = do
           let expectedPosition = setupGame [ (Piece King White, Coordinate 'e' 1)
                                            , (Piece King Black, Coordinate 'c' 2)
                                            ]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` expectedPosition
+          doMakeMove fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` expectedPosition
 
         it "returns false when the king moves into check by a king" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece King Black, Coordinate 'c' 2)
                                         ])
 
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'd' 1, moveType = Standard }) `shouldBe` False
+          moveAccepted fromPosition (Move (Coordinate 'e' 1) (Coordinate 'd' 1)) `shouldBe` False
 
         it "does not allow the king to be captured on the next move" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
@@ -246,7 +246,7 @@ spec = do
                                            , (Piece Pawn White, Coordinate 'a' 2)
                                            , (Piece Queen Black, Coordinate 'h' 1)
                                            , (Piece King Black, Coordinate 'e' 8)]
-          doMakeMove fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'a' 2, moveTo = Coordinate 'a' 4, moveType = Standard }) `shouldBe` expectedPosition
+          doMakeMove fromPosition (Move (Coordinate 'a' 2) (Coordinate 'a' 4)) `shouldBe` expectedPosition
 
         it "returns false if the king can be captured on the next move" $ do
           let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
@@ -254,47 +254,47 @@ spec = do
                                         , (Piece Queen Black, Coordinate 'h' 1)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         ])
-          moveAccepted fromPosition (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'a' 2, moveTo = Coordinate 'a' 4, moveType = Standard })
+          moveAccepted fromPosition (Move (Coordinate 'a' 2) (Coordinate 'a' 4))
              `shouldBe` False
 
         it "does not allow a piece pinned to the king to be moved" $
-          doMakeMove discoveredCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 5, moveType = Standard }) `shouldBe` discoveredCheckTest
+          doMakeMove discoveredCheckTest (Move (Coordinate 'e' 5) (Coordinate 'h' 5)) `shouldBe` discoveredCheckTest
 
         it "returns false if a piece pinned to the king is moved" $
-          moveAccepted discoveredCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 5, moveTo = Coordinate 'h' 5, moveType = Standard }) `shouldBe` False
+          moveAccepted discoveredCheckTest (Move (Coordinate 'e' 5) (Coordinate 'h' 5)) `shouldBe` False
 
         it "requires the king to move under double check" $
-          doMakeMove doubleCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'h' 7, moveTo = Coordinate 'e' 4, moveType = Capture }) `shouldBe` doubleCheckTest
+          doMakeMove doubleCheckTest (Capture (Coordinate 'h' 7) (Coordinate 'e' 4)) `shouldBe` doubleCheckTest
 
         it "returns false if the king does not move under double check" $
-          moveAccepted doubleCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'h' 7, moveTo = Coordinate 'e' 4, moveType = Capture }) `shouldBe` False
+          moveAccepted doubleCheckTest (Capture (Coordinate 'h' 7) (Coordinate 'e' 4)) `shouldBe` False
 
         it "does not allow the king to castle into check" $
-          doMakeMove castleIntoCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle }) `shouldBe` castleIntoCheckTest
+          doMakeMove castleIntoCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'g' 1)) `shouldBe` castleIntoCheckTest
 
         it "returns false if the king castles into check" $
-          moveAccepted castleIntoCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle }) `shouldBe` False
+          moveAccepted castleIntoCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'g' 1)) `shouldBe` False
 
         it "does not allow the white king to kingside castle through check" $
-          doMakeMove whiteKingsideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle }) `shouldBe` whiteKingsideCastleThroughCheckTest
+          doMakeMove whiteKingsideCastleThroughCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'g' 1)) `shouldBe` whiteKingsideCastleThroughCheckTest
 
         it "returns false if the white king kingside castles through check" $
-          moveAccepted whiteKingsideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'g' 1, moveType = Castle }) `shouldBe` False
+          moveAccepted whiteKingsideCastleThroughCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'g' 1)) `shouldBe` False
 
         it "does not allow the white king to queenside castle through check" $
-          doMakeMove whiteQueensideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle }) `shouldBe` whiteQueensideCastleThroughCheckTest
+          doMakeMove whiteQueensideCastleThroughCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'c' 1)) `shouldBe` whiteQueensideCastleThroughCheckTest
 
         it "returns false if the white king queenside castles through check" $
-          moveAccepted whiteQueensideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 1, moveTo = Coordinate 'c' 1, moveType = Castle }) `shouldBe` False
+          moveAccepted whiteQueensideCastleThroughCheckTest (Castle (Coordinate 'e' 1) (Coordinate 'c' 1)) `shouldBe` False
 
         it "does not allow the black king to kingside castle through check" $
-          doMakeMove blackKingsideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'g' 8, moveType = Castle }) `shouldBe` blackKingsideCastleThroughCheckTest
+          doMakeMove blackKingsideCastleThroughCheckTest (Castle (Coordinate 'e' 8) (Coordinate 'g' 8)) `shouldBe` blackKingsideCastleThroughCheckTest
 
         it "returns false if the black king kingside castles through check" $
-          moveAccepted blackKingsideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'g' 8, moveType = Castle }) `shouldBe` False
+          moveAccepted blackKingsideCastleThroughCheckTest (Castle (Coordinate 'e' 8) (Coordinate 'g' 8)) `shouldBe` False
 
         it "does not allow the black king to queenside castle through check" $
-          doMakeMove blackQueensideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'c' 8, moveType = Castle }) `shouldBe` blackQueensideCastleThroughCheckTest
+          doMakeMove blackQueensideCastleThroughCheckTest (Castle (Coordinate 'e' 8) (Coordinate 'c' 8)) `shouldBe` blackQueensideCastleThroughCheckTest
 
         it "returns false if the black king queenside castles through check" $
-          moveAccepted blackQueensideCastleThroughCheckTest (Move { movePromoteTo = Nothing, moveFrom = Coordinate 'e' 8, moveTo = Coordinate 'c' 8, moveType = Castle }) `shouldBe` False
+          moveAccepted blackQueensideCastleThroughCheckTest (Castle (Coordinate 'e' 8) (Coordinate 'c' 8)) `shouldBe` False
