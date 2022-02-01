@@ -17,62 +17,66 @@ module Chess.Base
   , RegularBoardRepresentation
   , RegularGame(..)
   , Square(..)
-
   , opponent
   ) where
 
-import Control.Applicative
-import Control.Monad.State.Lazy
+import           Control.Applicative
+import           Control.Monad.State.Lazy
 
-import Data.List
-import Data.Maybe
+import           Data.List
+import           Data.Maybe
 
 data Square = Square
   { pieceOn  :: Maybe Piece
   , location :: Coordinate
-  } deriving(Eq, Read, Show)
+  }
+  deriving (Eq, Read, Show)
 
 data Piece = Piece
   { pieceType  :: PieceType
   , pieceOwner :: Player
-  } deriving(Eq, Read)
+  }
+  deriving (Eq, Read)
 
 data Move = Move
-  { moveFrom         :: Coordinate
-  , moveTo           :: Coordinate
-  , moveType         :: MoveType
-  , movePromoteTo    :: Maybe Piece
-  } deriving(Eq, Read, Show)
+  { moveFrom      :: Coordinate
+  , moveTo        :: Coordinate
+  , moveType      :: MoveType
+  , movePromoteTo :: Maybe Piece
+  }
+  deriving (Eq, Read, Show)
 
 data MoveType = Standard | Capture | Castle | Promotion | EnPassant deriving(Eq, Read, Show)
 
 instance Show Piece where
-  show (Piece Rook White)   = "R"
+  show (Piece Rook   White) = "R"
   show (Piece Knight White) = "N"
   show (Piece Bishop White) = "B"
-  show (Piece Queen White)  = "Q"
-  show (Piece King White)   = "K"
-  show (Piece Pawn White)   = "P"
+  show (Piece Queen  White) = "Q"
+  show (Piece King   White) = "K"
+  show (Piece Pawn   White) = "P"
 
-  show (Piece Rook Black)   = "r"
+  show (Piece Rook   Black) = "r"
   show (Piece Knight Black) = "n"
   show (Piece Bishop Black) = "b"
-  show (Piece Queen Black)  = "q"
-  show (Piece King Black)   = "k"
-  show (Piece Pawn Black)   = "p"
+  show (Piece Queen  Black) = "q"
+  show (Piece King   Black) = "k"
+  show (Piece Pawn   Black) = "p"
 
 data PieceType  = Pawn | Knight | Bishop | Rook | Queen | King deriving (Enum, Eq, Read)
 data Player = White | Black deriving (Enum, Eq, Read, Show)
 
-data Coordinate = Coordinate File Rank deriving(Eq, Read, Show)
-type Rank   = Int
-type File   = Char
+data Coordinate = Coordinate File Rank
+  deriving (Eq, Read, Show)
+type Rank = Int
+type File = Char
 
 -- KkQq
-data CastleRights = CastleRights Bool Bool Bool Bool deriving(Eq, Show)
+data CastleRights = CastleRights Bool Bool Bool Bool
+  deriving (Eq, Show)
 data CastleSide = Queenside | Kingside deriving(Eq, Show)
 
-type RegularBoardRepresentation   = [[Square]]
+type RegularBoardRepresentation = [[Square]]
 
 data Game r = Game
   { placement       :: r
@@ -112,13 +116,13 @@ instance Show (Game RegularBoardRepresentation) where
     secondRank  = map pieceOn $ placement g !! 1
     firstRank   = map pieceOn $ head $ placement g
 
-isOnBoard                  :: Coordinate -> Bool
+isOnBoard :: Coordinate -> Bool
 isOnBoard (Coordinate f r) | f < 'a'   = False
                            | f > 'h'   = False
                            | r < 1     = False
                            | r > 8     = False
                            | otherwise = True
 
-opponent               :: Player -> Player
-opponent White         = Black
-opponent Black         = White
+opponent :: Player -> Player
+opponent White = Black
+opponent Black = White

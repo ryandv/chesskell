@@ -1,10 +1,10 @@
 module Test.Util where
 
-import Chess.Base
+import           Chess.Base
 
-import Control.Monad
+import           Control.Monad
 
-import Test.QuickCheck
+import           Test.QuickCheck
 
 coords :: Gen Coordinate
 coords = choose ('a', 'h') >>= (\x -> liftM (Coordinate x) (choose (1, 8)))
