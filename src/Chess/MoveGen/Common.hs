@@ -32,26 +32,18 @@ liftOp :: (a -> b -> c) -> b -> [a] -> [c]
 liftOp f c xs = (flip f) c <$> xs
 
 potentialOffsetMoves                  :: [(Int, Int)] -> BitboardRepresentation -> Player -> Coordinate -> [Move]
-potentialOffsetMoves offsets bb ply c = fmap destinationToMove . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
+potentialOffsetMoves offsets bb ply c = fmap (destinationToMove bb c) . filter canMoveToDestination . filter isOnBoard $ fmap (c `offsetBy`) offsets
   where canMoveToDestination = (flip (unoccupiedByAlly bb) ply)
-        destinationToMove x = Move { moveFrom = c
-                                   , moveTo = x
-                                   , moveType = determineMoveType bb c x
-                                   , movePromoteTo = Nothing
-                                   }
 
 potentialRayMoves              :: BitboardRepresentation -> Player -> Coordinate -> [Ray] -> [Move]
 potentialRayMoves b ply c rays = toLegalMoves $ foldr bitboardUnion emptyBitboard $ potentialRayMoves' occupancy ply c <$> rays
   where
     occupancy = totalOccupancy b
     toLegalMoves = filter selfCaptures
-      . fmap destinationToMove
+      . fmap (destinationToMove b c)
       . bitboardToCoordinates
-    selfCaptures move = moveType move /= Capture || (moveType move == Capture && (pieceOwner <$> (bitboardPieceAt b (moveTo move))) /= Just ply)
-    destinationToMove dest = Move { moveFrom = c
-                                  , moveTo = dest
-                                  , moveType = determineMoveType b c dest
-                                  , movePromoteTo = Nothing }
+    selfCaptures (Capture _ to) = (pieceOwner <$> bitboardPieceAt b to) /= Just ply
+    selfCaptures _ = True
 
 potentialRayMoves' :: Bitboard -> Player -> Coordinate -> Ray -> Bitboard
 potentialRayMoves' occupancy ply c r | r == E || r == N || r == NE || r == NW = potentialPositiveRayMoves occupancy ply c r
@@ -69,9 +61,9 @@ potentialNegativeRayMoves occupancy ply c r = unobstructedRay `bitboardXOR` rayF
           blocker = bitscanReverse $ unobstructedRay `bitboardIntersect` occupancy
           rayFromBlocker = rayGeneratorFor r (squareIndexToIndices blocker)
 
-determineMoveType              :: BitboardRepresentation -> Coordinate -> Coordinate -> MoveType
-determineMoveType b _ to       | bitboardIsOccupied b to = Capture
-                               | otherwise = Standard
+destinationToMove :: BitboardRepresentation -> Coordinate -> Coordinate -> Move
+destinationToMove b from to | bitboardIsOccupied b to = Capture from to
+                            | otherwise = Move from to
 
 determinePieceOwner :: RegularBoardRepresentation -> Coordinate -> Maybe Player
 determinePieceOwner b c = fmap pieceOwner $ pieceAt b c

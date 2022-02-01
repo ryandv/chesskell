@@ -84,14 +84,31 @@ isStalemate :: Game BitboardRepresentation -> Player -> Bool
 isStalemate game ply = (not $ isChecked game) && noLegalMovesRemaining game ply
 
 moveIsLegal :: Move -> Game BitboardRepresentation -> Bool
-moveIsLegal move@Move { moveFrom = from } game =
-  moveIsPseudoLegal && moveIsByRightPlayer && (notCheckedAfterMove game move) where
+moveIsLegal move@(Move from to) game =
+  moveIsPseudoLegal game move && moveIsByRightPlayer game move && notCheckedAfterMove game move
+moveIsLegal move@(Capture from to) game =
+  moveIsPseudoLegal game move && moveIsByRightPlayer game move && notCheckedAfterMove game move
+moveIsLegal move@(Castle from to) game =
+  moveIsPseudoLegal game move && moveIsByRightPlayer game move && notCheckedAfterMove game move
+moveIsLegal move@(EnPassant from to) game =
+  moveIsPseudoLegal game move && moveIsByRightPlayer game move && notCheckedAfterMove game move
+moveIsLegal move@(Promote from to _) game =
+  moveIsPseudoLegal game move && moveIsByRightPlayer game move && notCheckedAfterMove game move where
 
-  moveIsPseudoLegal = (move `elem` pseudoLegalMoves game)
-  moveIsByRightPlayer =
-    (pieceOwner <$> (bitboardPieceAt position from))
-      == (Just (activeColor game))
-  position = placement game
+moveIsPseudoLegal :: Game BitboardRepresentation -> Move -> Bool
+moveIsPseudoLegal game move = (move `elem` pseudoLegalMoves game)
+
+moveIsByRightPlayer :: Game BitboardRepresentation -> Move -> Bool
+moveIsByRightPlayer game (Move from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
+  == (Just (activeColor game))
+moveIsByRightPlayer game (Capture from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
+  == (Just (activeColor game))
+moveIsByRightPlayer game (EnPassant from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
+  == (Just (activeColor game))
+moveIsByRightPlayer game (Castle from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
+  == (Just (activeColor game))
+moveIsByRightPlayer game (Promote from _ _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
+  == (Just (activeColor game))
 
 notCheckedAfterMove :: Game BitboardRepresentation -> Move -> Bool
 notCheckedAfterMove game move =
@@ -105,11 +122,19 @@ noLegalMovesRemaining game ply =
     $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly Move { moveFrom = from } =
+  pieceIsOwnedByPly (Move from to) =
+    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly (Capture from to) =
+    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly (EnPassant from to) =
+    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly (Castle from to) =
+    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly (Promote from to _) =
     (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
 
   validCastles :: Move -> Bool
-  validCastles (Move from to Castle _)
+  validCastles (Castle from to)
     | from == Coordinate 'e' 1 && to == Coordinate 'g' 1 = isCastleSafe
       Kingside
       game
@@ -141,7 +166,8 @@ fastIsChecking moves bitboard coord pt =
 
  where
   moveIsCapture :: Move -> Bool
-  moveIsCapture = (== Capture) . moveType
+  moveIsCapture (Capture _ _) = True
+  moveIsCapture _ = False
 
   moveMatchesPieceType :: PieceType -> Move -> Bool
   moveMatchesPieceType pt =
@@ -149,6 +175,18 @@ fastIsChecking moves bitboard coord pt =
 
   moveIsFromTargetCoordinate :: Move -> Bool
   moveIsFromTargetCoordinate = (== coord) . moveFrom
+
+  moveTo (Move _ t) = t
+  moveTo (Capture _ t) = t
+  moveTo (Castle _ t) = t
+  moveTo (EnPassant _ t) = t
+  moveTo (Promote _ t _) = t
+
+  moveFrom (Move f _) = f
+  moveFrom (Capture f _) = f
+  moveFrom (Castle f _) = f
+  moveFrom (EnPassant f _) = f
+  moveFrom (Promote f _ _) = f
 
 isCastleSafe :: CastleSide -> Game BitboardRepresentation -> Player -> Bool
 isCastleSafe Kingside game White =

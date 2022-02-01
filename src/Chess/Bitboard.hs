@@ -385,36 +385,42 @@ removePieceFrom bitboards piece coord
                      `bitboardIntersect` (singleVacancy coord)
     }
   | piece == Just (Piece Rook Black) = bitboards
-    { blackRooks = (blackRooks bitboards)
+    { blackRooks = blackRooks bitboards
                      `bitboardIntersect` (singleVacancy coord)
     }
   | piece == Just (Piece Queen White) = bitboards
-    { whiteQueens = (whiteQueens bitboards)
+    { whiteQueens = whiteQueens bitboards
                       `bitboardIntersect` (singleVacancy coord)
     }
   | piece == Just (Piece Queen Black) = bitboards
-    { blackQueens = (blackQueens bitboards)
+    { blackQueens = blackQueens bitboards
                       `bitboardIntersect` (singleVacancy coord)
     }
   | piece == Just (Piece King White) = bitboards
-    { whiteKings = (whiteKings bitboards)
+    { whiteKings = whiteKings bitboards
                      `bitboardIntersect` (singleVacancy coord)
     }
   | piece == Just (Piece King Black) = bitboards
-    { blackKings = (blackKings bitboards)
+    { blackKings = blackKings bitboards
                      `bitboardIntersect` (singleVacancy coord)
     }
   | otherwise = bitboards
 
 bitboardMovePiece :: BitboardRepresentation -> Move -> BitboardRepresentation
-bitboardMovePiece bitboards move@(Move from to Capture _) =
-  bitboardMovePieceCapture bitboards move
-bitboardMovePiece bitboards move@(Move from to _ _) =
-  bitboardMovePieceStandard bitboards move
+bitboardMovePiece bitboards (Capture from to) =
+  bitboardMovePieceCapture bitboards from to
+bitboardMovePiece bitboards (Move from to) =
+  bitboardMovePieceStandard bitboards from to
+bitboardMovePiece bitboards (Castle from to) =
+  bitboardMovePieceStandard bitboards from to
+bitboardMovePiece bitboards (Promote from to _) =
+  bitboardMovePieceStandard bitboards from to
+bitboardMovePiece bitboards (EnPassant from to) =
+  bitboardMovePieceStandard bitboards from to
 
 bitboardMovePieceCapture
-  :: BitboardRepresentation -> Move -> BitboardRepresentation
-bitboardMovePieceCapture bitboards (Move { moveFrom = from, moveTo = to }) =
+  :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
+bitboardMovePieceCapture bitboards from to =
   updatedBitboards
     { totalOccupancy = whitePawns updatedBitboards
                        `bitboardUnion` whiteBishops updatedBitboards
@@ -446,8 +452,8 @@ bitboardMovePieceCapture bitboards (Move { moveFrom = from, moveTo = to }) =
   squareIndex = indicesToSquareIndex . coordinateToIndices
 
 bitboardMovePieceStandard
-  :: BitboardRepresentation -> Move -> BitboardRepresentation
-bitboardMovePieceStandard bitboards (Move { moveFrom = from, moveTo = to }) =
+  :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
+bitboardMovePieceStandard bitboards from to =
   updatedBitboards
     { totalOccupancy = whitePawns updatedBitboards
                        `bitboardUnion` whiteBishops updatedBitboards

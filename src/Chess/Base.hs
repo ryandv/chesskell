@@ -9,7 +9,8 @@ module Chess.Base
   , Game(..)
   , isOnBoard
   , Move(..)
-  , MoveType(..)
+  , moveFrom
+  , moveTo
   , Piece(..)
   , PieceType(..)
   , Player(..)
@@ -38,15 +39,22 @@ data Piece = Piece
   }
   deriving (Eq, Read)
 
-data Move = Move
-  { moveFrom      :: Coordinate
-  , moveTo        :: Coordinate
-  , moveType      :: MoveType
-  , movePromoteTo :: Maybe Piece
-  }
+data Move = Move Coordinate Coordinate | Capture Coordinate Coordinate | Castle Coordinate Coordinate | EnPassant Coordinate Coordinate | Promote Coordinate Coordinate Piece
   deriving (Eq, Read, Show)
 
-data MoveType = Standard | Capture | Castle | Promotion | EnPassant deriving(Eq, Read, Show)
+moveFrom :: Move -> Coordinate
+moveFrom (Move f _) = f
+moveFrom (Capture f _) = f
+moveFrom (Castle f _) = f
+moveFrom (EnPassant f _) = f
+moveFrom (Promote f _ _) = f
+
+moveTo :: Move -> Coordinate
+moveTo (Move _ t) = t
+moveTo (Capture _ t) = t
+moveTo (Castle _ t) = t
+moveTo (EnPassant _ t) = t
+moveTo (Promote _ t _) = t
 
 instance Show Piece where
   show (Piece Rook   White) = "R"
@@ -63,7 +71,7 @@ instance Show Piece where
   show (Piece King   Black) = "k"
   show (Piece Pawn   Black) = "p"
 
-data PieceType  = Pawn | Knight | Bishop | Rook | Queen | King deriving (Enum, Eq, Read)
+data PieceType  = Pawn | Knight | Bishop | Rook | Queen | King deriving (Enum, Eq, Read, Show)
 data Player = White | Black deriving (Enum, Eq, Read, Show)
 
 data Coordinate = Coordinate File Rank

@@ -18,10 +18,7 @@ potentialPawnMoves (Just enPassant) bitboard ply c@(Coordinate r f) = standardPa
         rankOffset Black = -1
 
         enPassantMoves                      :: Coordinate -> [Move]
-        enPassantMoves (Coordinate r' f')   | canEnPassantFromThisRank r' && canEnPassantFromThisFile f' = [Move { moveFrom = (Coordinate r f)
-                                                                                                           , moveTo = (Coordinate r' f')
-                                                                                                           , moveType = EnPassant
-                                                                                                           , movePromoteTo = Nothing }]
+        enPassantMoves (Coordinate r' f')   | canEnPassantFromThisRank r' && canEnPassantFromThisFile f' = [EnPassant (Coordinate r f) (Coordinate r' f')]
                                             | otherwise                                   = []
 
         canEnPassantFromThisRank r' = (toEnum $ fromEnum r' + (fromEnum $ rankOffset ply)) == r
@@ -49,22 +46,19 @@ standardPawnMoves bitboard ply c@(Coordinate _ r) | r == 2 && (ply == White)  = 
 
 advance                             :: BitboardRepresentation -> Coordinate -> Rank -> [Move]
 advance b c@(Coordinate f r) offset | destinationRank > 8 || destinationRank < 1 = []
-                                    | whiteCanPromote && movingPieceIsWhite = map (Move (Coordinate f r) destinationCoordinate Promotion)
-                                      [ Just $ Piece Rook White
-                                      , Just $ Piece Knight White
-                                      , Just $ Piece Bishop White
-                                      , Just $ Piece Queen White
+                                    | whiteCanPromote && movingPieceIsWhite = map (Promote (Coordinate f r) destinationCoordinate)
+                                      [ Piece Rook White
+                                      , Piece Knight White
+                                      , Piece Bishop White
+                                      , Piece Queen White
                                       ]
-                                    | blackCanPromote && movingPieceIsBlack = map (Move (Coordinate f r) destinationCoordinate Promotion)
-                                      [ Just $ Piece Rook Black
-                                      , Just $ Piece Knight Black
-                                      , Just $ Piece Bishop Black
-                                      , Just $ Piece Queen Black
+                                    | blackCanPromote && movingPieceIsBlack = map (Promote (Coordinate f r) destinationCoordinate)
+                                      [ Piece Rook Black
+                                      , Piece Knight Black
+                                      , Piece Bishop Black
+                                      , Piece Queen Black
                                       ]
-                                    | destinationUnoccupied = [Move { moveFrom      = (Coordinate f r)
-                                                                    , moveTo        = destinationCoordinate
-                                                                    , moveType      = Standard
-                                                                    , movePromoteTo = Nothing}]
+                                    | destinationUnoccupied = [Move (Coordinate f r) destinationCoordinate]
                                     | otherwise             = []
 
   where destinationRank = r + offset
@@ -88,10 +82,7 @@ blackCaptures bitboard c@(Coordinate f _) | f == 'a' = blackSECapture bitboard c
 
 capture                                       :: BitboardRepresentation -> Coordinate -> File -> Rank -> Player -> [Move]
 capture bitboard (Coordinate f r) tf dr enemy | (r+dr) > 8 || (r+dr) < 1 = []
-                                              | (isJust $ target) && fmap pieceOwner target == Just enemy = [Move { moveFrom = (Coordinate f r)
-                                                                                                           , moveTo = targetCoord
-                                                                                                           , moveType = Capture
-                                                                                                           , movePromoteTo = Nothing }]
+                                              | (isJust $ target) && fmap pieceOwner target == Just enemy = [Capture (Coordinate f r) targetCoord]
                                               | otherwise = [] where
   target = bitboardPieceAt bitboard (Coordinate tf (r+dr))
   targetCoord = Coordinate tf (r+dr)

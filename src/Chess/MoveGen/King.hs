@@ -32,10 +32,7 @@ potentialKingMoves castlerights bitboard ply c@(Coordinate f r) | f == 'e' && r 
   blackCastles (CastleRights _ oo _ ooo) = castles oo ooo Black
 
   ooCastle              :: Rank -> Player -> [Move]
-  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank
-                                                                                            , moveTo = Coordinate 'g' homeRank
-                                                                                            , moveType = Castle
-                                                                                            , movePromoteTo = Nothing }]
+  ooCastle homeRank ply | ooRookIsPresent homeRank ply && ooSquaresAreFree homeRank = [Castle (Coordinate 'e' homeRank) (Coordinate 'g' homeRank)]
                         | otherwise = []
 
   ooRookIsPresent              :: Rank -> Player -> Bool
@@ -45,10 +42,7 @@ potentialKingMoves castlerights bitboard ply c@(Coordinate f r) | f == 'e' && r 
   ooSquaresAreFree homeRank = all (not . bitboardIsOccupied bitboard) [(Coordinate 'f' homeRank), (Coordinate 'g' homeRank)]
 
   oooCastle              :: Rank -> Player -> [Move]
-  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Move { moveFrom = Coordinate 'e' homeRank
-                                                                                               , moveTo = Coordinate 'c' homeRank
-                                                                                               , moveType = Castle
-                                                                                               , movePromoteTo = Nothing }]
+  oooCastle homeRank ply | oooRookIsPresent homeRank ply && oooSquaresAreFree homeRank = [Castle (Coordinate 'e' homeRank) (Coordinate 'c' homeRank)]
                          | otherwise = []
 
   oooRookIsPresent              :: Rank -> Player -> Bool

@@ -4,7 +4,15 @@ import           Chess.Base
 
 positionAfterMove
   :: RegularBoardRepresentation -> Move -> RegularBoardRepresentation
-positionAfterMove position move@Move { moveFrom = from } =
+positionAfterMove position move@(Move from _) =
+  movePiece position (pieceAt position from) move
+positionAfterMove position move@(Capture from _) =
+  movePiece position (pieceAt position from) move
+positionAfterMove position move@(Castle from _) =
+  movePiece position (pieceAt position from) move
+positionAfterMove position move@(EnPassant from _) =
+  movePiece position (pieceAt position from) move
+positionAfterMove position move@(Promote from _ _) =
   movePiece position (pieceAt position from) move
 
 movePiece
@@ -12,7 +20,15 @@ movePiece
   -> Maybe Piece
   -> Move
   -> RegularBoardRepresentation
-movePiece position piece Move { moveFrom = from, moveTo = to } =
+movePiece position piece (Move from to) =
+  addPiece (addPiece position Nothing from) piece to
+movePiece position piece (Capture from to) =
+  addPiece (addPiece position Nothing from) piece to
+movePiece position piece (Castle from to) =
+  addPiece (addPiece position Nothing from) piece to
+movePiece position piece (EnPassant from to) =
+  addPiece (addPiece position Nothing from) piece to
+movePiece position piece (Promote from to _) =
   addPiece (addPiece position Nothing from) piece to
 
 addPiece
