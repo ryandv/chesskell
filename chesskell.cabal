@@ -15,6 +15,7 @@ library
                      , Chess.Base
                      , Chess.Bitboard
                      , Chess.Board
+                     , Chess.FastFenParser
                      , Chess.FenParser
                      , Chess.Game
                      , Chess.MoveGen
@@ -27,8 +28,11 @@ library
                      , Chess.Predicates
 
   build-depends:       base >=4.8
+                     , bytestring >= 0.10.10 && <0.11
                      , mtl >=2.1
                      , parsec >=3.1 && <3.2
+                     , attoparsec >= 0.13.2 && <0.14
+                     , parsers >= 0.12.10 && < 0.13
 
   default-language:    Haskell2010
 

@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Chess.Bitboard
-  ( Bitboard(..)
+  ( addPieceTo
+  , Bitboard(..)
   , BitboardRepresentation(..)
   , bitboardIntersect
   , bitboardUnion
@@ -10,6 +11,7 @@ module Chess.Bitboard
   , bitboardPieceAt
   , bitboardIsOccupied
   , BoardIndex
+  , emptyBitboardRepresentation
   , indicesToCoordinate
   , indicesToSquareIndex
   , squareIndexToIndices
@@ -27,6 +29,7 @@ module Chess.Bitboard
   , totalOccupancyFor
   , occupiedCoordinates
   , regularToBitboard
+  , singleOccupant
   , translateNorth
   , rankMask
   , fileMask
@@ -84,6 +87,31 @@ data BitboardRepresentation = BitboardRepresentation
   , totalOccupancy :: Bitboard
   }
   deriving (Eq, Show)
+
+instance Show (Game BitboardRepresentation) where
+  show g = show (placement g) ++ "\n"
+           ++ show (activeColor g) ++ " to move\n"
+           ++ show ( castlingRights g) ++ "\n"
+           ++ "En passant on " ++ show (enPassantSquare g) ++ "\n"
+           ++ "Halfmove clock at " ++ show (halfMoveClock g) ++ "\n"
+           ++ "Fullmove number " ++ show (fullMoveNumber g) ++ "\n" where
+
+emptyBitboardRepresentation :: BitboardRepresentation
+emptyBitboardRepresentation = BitboardRepresentation
+  { whitePawns     = emptyBitboard
+  , blackPawns     = emptyBitboard
+  , whiteBishops   = emptyBitboard
+  , blackBishops   = emptyBitboard
+  , whiteKnights   = emptyBitboard
+  , blackKnights   = emptyBitboard
+  , whiteRooks     = emptyBitboard
+  , blackRooks     = emptyBitboard
+  , whiteQueens    = emptyBitboard
+  , blackQueens    = emptyBitboard
+  , whiteKings     = emptyBitboard
+  , blackKings     = emptyBitboard
+  , totalOccupancy = emptyBitboard
+  }
 
 indicesToCoordinate :: (Int, Int) -> Coordinate
 indicesToCoordinate (r, f) = Coordinate (toEnum $ 97 + f) (r + 1)
@@ -263,23 +291,8 @@ regularToBitboard b = withoutTotalOccupancy
                        `bitboardUnion` (Bitboard $ squareToBitboard square)
       }
     | otherwise = bitboards
-  empty =
-    (BitboardRepresentation { whitePawns     = emptyBitboard
-                            , blackPawns     = emptyBitboard
-                            , whiteBishops   = emptyBitboard
-                            , blackBishops   = emptyBitboard
-                            , whiteKnights   = emptyBitboard
-                            , blackKnights   = emptyBitboard
-                            , whiteRooks     = emptyBitboard
-                            , blackRooks     = emptyBitboard
-                            , whiteQueens    = emptyBitboard
-                            , blackQueens    = emptyBitboard
-                            , whiteKings     = emptyBitboard
-                            , blackKings     = emptyBitboard
-                            , totalOccupancy = emptyBitboard
-                            }
-    )
-  withoutTotalOccupancy = foldr addPieceToBitboard empty $ concat b
+
+  withoutTotalOccupancy = foldr addPieceToBitboard emptyBitboardRepresentation $ concat b
   squareToBitboard square =
     shiftL 1 (indicesToSquareIndex . coordinateToIndices $ location square)
 
