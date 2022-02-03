@@ -213,52 +213,52 @@ spec = describe "bitboard" $ do
   describe "conversion from regular board representations" $ do
 
     it "can produce an occupancy bitboard for white pawns" $ do
-      whitePawns (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 65280
+      whitePawns ((placement startingPos)) `shouldBe` Bitboard 65280
 
     it "can produce an occupancy bitboard for black pawns" $ do
-      blackPawns (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 71776119061217280
+      blackPawns ((placement startingPos)) `shouldBe` Bitboard 71776119061217280
 
     it "can produce an occupancy bitboard for white knights" $ do
-      whiteKnights (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 66
+      whiteKnights ((placement startingPos)) `shouldBe` Bitboard 66
 
     it "can produce an occupancy bitboard for black knights" $ do
-      blackKnights (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 4755801206503243776
+      blackKnights ((placement startingPos)) `shouldBe` Bitboard 4755801206503243776
 
     it "can produce an occupancy bitboard for white bishops" $ do
-      whiteBishops (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 36
+      whiteBishops ((placement startingPos)) `shouldBe` Bitboard 36
 
     it "can produce an occupancy bitboard for black bishops" $ do
-      blackBishops (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 2594073385365405696
+      blackBishops ((placement startingPos)) `shouldBe` Bitboard 2594073385365405696
 
     it "can produce an occupancy bitboard for white rooks" $ do
-      whiteRooks (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 129
+      whiteRooks ((placement startingPos)) `shouldBe` Bitboard 129
 
     it "can produce an occupancy bitboard for black rooks" $ do
-      blackRooks (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 9295429630892703744
+      blackRooks ((placement startingPos)) `shouldBe` Bitboard 9295429630892703744
 
     it "can produce an occupancy bitboard for white queens" $ do
-      whiteQueens (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 8
+      whiteQueens ((placement startingPos)) `shouldBe` Bitboard 8
 
     it "can produce an occupancy bitboard for black queens" $ do
-      blackQueens (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 576460752303423488
+      blackQueens ((placement startingPos)) `shouldBe` Bitboard 576460752303423488
 
     it "can produce an occupancy bitboard for white kings" $ do
-      whiteKings (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 16
+      whiteKings ((placement startingPos)) `shouldBe` Bitboard 16
 
     it "can produce an occupancy bitboard for black kings" $ do
-      blackKings (regularToBitboard (placement startingPos)) `shouldBe` Bitboard 1152921504606846976
+      blackKings ((placement startingPos)) `shouldBe` Bitboard 1152921504606846976
 
     it "can produce the total occupancy of the board, for white pieces" $ do
-      whiteOccupancyFor (placement startingPos) `shouldBe` Bitboard 65535
+      whiteOccupancyFor (placement regularStartingPos) `shouldBe` Bitboard 65535
 
     it "can produce the total occupancy of the board, for black pieces" $ do
-      blackOccupancyFor (placement startingPos) `shouldBe` Bitboard 18446462598732840960
+      blackOccupancyFor (placement regularStartingPos) `shouldBe` Bitboard 18446462598732840960
 
     it "can produce the total occupancy of the board, for both colours" $ do
-      totalOccupancyFor (placement startingPos) `shouldBe` Bitboard 18446462598732906495
+      totalOccupancyFor (placement regularStartingPos) `shouldBe` Bitboard 18446462598732906495
 
     it "can convert a RegularBoardRepresentation into a BitboardRepresentation" $ do
-      regularToBitboard (placement startingPos) `shouldBe` BitboardRepresentation
+      (placement startingPos) `shouldBe` BitboardRepresentation
         { whitePawns   = Bitboard 65280
         , blackPawns   = Bitboard 71776119061217280
         , whiteKnights = Bitboard 66
@@ -276,23 +276,23 @@ spec = describe "bitboard" $ do
 
     describe "operations on BitboardRepresentations" $ do
       it "can determine what piece occupies a square on the board" $ do
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'a' 1) `shouldBe` (Just $ Piece Rook White)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'b' 1) `shouldBe` (Just $ Piece Knight White)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'c' 1) `shouldBe` (Just $ Piece Bishop White)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'd' 1) `shouldBe` (Just $ Piece Queen White)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 1) `shouldBe` (Just $ Piece King White)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 2) `shouldBe` (Just $ Piece Pawn White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'a' 1) `shouldBe` (Just $ Piece Rook White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'b' 1) `shouldBe` (Just $ Piece Knight White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'c' 1) `shouldBe` (Just $ Piece Bishop White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'd' 1) `shouldBe` (Just $ Piece Queen White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'e' 1) `shouldBe` (Just $ Piece King White)
+        bitboardPieceAt (placement startingPos) (Coordinate 'e' 2) `shouldBe` (Just $ Piece Pawn White)
 
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'a' 8) `shouldBe` (Just $ Piece Rook Black)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'b' 8) `shouldBe` (Just $ Piece Knight Black)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'c' 8) `shouldBe` (Just $ Piece Bishop Black)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'd' 8) `shouldBe` (Just $ Piece Queen Black)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 8) `shouldBe` (Just $ Piece King Black)
-        bitboardPieceAt (regularToBitboard $ placement startingPos) (Coordinate 'e' 7) `shouldBe` (Just $ Piece Pawn Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'a' 8) `shouldBe` (Just $ Piece Rook Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'b' 8) `shouldBe` (Just $ Piece Knight Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'c' 8) `shouldBe` (Just $ Piece Bishop Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'd' 8) `shouldBe` (Just $ Piece Queen Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'e' 8) `shouldBe` (Just $ Piece King Black)
+        bitboardPieceAt (placement startingPos) (Coordinate 'e' 7) `shouldBe` (Just $ Piece Pawn Black)
 
       describe "moving pieces" $ do
         it "can move a single piece to a different square on a given Bitboard" $
-          bitboardMovePiece (regularToBitboard $ placement startingPos) (Move ((Coordinate 'd' 2)) ((Coordinate 'd' 4))) `shouldBe` BitboardRepresentation
+          bitboardMovePiece (placement startingPos) (Move ((Coordinate 'd' 2)) ((Coordinate 'd' 4))) `shouldBe` BitboardRepresentation
             { whitePawns   = Bitboard 134280960
             , blackPawns   = Bitboard 71776119061217280
             , whiteKnights = Bitboard 66
@@ -309,13 +309,13 @@ spec = describe "bitboard" $ do
             }
 
         it "removes captured pieces from the appropriate Bitboard" $ do
-          let fromPosition = (setupGame [ (Piece King White, Coordinate 'e' 1)
+          let fromPosition = regularGameToBitboardGame (setupGame [ (Piece King White, Coordinate 'e' 1)
                                         , (Piece Queen White, Coordinate 'd' 1)
                                         , (Piece Knight Black, Coordinate 'c' 2)
                                         , (Piece King Black, Coordinate 'e' 8)
                                         ])
 
-          bitboardMovePiece (regularToBitboard $ placement fromPosition) (Capture ((Coordinate 'd' 1)) ((Coordinate 'c' 2))) `shouldBe` BitboardRepresentation
+          bitboardMovePiece (placement fromPosition) (Capture ((Coordinate 'd' 1)) ((Coordinate 'c' 2))) `shouldBe` BitboardRepresentation
             { whitePawns   = emptyBitboard
             , blackPawns   = emptyBitboard
             , whiteKnights = emptyBitboard

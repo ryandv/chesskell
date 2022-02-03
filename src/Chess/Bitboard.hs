@@ -32,6 +32,7 @@ module Chess.Bitboard
   , singleOccupant
   , translateNorth
   , rankMask
+  , removePieceFrom
   , fileMask
   , diagonalMask
   , antiDiagonalMask
@@ -426,10 +427,64 @@ bitboardMovePiece bitboards (Move from to) =
   bitboardMovePieceStandard bitboards from to
 bitboardMovePiece bitboards (Castle from to) =
   bitboardMovePieceStandard bitboards from to
-bitboardMovePiece bitboards (Promote from to _) =
-  bitboardMovePieceStandard bitboards from to
+bitboardMovePiece bitboards (Promote from to p) =
+  bitboardMovePiecePromote bitboards from to p
 bitboardMovePiece bitboards (EnPassant from to) =
-  bitboardMovePieceStandard bitboards from to
+  bitboardMovePieceEnPassant bitboards from to
+
+bitboardMovePieceEnPassant :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
+bitboardMovePieceEnPassant bitboards from to@(Coordinate f r) =
+  updatedBitboards
+    { totalOccupancy = whitePawns updatedBitboards
+                       `bitboardUnion` whiteBishops updatedBitboards
+                       `bitboardUnion` whiteKnights updatedBitboards
+                       `bitboardUnion` whiteRooks updatedBitboards
+                       `bitboardUnion` whiteQueens updatedBitboards
+                       `bitboardUnion` whiteKings updatedBitboards
+                       `bitboardUnion` blackPawns updatedBitboards
+                       `bitboardUnion` blackBishops updatedBitboards
+                       `bitboardUnion` blackKnights updatedBitboards
+                       `bitboardUnion` blackRooks updatedBitboards
+                       `bitboardUnion` blackQueens updatedBitboards
+                       `bitboardUnion` blackKings updatedBitboards
+    }
+ where
+  updatedBitboards = addPieceTo
+    (removePieceFrom (removePieceFrom bitboards capturedPawn capturedCoordinate)
+                     capturingPawn
+                     from
+    )
+    capturingPawn
+    to
+
+  capturingPawn = bitboardPieceAt bitboards from
+  capturedPawn = bitboardPieceAt bitboards capturedCoordinate
+  capturedCoordinate = Coordinate f (r + rankOffset)
+  rankOffset = if (pieceOwner <$> capturingPawn) == Just White then (-1) else 1
+
+bitboardMovePiecePromote :: BitboardRepresentation -> Coordinate -> Coordinate -> Piece -> BitboardRepresentation
+bitboardMovePiecePromote bitboards from to p =
+  updatedBitboards
+    { totalOccupancy = whitePawns updatedBitboards
+                       `bitboardUnion` whiteBishops updatedBitboards
+                       `bitboardUnion` whiteKnights updatedBitboards
+                       `bitboardUnion` whiteRooks updatedBitboards
+                       `bitboardUnion` whiteQueens updatedBitboards
+                       `bitboardUnion` whiteKings updatedBitboards
+                       `bitboardUnion` blackPawns updatedBitboards
+                       `bitboardUnion` blackBishops updatedBitboards
+                       `bitboardUnion` blackKnights updatedBitboards
+                       `bitboardUnion` blackRooks updatedBitboards
+                       `bitboardUnion` blackQueens updatedBitboards
+                       `bitboardUnion` blackKings updatedBitboards
+    }
+ where
+  updatedBitboards = addPieceTo
+    (removePieceFrom bitboards promotedPiece from)
+    (Just p)
+    to
+
+  promotedPiece    = bitboardPieceAt bitboards from
 
 bitboardMovePieceCapture
   :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
@@ -460,9 +515,6 @@ bitboardMovePieceCapture bitboards from to =
 
   capturedPiece = bitboardPieceAt bitboards to
   movedPiece    = bitboardPieceAt bitboards from
-
-  squareIndex :: Coordinate -> Int
-  squareIndex = indicesToSquareIndex . coordinateToIndices
 
 bitboardMovePieceStandard
   :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation

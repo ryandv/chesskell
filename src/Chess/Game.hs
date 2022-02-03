@@ -22,29 +22,26 @@ data ChessGame = ChessGame
   , bitboards :: Game BitboardRepresentation
   }
 
-makeMoveFrom :: RegularGame -> Move -> Maybe RegularGame
+makeMoveFrom :: (Game BitboardRepresentation) -> Move -> Maybe (Game BitboardRepresentation)
 makeMoveFrom game move = case moveAccepted game move of
   True  -> Just $ doMakeMove game move
   False -> Nothing
 
-moveAccepted :: RegularGame -> Move -> Bool
+moveAccepted :: (Game BitboardRepresentation) -> Move -> Bool
 moveAccepted game move =
-  evalState (makeMove move) $ ChessGame game (regularGameToBitboardGame game)
+  evalState (makeMove move) game
 
-doMakeMove :: RegularGame -> Move -> RegularGame
-doMakeMove game move = gameState $ execState (makeMove move) $ ChessGame
-  game
-  (regularGameToBitboardGame game)
+doMakeMove :: (Game BitboardRepresentation) -> Move -> (Game BitboardRepresentation)
+doMakeMove game move = execState (makeMove move) game
 
-makeMove :: Move -> State ChessGame Bool
+makeMove :: Move -> State (Game BitboardRepresentation) Bool
 makeMove = validatedMakeMove where
 
-  validatedMakeMove :: Move -> State ChessGame Bool
+  validatedMakeMove :: Move -> State (Game BitboardRepresentation) Bool
   validatedMakeMove move = do
     game <- get
-    let toMove   = activeColor . gameState $ game
-    let position = placement . gameState $ game
-    if (pieceOwner <$> pieceAt position (moveFrom move)) == (Just toMove)
+    let toMove   = activeColor game
+    if (pieceOwner <$> bitboardPieceAt (placement game) (moveFrom move)) == (Just toMove)
       then makeMove' move
       else return False
 
@@ -53,30 +50,21 @@ makeMove = validatedMakeMove where
   makeMove' move@(EnPassant _ _) = makeEnPassant move
   makeMove' move = makeStandardMove move
 
-makeStandardMove :: Move -> State ChessGame Bool
+makeStandardMove :: Move -> State (Game BitboardRepresentation) Bool
 makeStandardMove move = do
   game <- get
-  let gamestate         = gameState game
-  let bitboardGameState = bitboards game
-  let position          = placement bitboardGameState
 
-  if moveIsLegal move bitboardGameState
+  if moveIsLegal move game
     then do
-      let originalPiece = bitboardPieceAt position (moveFrom move)
+      let originalPiece = bitboardPieceAt (placement game) (moveFrom move)
 
-      put $ game
-        { gameState = gamestate { activeColor = opponent (activeColor gamestate)
-                                }
-        , bitboards = bitboardGameState
-                        { activeColor = opponent (activeColor gamestate)
-                        }
-        }
+      put $ game { activeColor = opponent (activeColor game) }
       doMovePiece originalPiece move
 
       return True
     else return False
 
-makeCastle :: Move -> State ChessGame Bool
+makeCastle :: Move -> State (Game BitboardRepresentation) Bool
 makeCastle move
   | moveFrom move == Coordinate 'e' 1 && moveTo move == Coordinate 'g' 1
   = makeWhiteKingsideCastle
@@ -87,25 +75,25 @@ makeCastle move
   | moveFrom move == Coordinate 'e' 8 && moveTo move == Coordinate 'c' 8
   = makeBlackQueensideCastle where
 
-  makeWhiteKingsideCastle :: State ChessGame Bool
+  makeWhiteKingsideCastle :: State (Game BitboardRepresentation) Bool
   makeWhiteKingsideCastle = doCastle
     Kingside
     disableWhiteCastles
     (Castle (Coordinate 'h' 1) (Coordinate 'f' 1))
 
-  makeWhiteQueensideCastle :: State ChessGame Bool
+  makeWhiteQueensideCastle :: State (Game BitboardRepresentation) Bool
   makeWhiteQueensideCastle = doCastle
     Queenside
     disableWhiteCastles
     (Castle (Coordinate 'a' 1) (Coordinate 'd' 1))
 
-  makeBlackKingsideCastle :: State ChessGame Bool
+  makeBlackKingsideCastle :: State (Game BitboardRepresentation) Bool
   makeBlackKingsideCastle = doCastle
     Kingside
     disableBlackCastles
     (Castle (Coordinate 'h' 8) (Coordinate 'f' 8))
 
-  makeBlackQueensideCastle :: State ChessGame Bool
+  makeBlackQueensideCastle :: State (Game BitboardRepresentation) Bool
   makeBlackQueensideCastle = doCastle
     Queenside
     disableBlackCastles
@@ -123,36 +111,25 @@ makeCastle move
     :: CastleSide
     -> (CastleRights -> CastleRights)
     -> Move
-    -> State ChessGame Bool
+    -> State (Game BitboardRepresentation) Bool
   doCastle castleSide fupdaterights rookMove = do
     game <- get
-    let gamestate         = gameState game
-    let bitboardGameState = bitboards game
-    let position          = placement bitboardGameState
+    let position          = placement game
     let from = (moveFrom move)
 
     let originalPiece     = bitboardPieceAt position from
     let rook              = bitboardPieceAt position (moveFrom rookMove)
 
-    if (not $ isChecked bitboardGameState
+    if (not $ isChecked game
          { placement = bitboardMovePiece (bitboardMovePiece position move)
                                          rookMove
          }
        )
-         && isCastleSafe castleSide bitboardGameState (activeColor gamestate)
+         && isCastleSafe castleSide game (activeColor game)
       then do
-        put $ game
-          { gameState = gamestate
-                          { activeColor    = opponent (activeColor gamestate)
-                          , castlingRights = fupdaterights
-                                               (castlingRights gamestate)
-                          }
-          , bitboards = bitboardGameState
-                          { activeColor    = opponent (activeColor gamestate)
-                          , castlingRights = fupdaterights
-                                               (castlingRights gamestate)
-                          }
-          }
+        put $ game { activeColor    = opponent (activeColor game)
+                   , castlingRights = fupdaterights (castlingRights game)
+                   }
 
         doMovePiece originalPiece move
         doMovePiece rook          rookMove
@@ -160,48 +137,33 @@ makeCastle move
         return True
       else return False
 
-makePromotion :: Move -> State ChessGame Bool
+makePromotion :: Move -> State (Game BitboardRepresentation) Bool
 makePromotion move@(Promote _ _ p) = do
   game <- get
-  let position          = gameState game
-  let bitboardGameState = bitboards game
 
-  if moveIsLegal move bitboardGameState
+  if moveIsLegal move game
     then do
-      put $ game
-        { gameState = position { activeColor = opponent (activeColor position) }
-        , bitboards = bitboardGameState
-                        { activeColor = opponent (activeColor position)
-                        }
-        }
+      put $ game { activeColor = opponent (activeColor game) }
 
       doMovePiece (Just p) move
       return True
     else return False
 
-makeEnPassant :: Move -> State ChessGame Bool
+makeEnPassant :: Move -> State (Game BitboardRepresentation) Bool
 makeEnPassant m = do
   game <- get
-  let position          = gameState game
-  let bitboardGameState = bitboards game
   let from = moveFrom m
   let (Coordinate f r)  = moveTo m
 
-  if moveIsLegal m bitboardGameState
+  if moveIsLegal m game
     then do
-      let posn          = placement bitboardGameState
+      let posn          = placement game
       let originalPiece = bitboardPieceAt posn from
       let rankOffset =
             if fmap pieceOwner originalPiece == Just White then (-1) else 1
-      put $ game
-        { gameState = position { activeColor = opponent (activeColor position)
-                               , enPassantSquare = Nothing
-                               }
-        , bitboards = bitboardGameState
-                        { activeColor     = opponent (activeColor position)
-                        , enPassantSquare = Nothing
-                        }
-        }
+      put $ game { activeColor     = opponent (activeColor game)
+                 , enPassantSquare = Nothing
+                 }
 
       doMovePiece originalPiece m
       updateSquare (Coordinate f (r + rankOffset)) Nothing
@@ -209,22 +171,12 @@ makeEnPassant m = do
       return True
     else return False
 
-doMovePiece :: Maybe Piece -> Move -> State ChessGame ()
+doMovePiece :: Maybe Piece -> Move -> State (Game BitboardRepresentation) ()
 doMovePiece p m = do
   game <- get
-  let position = placement $ gameState game
-  put $ game
-    { gameState = (gameState game) { placement = movePiece position p m }
-    , bitboards = regularGameToBitboardGame
-                    $ (gameState game) { placement = movePiece position p m }
-    }
+  put $ game { placement = bitboardMovePiece (placement game) m }
 
-updateSquare :: Coordinate -> Maybe Piece -> State ChessGame ()
+updateSquare :: Coordinate -> Maybe Piece -> State (Game BitboardRepresentation) ()
 updateSquare c p = do
   game <- get
-  let position = placement $ gameState game
-  put $ game
-    { gameState = (gameState game) { placement = addPiece position p c }
-    , bitboards = regularGameToBitboardGame
-                    $ (gameState game) { placement = addPiece position p c }
-    }
+  put $ game { placement = addPieceTo (placement game) p c }

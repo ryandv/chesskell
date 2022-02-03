@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Chess.FastFenParser
   ( fastParseFEN
-  , toFEN
+  , fastToFEN
   , FenParserState(..)
   ) where
 
@@ -15,7 +15,8 @@ import           Control.Applicative
 import           Data.Char
 import           Data.List
 import qualified Data.ByteString.Char8 as BS
-import qualified Data.ByteString.Internal as BSI
+import qualified Data.ByteString.Lazy as BSL
+import qualified Data.Attoparsec.ByteString.Lazy as P
 import           Data.Attoparsec.ByteString.Char8
 import qualified Data.Attoparsec.Internal.Types as I
 
@@ -26,10 +27,10 @@ data FenParserState = FenParserState
   }
   deriving Show
 
-fastParseFEN :: BSI.ByteString -> Either String (Game BitboardRepresentation)
-fastParseFEN = parseOnly (evalStateT fenParser (FenParserState $ Coordinate 'a' 8))
+fastParseFEN :: BSL.ByteString -> Either String (Game BitboardRepresentation)
+fastParseFEN = P.eitherResult . P.parse (evalStateT fenParser (FenParserState $ Coordinate 'a' 8))
 
-fenParser :: StateT FenParserState Parser (Game BitboardRepresentation)
+fenParser :: StateT FenParserState P.Parser (Game BitboardRepresentation)
 fenParser = do
   position     <- positionParser
   toMove       <- toMoveParser
@@ -39,7 +40,7 @@ fenParser = do
   fullMoves    <- fullMoveNumberParser
   return $ Game position toMove castleRights enPassant halfMoves fullMoves
 
-positionParser :: StateT FenParserState Parser BitboardRepresentation
+positionParser :: StateT FenParserState P.Parser BitboardRepresentation
 positionParser = do
   firstSevenRanks <- count 7 rankParser
   eighthRank      <- lastRankParser
@@ -59,10 +60,10 @@ positionParser = do
       `bitboardUnion` blackKings finalBitboard
     }
 
-rankParser :: StateT FenParserState Parser [(Maybe Piece, Coordinate)]
+rankParser :: StateT FenParserState P.Parser [(Maybe Piece, Coordinate)]
 rankParser = fmap concat . manyTill squareParser . lift $ char '/'
 
-lastRankParser :: StateT FenParserState Parser [(Maybe Piece, Coordinate)]
+lastRankParser :: StateT FenParserState P.Parser [(Maybe Piece, Coordinate)]
 lastRankParser = fmap concat . manyTill squareParser . lift $ char ' '
 
 uniteRepresentation :: (Maybe Piece, Coordinate) -> BitboardRepresentation -> BitboardRepresentation
@@ -74,7 +75,7 @@ nextRank (FenParserState (Coordinate f r)) =
 
 squareParser :: StateT FenParserState Parser [(Maybe Piece, Coordinate)]
 squareParser = do
-  piece             <- lift $ satisfy (`BS.elem` ("rnbqkpRNBQKP12345678" :: BSI.ByteString))
+  piece             <- lift $ satisfy (`BS.elem` ("rnbqkpRNBQKP12345678" :: BS.ByteString))
   currentCoordinate <- fmap currentLocation get
   case piece of
     'r' -> modify nextFile >> ((return . return) $ ((Just $ Piece Rook Black), currentCoordinate))
@@ -101,49 +102,48 @@ nextFile (FenParserState (Coordinate f r))
   | f == 'h'  = FenParserState $ Coordinate 'a' (r - 1)
   | otherwise = FenParserState $ Coordinate (succ f) r
 
-toMoveParser :: StateT FenParserState Parser Player
+toMoveParser :: StateT FenParserState P.Parser Player
 toMoveParser = do
   player <- lift $ satisfy (`BS.elem` "wb") >>= ((char ' ' >>) . return)
   case player of
     'w' -> return White
     _   -> return Black
 
-castlingRightsParser :: StateT FenParserState Parser CastleRights
+castlingRightsParser :: StateT FenParserState P.Parser CastleRights
 castlingRightsParser = do
   castleRights <-
     lift ((char '-' >> return (CastleRights False False False False)) <|> permute permutationParser)
   _ <- lift $ char ' '
   return castleRights where
 
-  permutationParser :: Permutation (I.Parser BSI.ByteString) CastleRights
   permutationParser = CastleRights
     <$?> (False, char 'K' >> return True)
     <|?> (False, char 'k' >> return True)
     <|?> (False, char 'Q' >> return True)
     <|?> (False, char 'q' >> return True)
 
-enPassantSquareParser :: StateT FenParserState Parser (Maybe Coordinate)
+enPassantSquareParser :: StateT FenParserState P.Parser (Maybe Coordinate)
 enPassantSquareParser =
   fmap Just coordinateParser <|> (lift (char '-') >> lift (char ' ') >> return Nothing) where
 
-  coordinateParser :: StateT FenParserState Parser Coordinate
+  coordinateParser :: StateT FenParserState P.Parser Coordinate
   coordinateParser = do
     rank <- lift $ satisfy (`BS.elem` "abcdefgh")
     file <- lift $ satisfy (`BS.elem` "12345678")
     _    <- lift $ char ' '
     return $ Coordinate rank (digitToInt file)
 
-halfMoveClockParser :: StateT FenParserState Parser Int
+halfMoveClockParser :: StateT FenParserState P.Parser Int
 halfMoveClockParser = do
   halfMoves <- lift decimal
   _         <- lift $ char ' '
   return halfMoves
 
-fullMoveNumberParser :: StateT FenParserState Parser Int
+fullMoveNumberParser :: StateT FenParserState P.Parser Int
 fullMoveNumberParser = lift decimal
 
-toFEN :: RegularGame -> String
-toFEN Game { placement = position, activeColor = ac, castlingRights = cr, enPassantSquare = eps, halfMoveClock = hmc, fullMoveNumber = fmn }
+fastToFEN :: (Game BitboardRepresentation) -> String
+fastToFEN Game { placement = position, activeColor = ac, castlingRights = cr, enPassantSquare = eps, halfMoveClock = hmc, fullMoveNumber = fmn }
   = positionString
     ++ toMoveString
     ++ castlingRightsString cr
@@ -151,7 +151,8 @@ toFEN Game { placement = position, activeColor = ac, castlingRights = cr, enPass
     ++ halfMovesString
     ++ fullMovesString where
   positionString =
-    (++ " ") $ intercalate "/" $ map stringifyRank $ reverse position
+    (++ " ") $ intercalate "/" $ map (stringifyRank position) $ (map . map) (indicesToCoordinate . squareIndexToIndices) $ reverse
+    [[0..7], [8..15], [16..23], [24..31], [32..39], [40..47], [48..55], [56..63]]
 
   toMoveString | ac == White = "w "
                | otherwise   = "b "
@@ -178,23 +179,23 @@ toFEN Game { placement = position, activeColor = ac, castlingRights = cr, enPass
   halfMovesString = show hmc ++ " "
   fullMovesString = show fmn
 
-  stringifyRank :: [Square] -> String
-  stringifyRank =
-    concatMap squishEmptySquares . group . foldr stringifyPiece "" . reverse
+  stringifyRank :: BitboardRepresentation -> [Coordinate] -> String
+  stringifyRank bb =
+    concatMap squishEmptySquares . group . foldr (stringifyPiece . bitboardPieceAt bb) "" . reverse
 
-  stringifyPiece :: Square -> String -> String
-  stringifyPiece (Square (Just (Piece Rook Black)) _) acc = acc ++ "r"
-  stringifyPiece (Square (Just (Piece Knight Black)) _) acc = acc ++ "n"
-  stringifyPiece (Square (Just (Piece Bishop Black)) _) acc = acc ++ "b"
-  stringifyPiece (Square (Just (Piece Queen Black)) _) acc = acc ++ "q"
-  stringifyPiece (Square (Just (Piece King Black)) _) acc = acc ++ "k"
-  stringifyPiece (Square (Just (Piece Pawn Black)) _) acc = acc ++ "p"
-  stringifyPiece (Square (Just (Piece Rook White)) _) acc = acc ++ "R"
-  stringifyPiece (Square (Just (Piece Knight White)) _) acc = acc ++ "N"
-  stringifyPiece (Square (Just (Piece Bishop White)) _) acc = acc ++ "B"
-  stringifyPiece (Square (Just (Piece Queen White)) _) acc = acc ++ "Q"
-  stringifyPiece (Square (Just (Piece King White)) _) acc = acc ++ "K"
-  stringifyPiece (Square (Just (Piece Pawn White)) _) acc = acc ++ "P"
+  stringifyPiece :: Maybe Piece -> String -> String
+  stringifyPiece (Just (Piece Rook Black)) acc = acc ++ "r"
+  stringifyPiece (Just (Piece Knight Black)) acc = acc ++ "n"
+  stringifyPiece (Just (Piece Bishop Black)) acc = acc ++ "b"
+  stringifyPiece (Just (Piece Queen Black)) acc = acc ++ "q"
+  stringifyPiece (Just (Piece King Black)) acc = acc ++ "k"
+  stringifyPiece (Just (Piece Pawn Black)) acc = acc ++ "p"
+  stringifyPiece (Just (Piece Rook White)) acc = acc ++ "R"
+  stringifyPiece (Just (Piece Knight White)) acc = acc ++ "N"
+  stringifyPiece (Just (Piece Bishop White)) acc = acc ++ "B"
+  stringifyPiece (Just (Piece Queen White)) acc = acc ++ "Q"
+  stringifyPiece (Just (Piece King White)) acc = acc ++ "K"
+  stringifyPiece (Just (Piece Pawn White)) acc = acc ++ "P"
   stringifyPiece _ acc = acc ++ "-"
 
   squishEmptySquares :: String -> String

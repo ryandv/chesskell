@@ -182,7 +182,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle kingside when the rook is not on its home square" $
-             potentialKingMoves (CastleRights False True False False) (regularToBitboard . placement $ blackKingNoRookCastleTest) Black (Coordinate 'e' 8) `shouldMatchList`
+             potentialKingMoves (CastleRights False True False False) (placement . regularGameToBitboardGame $ blackKingNoRookCastleTest) Black (Coordinate 'e' 8) `shouldMatchList`
                [ Move (Coordinate 'e' 8) (Coordinate 'd' 8)
                , Move (Coordinate 'e' 8) (Coordinate 'f' 8)
                , Move (Coordinate 'e' 8) (Coordinate 'f' 7)
@@ -191,7 +191,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the black king to castle queenside when the rook is not on its home square" $
-             potentialKingMoves (CastleRights False False False True) (regularToBitboard . placement $ blackKingNoRookCastleTest) Black (Coordinate 'e' 8) `shouldMatchList`
+             potentialKingMoves (CastleRights False False False True) (placement . regularGameToBitboardGame $ blackKingNoRookCastleTest) Black (Coordinate 'e' 8) `shouldMatchList`
                [ Move (Coordinate 'e' 8) (Coordinate 'd' 8)
                , Move (Coordinate 'e' 8) (Coordinate 'f' 8)
                , Move (Coordinate 'e' 8) (Coordinate 'f' 7)
@@ -200,7 +200,7 @@ spec = describe "potentialKingMoves" $
                ]
 
            it "does not allow the king to castle if the intermediate squares are occupied" $
-             potentialKingMoves (CastleRights True False False False) (regularToBitboard . placement $ startingPos) White (Coordinate 'e' 1) `shouldMatchList`
+             potentialKingMoves (CastleRights True False False False) (placement startingPos) White (Coordinate 'e' 1) `shouldMatchList`
                []
 
            it "does not generate castling moves for the opposing colour" $ do

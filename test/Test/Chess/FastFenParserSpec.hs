@@ -38,7 +38,10 @@ spec :: Spec
 spec =
   describe "FEN string parsing" $ do
     it "parses the starting position correctly" $
-      (successful $ fastParseFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") `shouldBe` (regularGameToBitboardGame startingPos)
+      (successful $ fastParseFEN "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") `shouldBe` startingPos
 
     it "parses this position from the Opera Game" $
       (successful $ fastParseFEN "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10") `shouldBe` operaGame
+
+    it "is the inverse of toFEN" $
+      fastToFEN operaGame `shouldBe` "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10"

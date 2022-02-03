@@ -1,6 +1,7 @@
 module Test.Chess.FenParserSpec where
 
 import Chess.Base
+import Chess.Bitboard
 import Chess.FenParser
 
 import Test.Hspec
@@ -224,10 +225,10 @@ spec :: Spec
 spec =
   describe "FEN string parsing" $ do
     it "parses the starting position correctly" $
-      (successful $ parseFen "" "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") `shouldBe` startingPos
+      regularGameToBitboardGame (successful $ parseFen "" "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1") `shouldBe` startingPos
 
     it "parses this position from the Opera Game" $
-      (successful $ parseFen "" "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10") `shouldBe` operaGame
+      regularGameToBitboardGame (successful $ parseFen "" "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10") `shouldBe` regularGameToBitboardGame operaGame
 
     it "is the inverse of toFEN" $
       toFEN operaGame `shouldBe` "rn2kb1r/p3qppp/2p2n2/1N2p1B1/2B1P3/1Q6/PPP2PPP/R3K2R b KQkq - 0 10"

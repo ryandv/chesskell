@@ -1,6 +1,7 @@
 module Test.Placements where
 
 import           Chess.Base
+import           Chess.Bitboard
 import           Chess.Board
 import           Chess.Game
 
@@ -20,24 +21,24 @@ setupGame piecePositions = flip execState emptyTest $ setupGame' piecePositions 
     put $ uncurry (placePiece board) pc
     setupGame' pcs
 
-diagonalTest :: RegularGame
-diagonalTest = setupGame
+diagonalTest :: (Game BitboardRepresentation)
+diagonalTest = regularGameToBitboardGame $ setupGame
   [ (Piece Queen White, Coordinate 'f' 3)
   , (Piece Queen White, Coordinate 'f' 7)
   , (Piece Queen White, Coordinate 'd' 5)
   ]
 
 
-discoveredCheckTest :: RegularGame
-discoveredCheckTest = setupGame
+discoveredCheckTest :: (Game BitboardRepresentation)
+discoveredCheckTest = regularGameToBitboardGame $ setupGame
   [ (Piece King Black , Coordinate 'e' 8)
   , (Piece Pawn Black , Coordinate 'e' 5)
   , (Piece King White , Coordinate 'e' 1)
   , (Piece Queen White, Coordinate 'e' 2)
   ]
 
-doubleCheckTest :: RegularGame
-doubleCheckTest = (setupGame
+doubleCheckTest :: (Game BitboardRepresentation)
+doubleCheckTest = regularGameToBitboardGame $ (setupGame
                     [ (Piece King Black  , Coordinate 'e' 8)
                     , (Piece Bishop Black, Coordinate 'h' 7)
                     , (Piece Knight White, Coordinate 'g' 7)
@@ -48,9 +49,9 @@ doubleCheckTest = (setupGame
   { activeColor = Black
   }
 
-castleIntoCheckTest :: RegularGame
+castleIntoCheckTest :: (Game BitboardRepresentation)
 castleIntoCheckTest =
-  (setupGame
+  regularGameToBitboardGame $ (setupGame
     [ (Piece King Black, Coordinate 'e' 8)
     , (Piece Rook Black, Coordinate 'g' 8)
     , (Piece Rook White, Coordinate 'h' 1)
@@ -58,9 +59,9 @@ castleIntoCheckTest =
     ]
   )
 
-whiteKingsideCastleThroughCheckTest :: RegularGame
+whiteKingsideCastleThroughCheckTest :: (Game BitboardRepresentation)
 whiteKingsideCastleThroughCheckTest =
-  (setupGame
+  regularGameToBitboardGame $ (setupGame
     [ (Piece King Black, Coordinate 'e' 8)
     , (Piece Rook Black, Coordinate 'f' 8)
     , (Piece Rook White, Coordinate 'h' 1)
@@ -68,9 +69,9 @@ whiteKingsideCastleThroughCheckTest =
     ]
   )
 
-whiteQueensideCastleThroughCheckTest :: RegularGame
+whiteQueensideCastleThroughCheckTest :: (Game BitboardRepresentation)
 whiteQueensideCastleThroughCheckTest =
-  (setupGame
+  regularGameToBitboardGame $ (setupGame
     [ (Piece King Black, Coordinate 'e' 8)
     , (Piece Rook Black, Coordinate 'd' 8)
     , (Piece Rook White, Coordinate 'a' 1)
@@ -78,9 +79,9 @@ whiteQueensideCastleThroughCheckTest =
     ]
   )
 
-blackKingsideCastleThroughCheckTest :: RegularGame
+blackKingsideCastleThroughCheckTest :: (Game BitboardRepresentation)
 blackKingsideCastleThroughCheckTest =
-  (setupGame
+  regularGameToBitboardGame $ (setupGame
       [ (Piece King Black, Coordinate 'e' 8)
       , (Piece Rook Black, Coordinate 'h' 8)
       , (Piece Rook White, Coordinate 'f' 1)
@@ -90,9 +91,9 @@ blackKingsideCastleThroughCheckTest =
     { activeColor = Black
     }
 
-blackQueensideCastleThroughCheckTest :: RegularGame
+blackQueensideCastleThroughCheckTest :: (Game BitboardRepresentation)
 blackQueensideCastleThroughCheckTest =
-  (setupGame
+  regularGameToBitboardGame $ (setupGame
       [ (Piece King Black, Coordinate 'e' 8)
       , (Piece Rook Black, Coordinate 'a' 8)
       , (Piece Rook White, Coordinate 'd' 1)
@@ -102,15 +103,15 @@ blackQueensideCastleThroughCheckTest =
     { activeColor = Black
     }
 
-whitePromotionTest :: RegularGame
-whitePromotionTest = setupGame
+whitePromotionTest :: (Game BitboardRepresentation)
+whitePromotionTest = regularGameToBitboardGame $ setupGame
   [ (Piece Pawn White, Coordinate 'e' 7)
   , (Piece King White, Coordinate 'a' 1)
   , (Piece King Black, Coordinate 'h' 1)
   ]
 
-blackPromotionTest :: RegularGame
-blackPromotionTest = (setupGame
+blackPromotionTest :: (Game BitboardRepresentation)
+blackPromotionTest = regularGameToBitboardGame $ (setupGame
                        [ (Piece Pawn Black, Coordinate 'e' 2)
                        , (Piece King White, Coordinate 'a' 8)
                        , (Piece King Black, Coordinate 'h' 8)
@@ -119,16 +120,16 @@ blackPromotionTest = (setupGame
   { activeColor = Black
   }
 
-promotionPinTest :: RegularGame
-promotionPinTest = setupGame
+promotionPinTest :: (Game BitboardRepresentation)
+promotionPinTest = regularGameToBitboardGame $ setupGame
   [ (Piece King White, Coordinate 'h' 7)
   , (Piece Pawn White, Coordinate 'e' 7)
   , (Piece King Black, Coordinate 'a' 1)
   , (Piece Rook Black, Coordinate 'a' 7)
   ]
 
-enPassantPinTest :: RegularGame
-enPassantPinTest = (setupGame
+enPassantPinTest :: (Game BitboardRepresentation)
+enPassantPinTest = regularGameToBitboardGame $ (setupGame
                      [ (Piece King White, Coordinate 'e' 1)
                      , (Piece Pawn White, Coordinate 'e' 5)
                      , (Piece Pawn Black, Coordinate 'd' 5)
@@ -222,8 +223,11 @@ emptyTest = Game
   , fullMoveNumber  = 1
   }
 
-startingPos :: RegularGame
-startingPos = Game
+startingPos :: (Game BitboardRepresentation)
+startingPos = regularGameToBitboardGame $ regularStartingPos
+
+regularStartingPos :: RegularGame
+regularStartingPos = Game
   { placement       =
     [ [ Square { pieceOn  = Just (Piece Rook White)
                , location = Coordinate 'a' 1
@@ -369,8 +373,8 @@ startingPos = Game
   , fullMoveNumber  = 1
   }
 
-kingOpening :: RegularGame
-kingOpening = Game
+kingOpening :: (Game BitboardRepresentation)
+kingOpening = regularGameToBitboardGame $ Game
   { placement       =
     [ [ Square { pieceOn  = Just (Piece Rook White)
                , location = Coordinate 'a' 1

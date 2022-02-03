@@ -23,7 +23,7 @@ spec = describe "potentialPawnMoves" $ do
              property $ forAll coords $ \c -> all (isOnBoard . moveTo) $ potentialPawnMoves Nothing (regularToBitboard $ position c) White c
 
            it "allows double-jumping from the second rank for White" $ do
-             potentialPawnMoves Nothing (regularToBitboard $ placement startingPos) White (Coordinate 'e' 2) `shouldMatchList`
+             potentialPawnMoves Nothing (placement startingPos) White (Coordinate 'e' 2) `shouldMatchList`
                [ Move (Coordinate 'e' 2) (Coordinate 'e' 4)
                , Move (Coordinate 'e' 2) (Coordinate 'e' 3)
                ]
@@ -38,7 +38,7 @@ spec = describe "potentialPawnMoves" $ do
                  [ Move (Coordinate 'e' 6) (Coordinate 'e' 7) ]
 
            it "allows double-jumping from the second rank for Black" $
-             potentialPawnMoves Nothing  (regularToBitboard $ placement startingPos) Black (Coordinate 'e' 7) `shouldMatchList`
+             potentialPawnMoves Nothing  (placement startingPos) Black (Coordinate 'e' 7) `shouldMatchList`
                [ Move (Coordinate 'e' 7) (Coordinate 'e' 5)
                , Move (Coordinate 'e' 7) (Coordinate 'e' 6)
                ]

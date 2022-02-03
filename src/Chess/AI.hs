@@ -11,6 +11,7 @@ import           Chess.Predicates
 
 import           Control.Applicative
 
+import           Data.Bits
 import           Data.List
 import           Data.Maybe
 import           Data.Ord
@@ -26,7 +27,7 @@ instance Functor GameTree where
   fmap f (GameTree v children moves) =
     GameTree (f v) ((fmap . fmap) f children) moves
 
-instance Ord (Game RegularBoardRepresentation) where
+instance Ord (Game BitboardRepresentation) where
   compare = comparing evalGame
 
 whitePawnPieceSquareTable :: [[Int]]
@@ -57,11 +58,11 @@ pieceSquareTableLookup :: [[Int]] -> Coordinate -> Int
 pieceSquareTableLookup t (Coordinate f r) =
   (t !! (r - 1)) !! (fromEnum f - fromEnum 'a')
 
-evalGame :: RegularGame -> Int
+evalGame :: (Game BitboardRepresentation) -> Int
 evalGame game
-  | isCheckmate (regularGameToBitboardGame game) (activeColor game)
+  | isCheckmate game (activeColor game)
   = checkmateValue
-  | isStalemate (regularGameToBitboardGame game) (activeColor game)
+  | isStalemate game (activeColor game)
   = 0
   | otherwise
   = evalPosition $ placement game
@@ -70,22 +71,50 @@ evalGame game
   checkmateValue | activeColor game == White = minBound
                  | otherwise                 = maxBound
 
-evalPosition :: RegularBoardRepresentation -> Int
-evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
+-- move into bitboard module
+evalPosition :: BitboardRepresentation -> Int
+evalPosition BitboardRepresentation
+  { whitePawns = wp@(Bitboard wpbits)
+  , blackPawns = bp@(Bitboard bpbits)
+  , whiteBishops = wb@(Bitboard wbbits)
+  , blackBishops = bb@(Bitboard bbbits)
+  , whiteKnights = wn@(Bitboard wnbits)
+  , blackKnights = bn@(Bitboard bnbits)
+  , whiteRooks = wr@(Bitboard wrbits)
+  , blackRooks = br@(Bitboard brbits)
+  , whiteQueens = wq@(Bitboard wqbits)
+  , blackQueens = bq@(Bitboard bqbits)
+  } = whitePawnsValue
+      + blackPawnsValue
+      + whiteBishopsValue
+      + blackBishopsValue
+      + whiteKnightsValue
+      + blackKnightsValue
+      + whiteRooksValue
+      + blackRooskValue
+      + whiteQueensValue
+      + blackQueensValue where
 
-  pieceValue :: Square -> Int
-  pieceValue (Square (Just (Piece Pawn owner)) loc)
-    | owner == White = 100 + whitePawnLocValue loc
-    | otherwise      = -100 + blackPawnLocValue loc
-  pieceValue (Square (Just (Piece Knight owner)) _) | owner == White = 300
-                                                    | otherwise      = -300
-  pieceValue (Square (Just (Piece Bishop owner)) _) | owner == White = 300
-                                                    | otherwise      = -300
-  pieceValue (Square (Just (Piece Rook owner)) _) | owner == White = 500
-                                                  | otherwise      = -500
-  pieceValue (Square (Just (Piece Queen owner)) _) | owner == White = 900
-                                                   | otherwise      = -900
-  pieceValue _ = 0
+  whitePawnsValue :: Int
+  whitePawnsValue = foldr ((+) . whitePawnLocValue) ((popCount wpbits) * 100) $ bitboardToCoordinates wp
+  blackPawnsValue :: Int
+  blackPawnsValue = foldr ((+) . blackPawnLocValue) ((popCount bpbits) * (-100)) $ bitboardToCoordinates bp
+  whiteBishopsValue :: Int
+  whiteBishopsValue = popCount wbbits * 300
+  blackBishopsValue :: Int
+  blackBishopsValue = popCount bbbits * (-300)
+  whiteKnightsValue :: Int
+  whiteKnightsValue = popCount wnbits * 300
+  blackKnightsValue :: Int
+  blackKnightsValue = popCount bnbits * (-300)
+  whiteRooksValue :: Int
+  whiteRooksValue = popCount wrbits * 500
+  blackRooskValue :: Int
+  blackRooskValue = popCount brbits * (-500)
+  whiteQueensValue :: Int
+  whiteQueensValue = popCount wqbits * 900
+  blackQueensValue :: Int
+  blackQueensValue = popCount bqbits * (-900)
 
   whitePawnLocValue :: Coordinate -> Int
   whitePawnLocValue = pieceSquareTableLookup whitePawnPieceSquareTable
@@ -95,15 +124,15 @@ evalPosition position = foldr ((+) . pieceValue) 0 $ concat position where
 
 -- Inspired by John Hughes' "Why Functional Programming Matters"
 
-gamesFrom :: RegularGame -> [(Move, RegularGame)]
+gamesFrom :: (Game BitboardRepresentation) -> [(Move, (Game BitboardRepresentation))]
 gamesFrom game = mapMaybe (\move -> (move, ) <$> makeMoveFrom game move)
-                          (pseudoLegalMoves (regularGameToBitboardGame game))
+                          (pseudoLegalMoves game)
 
 gameTreeFrom
-  :: (RegularGame -> [RegularGame])
+  :: ((Game BitboardRepresentation) -> [(Game BitboardRepresentation)])
   -> [Move]
-  -> RegularGame
-  -> GameTree RegularGame
+  -> (Game BitboardRepresentation)
+  -> GameTree (Game BitboardRepresentation)
 gameTreeFrom f moves game = GameTree
   game
   (map (\edge -> (gameTreeFrom f ((fst edge) : moves) (snd edge)))
@@ -111,16 +140,16 @@ gameTreeFrom f moves game = GameTree
   )
   moves
 
-maxByGameValue :: [GameTree RegularGame] -> GameTree RegularGame
+maxByGameValue :: [GameTree (Game BitboardRepresentation)] -> GameTree (Game BitboardRepresentation)
 maxByGameValue = maximumBy (comparing gameTreeValue)
 
-minByGameValue :: [GameTree RegularGame] -> GameTree RegularGame
+minByGameValue :: [GameTree (Game BitboardRepresentation)] -> GameTree (Game BitboardRepresentation)
 minByGameValue = minimumBy (comparing gameTreeValue)
 
-minimize :: GameTree RegularGame -> GameTree RegularGame
+minimize :: GameTree (Game BitboardRepresentation) -> GameTree (Game BitboardRepresentation)
 minimize = minByGameValue . minimize'
 
-minimize' :: GameTree RegularGame -> [GameTree RegularGame]
+minimize' :: GameTree (Game BitboardRepresentation) -> [GameTree (Game BitboardRepresentation)]
 minimize' (GameTree v []       moves) = [GameTree v [] moves]
 minimize' (GameTree _ children _    ) = mapMax (map maximize' children) where
 
@@ -137,10 +166,10 @@ minimize' (GameTree _ children _    ) = mapMax (map maximize' children) where
     | (evalGame $ gameTreeValue x) >= (evalGame $ gameTreeValue pot) = True
     | otherwise = mingeq xs pot
 
-maximize :: GameTree RegularGame -> GameTree RegularGame
+maximize :: GameTree (Game BitboardRepresentation) -> GameTree (Game BitboardRepresentation)
 maximize = maxByGameValue . maximize'
 
-maximize' :: GameTree RegularGame -> [GameTree RegularGame]
+maximize' :: GameTree (Game BitboardRepresentation) -> [GameTree (Game BitboardRepresentation)]
 maximize' (GameTree v []       moves) = [GameTree v [] moves]
 maximize' (GameTree _ children _    ) = mapMin (map minimize' children) where
 
@@ -162,17 +191,15 @@ prune 0 (GameTree v _ moves) = GameTree v [] moves
 prune n (GameTree v children moves) =
   GameTree v (map (prune $ n - 1) children) moves
 
-decideOnMove :: Player -> RegularGame -> Move
+decideOnMove :: Player -> (Game BitboardRepresentation) -> Move
 decideOnMove player game
   | player == White
   = head $ reverse $ gameTreeLastMove $ maximize $ prune 4 $ gameTreeFrom
-    (mapMaybe (makeMoveFrom game) . pseudoLegalMoves . regularGameToBitboardGame
-    )
+    (mapMaybe (makeMoveFrom game) . pseudoLegalMoves)
     []
     game
   | otherwise
   = head $ reverse $ gameTreeLastMove $ minimize $ prune 4 $ gameTreeFrom
-    (mapMaybe (makeMoveFrom game) . pseudoLegalMoves . regularGameToBitboardGame
-    )
+    (mapMaybe (makeMoveFrom game) . pseudoLegalMoves)
     []
     game
