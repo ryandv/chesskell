@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeOperators #-}
+
 module Chess.MoveGen.Common where
 
 import Chess.Base
@@ -5,6 +7,7 @@ import Chess.Board
 import Chess.Bitboard
 
 import Data.Maybe
+import qualified Data.Strict.Tuple as T
 
 data Ray = N | NE | E | SE | S | SW | W | NW deriving(Eq, Show)
 
@@ -18,7 +21,7 @@ rayToOffsets SW = (-1, -1)
 rayToOffsets W = (-1, 0)
 rayToOffsets NW = (-1, 1)
 
-rayGeneratorFor :: Ray -> (Int, Int) -> Bitboard
+rayGeneratorFor :: Ray -> (Int T.:!: Int) -> Bitboard
 rayGeneratorFor N = northRay
 rayGeneratorFor NE = northEastRay
 rayGeneratorFor E = eastRay

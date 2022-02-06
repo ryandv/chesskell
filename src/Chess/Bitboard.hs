@@ -1,4 +1,6 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeOperators #-}
 
 module Chess.Bitboard
   ( addPieceTo
@@ -54,6 +56,7 @@ import           Data.Bits
 import           Data.Functor
 import           Data.List
 import           Data.Maybe
+import qualified Data.Strict.Tuple as T
 import           Data.Word
 import           Text.Show
 
@@ -64,7 +67,10 @@ instance BoardIndex Int where
   isOccupied (Bitboard word) squareIndex = testBit word squareIndex
 
 instance BoardIndex (Int, Int) where
-  isOccupied (Bitboard word) = testBit word . indicesToSquareIndex
+  isOccupied (Bitboard word) (!r, !f) = testBit word $ 8 * r + f
+
+instance BoardIndex (Int T.:!: Int) where
+  isOccupied (Bitboard word) (r T.:!: f) = testBit word $ 8 * r + f
 
 instance BoardIndex Coordinate where
   isOccupied b c = isOccupied b $ coordinateToIndices c
@@ -114,17 +120,17 @@ emptyBitboardRepresentation = BitboardRepresentation
   , totalOccupancy = emptyBitboard
   }
 
-indicesToCoordinate :: (Int, Int) -> Coordinate
-indicesToCoordinate (r, f) = Coordinate (toEnum $ 97 + f) (r + 1)
+indicesToCoordinate :: (Int T.:!: Int) -> Coordinate
+indicesToCoordinate (r T.:!: f) = Coordinate (toEnum $ 97 + f) (r + 1)
 
-indicesToSquareIndex :: (Int, Int) -> Int
-indicesToSquareIndex (r, f) = 8 * r + f
+indicesToSquareIndex :: (Int T.:!: Int) -> Int
+indicesToSquareIndex (r T.:!: f) = 8 * r + f
 
-squareIndexToIndices :: Int -> (Int, Int)
-squareIndexToIndices i = (i `div` 8, i `mod` 8)
+squareIndexToIndices :: Int -> (Int T.:!: Int)
+squareIndexToIndices i = (i `div` 8 T.:!: i `mod` 8)
 
-coordinateToIndices :: Coordinate -> (Int, Int)
-coordinateToIndices (Coordinate f r) = (r - 1, fromEnum f - 97)
+coordinateToIndices :: Coordinate -> (Int T.:!: Int)
+coordinateToIndices (Coordinate !f !r) = (r - 1 T.:!: fromEnum f - 97)
 
 bitboardToCoordinates :: Bitboard -> [Coordinate]
 bitboardToCoordinates (Bitboard bits) =
@@ -457,8 +463,8 @@ bitboardMovePieceEnPassant bitboards from to@(Coordinate f r) =
     capturingPawn
     to
 
-  capturingPawn = bitboardPieceAt bitboards from
-  capturedPawn = bitboardPieceAt bitboards capturedCoordinate
+  capturingPawn = bitboardSpecificPieceAt bitboards from Pawn
+  capturedPawn = bitboardSpecificPieceAt bitboards capturedCoordinate Pawn
   capturedCoordinate = Coordinate f (r + rankOffset)
   rankOffset = if (pieceOwner <$> capturingPawn) == Just White then (-1) else 1
 
@@ -554,6 +560,21 @@ bitboardPieceAt b c | isOccupied (whitePawns b) c   = Just $ Piece Pawn White
                     | isOccupied (blackKings b) c   = Just $ Piece King Black
                     | otherwise                     = Nothing
 
+bitboardSpecificPieceAt :: BitboardRepresentation -> Coordinate -> PieceType -> Maybe Piece
+bitboardSpecificPieceAt b c Pawn   | (isOccupied (whitePawns b) c) = Just $ Piece Pawn White
+bitboardSpecificPieceAt b c Pawn   | isOccupied (blackPawns b) c = Just $ Piece Pawn Black
+bitboardSpecificPieceAt b c Bishop | isOccupied (whiteBishops b) c = Just $ Piece Bishop White
+bitboardSpecificPieceAt b c Bishop | isOccupied (blackBishops b) c = Just $ Piece Bishop Black
+bitboardSpecificPieceAt b c Knight | isOccupied (whiteKnights b) c = Just $ Piece Knight White
+bitboardSpecificPieceAt b c Knight | isOccupied (blackKnights b) c = Just $ Piece Knight Black
+bitboardSpecificPieceAt b c Rook   | isOccupied (whiteRooks b) c = Just $ Piece Rook White
+bitboardSpecificPieceAt b c Rook   | isOccupied (blackRooks b) c = Just $ Piece Rook Black
+bitboardSpecificPieceAt b c Queen  | isOccupied (whiteQueens b) c = Just $ Piece Queen White
+bitboardSpecificPieceAt b c Queen  | isOccupied (blackQueens b) c = Just $ Piece Queen Black
+bitboardSpecificPieceAt b c King   | isOccupied (whiteKings b) c = Just $ Piece King White
+bitboardSpecificPieceAt b c King   | isOccupied (blackKings b) c = Just $ Piece King Black
+bitboardSpecificPieceAt _ _ _      = Nothing
+
 occupiedCoordinates :: BitboardRepresentation -> [Coordinate]
 occupiedCoordinates bitboards = filter (bitboardIsOccupied bitboards)
   $ map (indicesToCoordinate . squareIndexToIndices) [0 .. 63]
@@ -585,35 +606,35 @@ antiDiagonalMask antiDiagonal = Bitboard
   north = ((-1) * diag) .&. (shiftR diag 31)
   south = diag .&. (shiftR ((-1) * diag) 31)
 
-northRay :: (Int, Int) -> Bitboard
-northRay (rank, file) = positiveRayFromLine (fileMask file) (rank, file)
+northRay :: (Int T.:!: Int) -> Bitboard
+northRay (rank T.:!: file) = positiveRayFromLine (fileMask file) (rank T.:!: file)
 
-eastRay :: (Int, Int) -> Bitboard
-eastRay (rank, file) = positiveRayFromLine (rankMask rank) (rank, file)
+eastRay :: (Int T.:!: Int) -> Bitboard
+eastRay (rank T.:!: file) = positiveRayFromLine (rankMask rank) (rank T.:!: file)
 
-southRay :: (Int, Int) -> Bitboard
-southRay (rank, file) = negativeRayFromLine (fileMask file) (rank, file)
+southRay :: (Int T.:!: Int) -> Bitboard
+southRay (rank T.:!: file) = negativeRayFromLine (fileMask file) (rank T.:!: file)
 
-westRay :: (Int, Int) -> Bitboard
-westRay (rank, file) = negativeRayFromLine (rankMask rank) (rank, file)
+westRay :: (Int T.:!: Int) -> Bitboard
+westRay (rank T.:!: file) = negativeRayFromLine (rankMask rank) (rank T.:!: file)
 
-northEastRay :: (Int, Int) -> Bitboard
-northEastRay (rank, file) = positiveRayFromLine (diagonalMask $ rank - file) (rank, file)
+northEastRay :: (Int T.:!: Int) -> Bitboard
+northEastRay (rank T.:!: file) = positiveRayFromLine (diagonalMask $ rank - file) (rank T.:!: file)
 
-southEastRay :: (Int, Int) -> Bitboard
-southEastRay (rank, file) = negativeRayFromLine (antiDiagonalMask $ rank + file) (rank, file)
+southEastRay :: (Int T.:!: Int) -> Bitboard
+southEastRay (rank T.:!: file) = negativeRayFromLine (antiDiagonalMask $ rank + file) (rank T.:!: file)
 
-southWestRay :: (Int, Int) -> Bitboard
-southWestRay (rank, file) = negativeRayFromLine (diagonalMask $ rank - file) (rank, file)
+southWestRay :: (Int T.:!: Int) -> Bitboard
+southWestRay (rank T.:!: file) = negativeRayFromLine (diagonalMask $ rank - file) (rank T.:!: file)
 
-northWestRay :: (Int, Int) -> Bitboard
-northWestRay (rank, file) = positiveRayFromLine (antiDiagonalMask $ rank + file) (rank, file)
+northWestRay :: (Int T.:!: Int) -> Bitboard
+northWestRay (rank T.:!: file) = positiveRayFromLine (antiDiagonalMask $ rank + file) (rank T.:!: file)
 
-positiveRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
-positiveRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank, file)))
+positiveRayFromLine :: Bitboard -> (Int T.:!: Int) -> Bitboard
+positiveRayFromLine (Bitboard bits) (rank T.:!: file) = Bitboard $ bits .&. (shiftL (-2) (indicesToSquareIndex (rank T.:!: file)))
 
-negativeRayFromLine :: Bitboard -> (Int, Int) -> Bitboard
-negativeRayFromLine (Bitboard bits) (rank, file) = Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank, file))) - 1)
+negativeRayFromLine :: Bitboard -> (Int T.:!: Int) -> Bitboard
+negativeRayFromLine (Bitboard bits) (rank T.:!: file) = Bitboard $ bits .&. ((shiftL 1 (indicesToSquareIndex (rank T.:!: file))) - 1)
 
 bitscanForwardTable :: [Int]
 bitscanForwardTable =
