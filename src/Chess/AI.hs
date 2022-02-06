@@ -15,6 +15,7 @@ import           Data.Bits
 import           Data.List
 import           Data.Maybe
 import           Data.Ord
+import qualified Data.Vector as V
 
 data GameTree a = GameTree
   { gameTreeValue    :: a
@@ -30,33 +31,13 @@ instance Functor GameTree where
 instance Ord (Game BitboardRepresentation) where
   compare = comparing evalGame
 
-whitePawnPieceSquareTable :: [[Int]]
-whitePawnPieceSquareTable =
-  [ [0, 0, 0, 0, 0, 0, 0, 0]
-  , [50, 50, 50, 50, 50, 50, 50, 50]
-  , [10, 10, 20, 30, 30, 20, 10, 10]
-  , [5, 5, 10, 27, 27, 10, 5, 5]
-  , [0, 0, 0, 25, 25, 0, 0, 0]
-  , [5, -5, -10, 0, 0, -10, -5, 5]
-  , [5, 10, 10, -25, -25, 10, 10, 5]
-  , [0, 0, 0, 0, 0, 0, 0, 0]
-  ]
+whitePawnPieceSquareTable :: V.Vector Int
+whitePawnPieceSquareTable = V.fromList
+  [ 0, 0, 0, 0, 0, 0, 0, 0, 50, 50, 50, 50, 50, 50, 50, 50, 10, 10, 20, 30, 30, 20, 10, 10, 5, 5, 10, 27, 27, 10, 5, 5, 0, 0, 0, 25, 25, 0, 0, 0, 5, -5, -10, 0, 0, -10, -5, 5, 5, 10, 10, -25, -25, 10, 10, 5, 0, 0, 0, 0, 0, 0, 0, 0]
 
-blackPawnPieceSquareTable :: [[Int]]
-blackPawnPieceSquareTable =
-  [ [0, 0, 0, 0, 0, 0, 0, 0]
-  , [-5, -10, -10, 25, 25, -10, -10, -5]
-  , [-5, 5, 10, 0, 0, 10, 5, -5]
-  , [0, 0, 0, -25, -25, 0, 0, 0]
-  , [-5, -5, -10, -27, -27, -10, -5, -5]
-  , [-10, -10, -20, -30, -30, -20, -10, -10]
-  , [-50, -50, -50, -50, -50, -50, -50, -50]
-  , [0, 0, 0, 0, 0, 0, 0, 0]
-  ]
-
-pieceSquareTableLookup :: [[Int]] -> Coordinate -> Int
-pieceSquareTableLookup t (Coordinate f r) =
-  (t !! (r - 1)) !! (fromEnum f - fromEnum 'a')
+blackPawnPieceSquareTable :: V.Vector Int
+blackPawnPieceSquareTable = V.fromList
+  [ 0, 0, 0, 0, 0, 0, 0, 0, -5, -10, -10, 25, 25, -10, -10, -5, -5, 5, 10, 0, 0, 10, 5, -5, 0, 0, 0, -25, -25, 0, 0, 0, -5, -5, -10, -27, -27, -10, -5, -5, -10, -10, -20, -30, -30, -20, -10, -10, -50, -50, -50, -50, -50, -50, -50, -50, 0, 0, 0, 0, 0, 0, 0, 0]
 
 evalGame :: (Game BitboardRepresentation) -> Int
 evalGame game
@@ -96,9 +77,9 @@ evalPosition BitboardRepresentation
       + blackQueensValue where
 
   whitePawnsValue :: Int
-  whitePawnsValue = foldr ((+) . whitePawnLocValue) ((popCount wpbits) * 100) $ bitboardToCoordinates wp
+  whitePawnsValue = foldr ((+) . whitePawnLocValue) ((popCount wpbits) * 100) $ bitboardToSquareIndices wp
   blackPawnsValue :: Int
-  blackPawnsValue = foldr ((+) . blackPawnLocValue) ((popCount bpbits) * (-100)) $ bitboardToCoordinates bp
+  blackPawnsValue = foldr ((+) . blackPawnLocValue) ((popCount bpbits) * (-100)) $ bitboardToSquareIndices bp
   whiteBishopsValue :: Int
   whiteBishopsValue = popCount wbbits * 300
   blackBishopsValue :: Int
@@ -116,11 +97,11 @@ evalPosition BitboardRepresentation
   blackQueensValue :: Int
   blackQueensValue = popCount bqbits * (-900)
 
-  whitePawnLocValue :: Coordinate -> Int
-  whitePawnLocValue = pieceSquareTableLookup whitePawnPieceSquareTable
+  whitePawnLocValue :: Int -> Int
+  whitePawnLocValue = (whitePawnPieceSquareTable V.!)
 
-  blackPawnLocValue :: Coordinate -> Int
-  blackPawnLocValue = pieceSquareTableLookup blackPawnPieceSquareTable
+  blackPawnLocValue :: Int -> Int
+  blackPawnLocValue = (blackPawnPieceSquareTable V.!)
 
 -- Inspired by John Hughes' "Why Functional Programming Matters"
 

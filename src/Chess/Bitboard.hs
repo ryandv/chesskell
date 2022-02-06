@@ -21,6 +21,7 @@ module Chess.Bitboard
   , squareIndexToIndices
   , coordinateToIndices
   , bitboardToCoordinates
+  , bitboardToSquareIndices
   , emptyBitboard
   , isOccupied
   , turnWord64IntoWord8s
@@ -137,6 +138,9 @@ squareIndexToIndices i = (i `div` 8 T.:!: i `mod` 8)
 
 coordinateToIndices :: Coordinate -> (Int T.:!: Int)
 coordinateToIndices (Coordinate !f !r) = (r - 1 T.:!: fromEnum f - 97)
+
+bitboardToSquareIndices :: Bitboard -> [Int]
+bitboardToSquareIndices (Bitboard bits) = filter (testBit bits) [0 .. 63]
 
 bitboardToCoordinates :: Bitboard -> [Coordinate]
 bitboardToCoordinates (Bitboard bits) =
