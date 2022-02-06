@@ -26,6 +26,8 @@ operaGame = Game
     , whiteKings = Bitboard 16
     , blackKings = Bitboard 1152921504606846976
     , totalOccupancy = Bitboard 12966184737118021521
+    , whiteOccupancy = Bitboard 283803576209
+    , blackOccupancy = Bitboard 12966184453314445312
     }
   , activeColor     = Black
   , castlingRights  = (CastleRights True True True True)

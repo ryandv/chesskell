@@ -45,7 +45,7 @@ potentialRayMoves b ply c rays = toLegalMoves $ foldr bitboardUnion emptyBitboar
     toLegalMoves = filter selfCaptures
       . fmap (destinationToMove b c)
       . bitboardToCoordinates
-    selfCaptures (Capture _ to) = (pieceOwner <$> bitboardPieceAt b to) /= Just ply
+    selfCaptures (Capture _ to) = bitboardOwnerAt b to /= Just ply
     selfCaptures _ = True
 
 potentialRayMoves' :: Bitboard -> Player -> Coordinate -> Ray -> Bitboard
@@ -79,4 +79,4 @@ unoccupiedByAlly b c ply | isNothing targetOwner = True
                          | Just ply /= targetOwner = True
                          | Just ply == targetOwner = False where
   targetPiece = bitboardPieceAt b c
-  targetOwner = pieceOwner <$> targetPiece
+  targetOwner = bitboardOwnerAt b c

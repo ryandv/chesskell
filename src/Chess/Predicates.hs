@@ -99,16 +99,11 @@ moveIsPseudoLegal :: Game BitboardRepresentation -> Move -> Bool
 moveIsPseudoLegal game move = (move `elem` pseudoLegalMoves game)
 
 moveIsByRightPlayer :: Game BitboardRepresentation -> Move -> Bool
-moveIsByRightPlayer game (Move from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
-  == (Just (activeColor game))
-moveIsByRightPlayer game (Capture from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
-  == (Just (activeColor game))
-moveIsByRightPlayer game (EnPassant from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
-  == (Just (activeColor game))
-moveIsByRightPlayer game (Castle from _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
-  == (Just (activeColor game))
-moveIsByRightPlayer game (Promote from _ _) = (pieceOwner <$> (bitboardPieceAt (placement game) from))
-  == (Just (activeColor game))
+moveIsByRightPlayer game (Move from _) = bitboardOwnerAt (placement game) from == (Just (activeColor game))
+moveIsByRightPlayer game (Capture from _) = bitboardOwnerAt (placement game) from == (Just (activeColor game))
+moveIsByRightPlayer game (EnPassant from _) = bitboardOwnerAt (placement game) from == (Just (activeColor game))
+moveIsByRightPlayer game (Castle from _) = bitboardOwnerAt (placement game) from == (Just (activeColor game))
+moveIsByRightPlayer game (Promote from _ _) = bitboardOwnerAt (placement game) from == (Just (activeColor game))
 
 notCheckedAfterMove :: Game BitboardRepresentation -> Move -> Bool
 notCheckedAfterMove game move =
@@ -122,16 +117,11 @@ noLegalMovesRemaining game ply =
     $ pseudoLegalMoves game where
 
   pieceIsOwnedByPly :: Move -> Bool
-  pieceIsOwnedByPly (Move from to) =
-    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
-  pieceIsOwnedByPly (Capture from to) =
-    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
-  pieceIsOwnedByPly (EnPassant from to) =
-    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
-  pieceIsOwnedByPly (Castle from to) =
-    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
-  pieceIsOwnedByPly (Promote from to _) =
-    (pieceOwner <$> (bitboardPieceAt (placement game) from)) == (Just ply)
+  pieceIsOwnedByPly (Move from to) = bitboardOwnerAt (placement game) from == (Just ply)
+  pieceIsOwnedByPly (Capture from to) = bitboardOwnerAt (placement game) from == (Just ply)
+  pieceIsOwnedByPly (EnPassant from to) = bitboardOwnerAt (placement game) from == (Just ply)
+  pieceIsOwnedByPly (Castle from to) = bitboardOwnerAt (placement game) from == (Just ply)
+  pieceIsOwnedByPly (Promote from to _) = bitboardOwnerAt (placement game) from == (Just ply)
 
   validCastles :: Move -> Bool
   validCastles (Castle from to)

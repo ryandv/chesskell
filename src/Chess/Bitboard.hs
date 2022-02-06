@@ -11,6 +11,8 @@ module Chess.Bitboard
   , bitboardComplement
   , bitboardXOR
   , bitboardPieceAt
+  , bitboardOwnerAt
+  , bitboardSpecificPieceAt
   , bitboardIsOccupied
   , BoardIndex
   , emptyBitboardRepresentation
@@ -92,6 +94,8 @@ data BitboardRepresentation = BitboardRepresentation
   , whiteKings     :: Bitboard
   , blackKings     :: Bitboard
   , totalOccupancy :: Bitboard
+  , whiteOccupancy :: Bitboard
+  , blackOccupancy :: Bitboard
   }
   deriving (Eq, Show)
 
@@ -118,6 +122,8 @@ emptyBitboardRepresentation = BitboardRepresentation
   , whiteKings     = emptyBitboard
   , blackKings     = emptyBitboard
   , totalOccupancy = emptyBitboard
+  , whiteOccupancy = emptyBitboard
+  , blackOccupancy = emptyBitboard
   }
 
 indicesToCoordinate :: (Int T.:!: Int) -> Coordinate
@@ -233,21 +239,24 @@ totalOccupancyFor =
 
 regularToBitboard :: RegularBoardRepresentation -> BitboardRepresentation
 regularToBitboard b = withoutTotalOccupancy
-  { totalOccupancy = whitePawns withoutTotalOccupancy
-                     `bitboardUnion` whiteBishops withoutTotalOccupancy
-                     `bitboardUnion` whiteKnights withoutTotalOccupancy
-                     `bitboardUnion` whiteRooks withoutTotalOccupancy
-                     `bitboardUnion` whiteQueens withoutTotalOccupancy
-                     `bitboardUnion` whiteKings withoutTotalOccupancy
-                     `bitboardUnion` blackPawns withoutTotalOccupancy
-                     `bitboardUnion` blackBishops withoutTotalOccupancy
-                     `bitboardUnion` blackKnights withoutTotalOccupancy
-                     `bitboardUnion` blackRooks withoutTotalOccupancy
-                     `bitboardUnion` blackQueens withoutTotalOccupancy
-                     `bitboardUnion` blackKings withoutTotalOccupancy
+  { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+  , whiteOccupancy = whiteOccupancy
+  , blackOccupancy = blackOccupancy
   }
 
  where
+  whiteOccupancy = (whitePawns withoutTotalOccupancy
+                      `bitboardUnion` whiteBishops withoutTotalOccupancy
+                      `bitboardUnion` whiteKnights withoutTotalOccupancy
+                      `bitboardUnion` whiteRooks withoutTotalOccupancy
+                      `bitboardUnion` whiteQueens withoutTotalOccupancy
+                      `bitboardUnion` whiteKings withoutTotalOccupancy)
+  blackOccupancy = (blackPawns withoutTotalOccupancy
+                      `bitboardUnion` blackBishops withoutTotalOccupancy
+                      `bitboardUnion` blackKnights withoutTotalOccupancy
+                      `bitboardUnion` blackRooks withoutTotalOccupancy
+                      `bitboardUnion` blackQueens withoutTotalOccupancy
+                      `bitboardUnion` blackKings withoutTotalOccupancy)
   addPieceToBitboard square bitboards
     | pieceOn square == Just (Piece Pawn White) = bitboards
       { whitePawns = (whitePawns bitboards)
@@ -441,20 +450,23 @@ bitboardMovePiece bitboards (EnPassant from to) =
 bitboardMovePieceEnPassant :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
 bitboardMovePieceEnPassant bitboards from to@(Coordinate f r) =
   updatedBitboards
-    { totalOccupancy = whitePawns updatedBitboards
+    { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+    , whiteOccupancy = whiteOccupancy
+    , blackOccupancy = blackOccupancy
+    }
+ where
+  whiteOccupancy = whitePawns updatedBitboards
                        `bitboardUnion` whiteBishops updatedBitboards
                        `bitboardUnion` whiteKnights updatedBitboards
                        `bitboardUnion` whiteRooks updatedBitboards
                        `bitboardUnion` whiteQueens updatedBitboards
                        `bitboardUnion` whiteKings updatedBitboards
-                       `bitboardUnion` blackPawns updatedBitboards
+  blackOccupancy = blackPawns updatedBitboards
                        `bitboardUnion` blackBishops updatedBitboards
                        `bitboardUnion` blackKnights updatedBitboards
                        `bitboardUnion` blackRooks updatedBitboards
                        `bitboardUnion` blackQueens updatedBitboards
                        `bitboardUnion` blackKings updatedBitboards
-    }
- where
   updatedBitboards = addPieceTo
     (removePieceFrom (removePieceFrom bitboards capturedPawn capturedCoordinate)
                      capturingPawn
@@ -471,46 +483,52 @@ bitboardMovePieceEnPassant bitboards from to@(Coordinate f r) =
 bitboardMovePiecePromote :: BitboardRepresentation -> Coordinate -> Coordinate -> Piece -> BitboardRepresentation
 bitboardMovePiecePromote bitboards from to p =
   updatedBitboards
-    { totalOccupancy = whitePawns updatedBitboards
-                       `bitboardUnion` whiteBishops updatedBitboards
-                       `bitboardUnion` whiteKnights updatedBitboards
-                       `bitboardUnion` whiteRooks updatedBitboards
-                       `bitboardUnion` whiteQueens updatedBitboards
-                       `bitboardUnion` whiteKings updatedBitboards
-                       `bitboardUnion` blackPawns updatedBitboards
-                       `bitboardUnion` blackBishops updatedBitboards
-                       `bitboardUnion` blackKnights updatedBitboards
-                       `bitboardUnion` blackRooks updatedBitboards
-                       `bitboardUnion` blackQueens updatedBitboards
-                       `bitboardUnion` blackKings updatedBitboards
+    { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+    , whiteOccupancy = whiteOccupancy
+    , blackOccupancy = blackOccupancy
     }
  where
+  whiteOccupancy = whitePawns updatedBitboards
+                   `bitboardUnion` whiteBishops updatedBitboards
+                   `bitboardUnion` whiteKnights updatedBitboards
+                   `bitboardUnion` whiteRooks updatedBitboards
+                   `bitboardUnion` whiteQueens updatedBitboards
+                   `bitboardUnion` whiteKings updatedBitboards
+  blackOccupancy = blackPawns updatedBitboards
+                   `bitboardUnion` blackBishops updatedBitboards
+                   `bitboardUnion` blackKnights updatedBitboards
+                   `bitboardUnion` blackRooks updatedBitboards
+                   `bitboardUnion` blackQueens updatedBitboards
+                   `bitboardUnion` blackKings updatedBitboards
   updatedBitboards = addPieceTo
     (removePieceFrom bitboards promotedPiece from)
     (Just p)
     to
 
-  promotedPiece    = bitboardPieceAt bitboards from
+  promotedPiece    = bitboardSpecificPieceAt bitboards from Pawn
 
 bitboardMovePieceCapture
   :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
 bitboardMovePieceCapture bitboards from to =
   updatedBitboards
-    { totalOccupancy = whitePawns updatedBitboards
+    { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+    , whiteOccupancy = whiteOccupancy
+    , blackOccupancy = blackOccupancy
+    }
+
+ where
+  whiteOccupancy = whitePawns updatedBitboards
                        `bitboardUnion` whiteBishops updatedBitboards
                        `bitboardUnion` whiteKnights updatedBitboards
                        `bitboardUnion` whiteRooks updatedBitboards
                        `bitboardUnion` whiteQueens updatedBitboards
                        `bitboardUnion` whiteKings updatedBitboards
-                       `bitboardUnion` blackPawns updatedBitboards
+  blackOccupancy = blackPawns updatedBitboards
                        `bitboardUnion` blackBishops updatedBitboards
                        `bitboardUnion` blackKnights updatedBitboards
                        `bitboardUnion` blackRooks updatedBitboards
                        `bitboardUnion` blackQueens updatedBitboards
                        `bitboardUnion` blackKings updatedBitboards
-    }
-
- where
   updatedBitboards = addPieceTo
     (removePieceFrom (removePieceFrom bitboards capturedPiece to)
                      movedPiece
@@ -526,24 +544,32 @@ bitboardMovePieceStandard
   :: BitboardRepresentation -> Coordinate -> Coordinate -> BitboardRepresentation
 bitboardMovePieceStandard bitboards from to =
   updatedBitboards
-    { totalOccupancy = whitePawns updatedBitboards
-                       `bitboardUnion` whiteBishops updatedBitboards
-                       `bitboardUnion` whiteKnights updatedBitboards
-                       `bitboardUnion` whiteRooks updatedBitboards
-                       `bitboardUnion` whiteQueens updatedBitboards
-                       `bitboardUnion` whiteKings updatedBitboards
-                       `bitboardUnion` blackPawns updatedBitboards
-                       `bitboardUnion` blackBishops updatedBitboards
-                       `bitboardUnion` blackKnights updatedBitboards
-                       `bitboardUnion` blackRooks updatedBitboards
-                       `bitboardUnion` blackQueens updatedBitboards
-                       `bitboardUnion` blackKings updatedBitboards
+    { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+    , whiteOccupancy = whiteOccupancy
+    , blackOccupancy = blackOccupancy
     }
 
  where
+  whiteOccupancy = whitePawns updatedBitboards
+                   `bitboardUnion` whiteBishops updatedBitboards
+                   `bitboardUnion` whiteKnights updatedBitboards
+                   `bitboardUnion` whiteRooks updatedBitboards
+                   `bitboardUnion` whiteQueens updatedBitboards
+                   `bitboardUnion` whiteKings updatedBitboards
+  blackOccupancy = blackPawns updatedBitboards
+                   `bitboardUnion` blackBishops updatedBitboards
+                   `bitboardUnion` blackKnights updatedBitboards
+                   `bitboardUnion` blackRooks updatedBitboards
+                   `bitboardUnion` blackQueens updatedBitboards
+                   `bitboardUnion` blackKings updatedBitboards
   updatedBitboards =
     addPieceTo (removePieceFrom bitboards movedPiece from) movedPiece to
   movedPiece = bitboardPieceAt bitboards from
+
+bitboardOwnerAt :: BitboardRepresentation -> Coordinate -> Maybe Player
+bitboardOwnerAt b c | isOccupied (whiteOccupancy b) c = Just White
+                    | isOccupied (blackOccupancy b) c = Just Black
+                    | otherwise = Nothing
 
 bitboardPieceAt :: BitboardRepresentation -> Coordinate -> Maybe Piece
 bitboardPieceAt b c | isOccupied (whitePawns b) c   = Just $ Piece Pawn White

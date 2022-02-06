@@ -41,7 +41,7 @@ makeMove = validatedMakeMove where
   validatedMakeMove move = do
     game <- get
     let toMove   = activeColor game
-    if (pieceOwner <$> bitboardPieceAt (placement game) (moveFrom move)) == (Just toMove)
+    if bitboardOwnerAt (placement game) (moveFrom move) == (Just toMove)
       then makeMove' move
       else return False
 
@@ -118,7 +118,7 @@ makeCastle move
     let from = (moveFrom move)
 
     let originalPiece     = bitboardPieceAt position from
-    let rook              = bitboardPieceAt position (moveFrom rookMove)
+    let rook              = bitboardSpecificPieceAt position (moveFrom rookMove) Rook
 
     if (not $ isChecked game
          { placement = bitboardMovePiece (bitboardMovePiece position move)

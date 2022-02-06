@@ -275,6 +275,8 @@ spec = describe "bitboard" $ do
         , whiteKings   = Bitboard 16
         , blackKings   = Bitboard 1152921504606846976
         , totalOccupancy        = Bitboard 18446462598732906495
+        , blackOccupancy = Bitboard 18446462598732840960
+        , whiteOccupancy = Bitboard 65535
         }
 
     describe "operations on BitboardRepresentations" $ do
@@ -309,6 +311,8 @@ spec = describe "bitboard" $ do
             , whiteKings   = Bitboard 16
             , blackKings   = Bitboard 1152921504606846976
             , totalOccupancy        = Bitboard 18446462598867122175
+            , whiteOccupancy = Bitboard 134281215
+            , blackOccupancy = Bitboard 18446462598732840960
             }
 
         it "removes captured pieces from the appropriate Bitboard" $ do
@@ -332,6 +336,8 @@ spec = describe "bitboard" $ do
             , whiteKings   = Bitboard 16
             , blackKings   = Bitboard 1152921504606846976
             , totalOccupancy        = Bitboard 1152921504606848016
+            , whiteOccupancy = Bitboard 1040
+            , blackOccupancy = Bitboard 1152921504606846976
             }
 
     modifyMaxSuccess (const $ 2 ^ 16) $ describe "bitscan" $ do

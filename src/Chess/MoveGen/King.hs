@@ -13,7 +13,7 @@ potentialKingMoves castlerights bitboard ply c@(Coordinate f r) | f == 'e' && r 
 
   possibleMoves = [(-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1)]
 
-  kingOwner = fmap pieceOwner $ bitboardPieceAt bitboard c
+  kingOwner = fmap pieceOwner $ bitboardSpecificPieceAt bitboard c King
 
   castles                        :: Bool -> Bool -> Player -> [Move]
   castles kingside queenside ply | kingside && queenside = ooCastle (getHomeRank ply) ply ++ oooCastle (getHomeRank ply) ply

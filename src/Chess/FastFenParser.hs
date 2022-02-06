@@ -45,19 +45,12 @@ positionParser = do
   firstSevenRanks <- count 7 rankParser
   eighthRank      <- lastRankParser
   let finalBitboard = foldr uniteRepresentation emptyBitboardRepresentation . concat $ firstSevenRanks ++ [eighthRank]
+  let whiteOccupancy = (whitePawns finalBitboard `bitboardUnion` whiteKnights finalBitboard `bitboardUnion` whiteBishops finalBitboard `bitboardUnion` whiteRooks finalBitboard `bitboardUnion` whiteQueens finalBitboard `bitboardUnion` whiteKings finalBitboard)
+  let blackOccupancy = (blackPawns finalBitboard `bitboardUnion` blackKnights finalBitboard `bitboardUnion` blackBishops finalBitboard `bitboardUnion` blackRooks finalBitboard `bitboardUnion` blackQueens finalBitboard `bitboardUnion` blackKings finalBitboard)
   return $ finalBitboard
-    { totalOccupancy = whitePawns finalBitboard
-      `bitboardUnion` whiteKnights finalBitboard
-      `bitboardUnion` whiteBishops finalBitboard
-      `bitboardUnion` whiteRooks finalBitboard
-      `bitboardUnion` whiteQueens finalBitboard
-      `bitboardUnion` whiteKings finalBitboard
-      `bitboardUnion` blackPawns finalBitboard
-      `bitboardUnion` blackBishops finalBitboard
-      `bitboardUnion` blackKnights finalBitboard
-      `bitboardUnion` blackRooks finalBitboard
-      `bitboardUnion` blackQueens finalBitboard
-      `bitboardUnion` blackKings finalBitboard
+    { totalOccupancy = whiteOccupancy `bitboardUnion` blackOccupancy
+    , whiteOccupancy = whiteOccupancy
+    , blackOccupancy = blackOccupancy
     }
 
 rankParser :: StateT FenParserState P.Parser [(Maybe Piece, Coordinate)]
