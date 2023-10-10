@@ -1,4 +1,4 @@
-FROM fpco/stack-build-small:lts-16.31 AS builder
+FROM fpco/stack-build-small:lts-20.15 AS builder
 
 RUN mkdir /opt/build
 WORKDIR /opt/build

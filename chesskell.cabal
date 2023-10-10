@@ -28,12 +28,12 @@ library
                      , Chess.Predicates
 
   build-depends:       base >=4.8
-                     , bytestring >= 0.10.10 && <0.11
+                     , bytestring >= 0.11.4.0 && <0.12
                      , mtl >=2.1
                      , parsec >=3.1 && <3.2
-                     , attoparsec >= 0.13.2 && <0.14
+                     , attoparsec >= 0.14.4 && <0.15
                      , parsers >= 0.12.10 && < 0.13
-                     , strict >= 0.3.2 && < 0.4
+                     , strict >= 0.4.0.1 && < 0.5
                      , vector >= 0.12.1.2 && < 0.13
 
   default-language:    Haskell2010
